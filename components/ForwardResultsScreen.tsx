@@ -1,6 +1,8 @@
 
 import React from 'react';
+import { motion } from 'motion/react';
 import { MatchResult } from '../types';
+import { Icons } from './Icons';
 
 interface ForwardResultsScreenProps {
     results: MatchResult[];
@@ -11,26 +13,57 @@ interface ForwardResultsScreenProps {
 
 const ForwardResultsScreen: React.FC<ForwardResultsScreenProps> = ({ results, onBack, onViewResult }) => {
     return (
-        <div className="p-2 h-[calc(100vh-90px)] flex flex-col">
-            <h2 className="text-2xl font-bold text-center mb-4 tracking-tighter uppercase italic">Simulated Results</h2>
-            <div className="flex-grow overflow-y-auto space-y-3 pr-1">
+        <div className="p-4 h-[calc(100vh-90px)] flex flex-col bg-[#050808]">
+            <div className="mb-6">
+                <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter leading-none">SIMULATED</h2>
+                <p className="text-[10px] font-mono font-black text-teal-500 uppercase tracking-[0.4em] mt-2">MATCH_RESULTS_BATCH</p>
+            </div>
+
+            <div className="flex-grow overflow-y-auto space-y-4 pr-1 scrollbar-hide">
                 {results.map((result, index) => (
-                    <div key={index} className="bg-white dark:bg-gray-800/50 p-4 rounded-xl border border-white/5 shadow-lg">
-                        <div className="flex justify-between items-start mb-2">
-                            <p className="text-sm font-black uppercase tracking-tight">{result.firstInning.teamName} <span className="text-gray-500 font-normal italic lowercase">vs</span> {result.secondInning.teamName}</p>
-                            <span className="text-[10px] font-mono opacity-40">MATCH_{result.matchNumber}</span>
+                    <motion.div 
+                        key={index}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="bg-white/[0.03] p-5 rounded-[24px] border border-white/5 shadow-2xl backdrop-blur-xl group hover:bg-white/[0.06] transition-all"
+                    >
+                        <div className="flex justify-between items-start mb-3">
+                            <div className="flex flex-col">
+                                <p className="text-xs font-black text-white italic uppercase tracking-tight group-hover:text-teal-500 transition-colors">
+                                    {result.firstInning.teamName} <span className="text-white/20 font-normal italic lowercase mx-1">vs</span> {result.secondInning.teamName}
+                                </p>
+                                <span className="text-[8px] font-mono text-white/20 uppercase tracking-widest mt-1">MATCH_ID: {result.matchNumber}</span>
+                            </div>
+                            <div className="w-8 h-8 rounded-full bg-teal-500/10 flex items-center justify-center text-teal-500">
+                                <Icons.Activity className="w-3.5 h-3.5" />
+                            </div>
                         </div>
-                        <p className="text-xs font-bold text-teal-500 mb-3">{result.summary}</p>
+                        
+                        <div className="p-3 bg-black/40 rounded-xl border border-white/5 mb-4">
+                            <p className="text-[10px] font-bold text-teal-500 italic leading-relaxed">{result.summary}</p>
+                        </div>
+
                         <button 
                             onClick={() => onViewResult(result)}
-                            className="w-full bg-teal-500/10 hover:bg-teal-500 text-teal-500 hover:text-[#0A0F0F] py-2 rounded-lg text-[10px] font-black uppercase italic transition-all border border-teal-500/20"
+                            className="w-full bg-white text-black hover:bg-teal-500 hover:text-white py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all shadow-lg flex items-center justify-center gap-2"
                         >
-                            View Full Scorecard
+                            VIEW SCORECARD
+                            <Icons.ChevronRight className="w-3 h-3" />
                         </button>
-                    </div>
+                    </motion.div>
                 ))}
             </div>
-            <button onClick={onBack} className="w-full mt-4 bg-gray-800 hover:bg-gray-700 text-white font-black uppercase italic py-3 rounded-xl transition-all">Continue to Dashboard</button>
+
+            <div className="mt-6 pt-6 border-t border-white/5">
+                <button 
+                    onClick={onBack} 
+                    className="w-full bg-teal-500 text-black hover:bg-teal-600 font-black uppercase italic tracking-widest py-4 rounded-2xl transition-all shadow-[0_10px_30px_rgba(20,184,166,0.3)] flex items-center justify-center gap-3"
+                >
+                    CONTINUE TO DASHBOARD
+                    <Icons.ArrowRight className="w-[18px] h-[18px]" />
+                </button>
+            </div>
         </div>
     );
 };

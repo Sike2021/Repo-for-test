@@ -40,7 +40,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                         <div className="p-6">
                             <div className="flex items-center gap-3 mb-4">
                                 <div className={`p-2 rounded-full ${type === 'danger' ? 'bg-red-500/20 text-red-500' : 'bg-teal-500/20 text-teal-500'}`}>
-                                    <AlertTriangle size={24} />
+                                    <AlertTriangle className="w-6 h-6" />
                                 </div>
                                 <h3 className="text-xl font-black italic uppercase tracking-tighter text-white">
                                     {title}
@@ -75,7 +75,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                             onClick={onCancel}
                             className="absolute top-4 right-4 text-white/30 hover:text-white transition-colors"
                         >
-                            <X size={20} />
+                            <X className="w-5 h-5" />
                         </button>
                     </motion.div>
                 </div>

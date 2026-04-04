@@ -47,7 +47,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStartNewGame, onResumeGame, onOpe
                         transition={{ delay: 0.2 }}
                         className="inline-flex items-center gap-1.5 md:gap-3 bg-white/[0.03] text-teal-500 px-3 md:px-6 py-1 md:py-2 rounded-full text-[7px] md:text-[10px] font-black uppercase tracking-[0.5em] mb-4 md:mb-8 border border-white/10 backdrop-blur-xl shadow-2xl"
                     >
-                        <Trophy size={10} md:size={12} className="fill-current" />
+                        <Trophy className="fill-current w-2.5 h-2.5 md:w-3 md:h-3" />
                         SIKE'S_MANAGEMENT_v2.6
                     </motion.div>
                     
@@ -81,7 +81,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStartNewGame, onResumeGame, onOpe
                                 <div className="relative flex items-center justify-between">
                                     <div className="flex items-center gap-3 md:gap-6">
                                         <div className="w-9 h-9 md:w-14 md:h-14 bg-black/10 rounded-lg md:rounded-2xl flex items-center justify-center shadow-inner">
-                                            <Play size={20} md:size={24} fill="currentColor" />
+                                            <Play className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" />
                                         </div>
                                         <span>CONTINUE_CAREER</span>
                                     </div>
@@ -103,7 +103,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStartNewGame, onResumeGame, onOpe
                         <div className="relative flex items-center justify-between">
                             <div className="flex items-center gap-3 md:gap-6">
                                 <div className="w-9 h-9 md:w-14 md:h-14 bg-white/5 rounded-lg md:rounded-2xl flex items-center justify-center text-teal-500 group-hover:rotate-12 transition-transform duration-500">
-                                    <RotateCcw size={20} md:size={24} />
+                                    <RotateCcw className="w-5 h-5 md:w-6 md:h-6" />
                                 </div>
                                 <span>{hasSaveData ? "NEW_LEGACY" : "START_LEGACY"}</span>
                             </div>
@@ -122,7 +122,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStartNewGame, onResumeGame, onOpe
                             className="group relative overflow-hidden bg-white/[0.03] hover:bg-white/[0.06] text-white py-4 md:py-7 px-5 md:px-8 rounded-[20px] md:rounded-[32px] font-black italic tracking-tighter text-base md:text-xl uppercase transition-all border border-white/10 backdrop-blur-2xl hover:border-teal-500/40 shadow-xl"
                         >
                             <div className="flex flex-col items-start gap-1.5 md:gap-4">
-                                <Database size={18} md:size={20} className="text-teal-500 group-hover:scale-110 transition-transform duration-500" />
+                                <Database className="text-teal-500 group-hover:scale-110 transition-transform duration-500 w-4.5 h-4.5 md:w-5 md:h-5" />
                                 <span>DATA_EDITOR</span>
                             </div>
                         </motion.button>
@@ -134,7 +134,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStartNewGame, onResumeGame, onOpe
                             className="group relative overflow-hidden bg-white/[0.02] text-white/20 py-4 md:py-7 px-5 md:px-8 rounded-[20px] md:rounded-[32px] font-black italic tracking-tighter text-base md:text-xl uppercase transition-all border border-white/5 backdrop-blur-xl cursor-not-allowed"
                         >
                             <div className="flex flex-col items-start gap-1.5 md:gap-4">
-                                <Settings size={18} md:size={20} className="text-white/10" />
+                                <Settings className="text-white/10 w-4.5 h-4.5 md:w-5 md:h-5" />
                                 <span>SETTINGS</span>
                             </div>
                         </motion.button>
@@ -156,7 +156,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStartNewGame, onResumeGame, onOpe
                     <div>BUILD_V2.6.0</div>
                     <div className="hidden md:block w-1 h-1 rounded-full bg-white/20" />
                     <div className="flex items-center gap-1.5 md:gap-3">
-                        <Users size={8} md:size={10} />
+                        <Users className="w-2 h-2 md:w-2.5 md:h-2.5" />
                         1.2M_ACTIVE
                     </div>
                 </motion.div>

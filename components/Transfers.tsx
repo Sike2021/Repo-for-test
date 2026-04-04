@@ -341,7 +341,7 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                                 <div className="mt-12 flex flex-col items-center gap-4">
                                     {(selectedOtherPlayerForSwap.battingSkill >= 80 || selectedOtherPlayerForSwap.secondarySkill >= 80) && (
                                         <p className="text-xs font-black text-red-500 uppercase tracking-widest flex items-center gap-2 bg-red-500/10 px-6 py-3 rounded-full">
-                                            <TrendingUp size={14} /> -10Cr Next Season Penalty
+                                            <TrendingUp className="w-3.5 h-3.5" /> -10Cr Next Season Penalty
                                         </p>
                                     )}
                                     <div className="flex gap-4">

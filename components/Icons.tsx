@@ -53,7 +53,8 @@ import {
   Circle,
   Scale,
   Download,
-  Trash2
+  Trash2,
+  Menu
 } from 'lucide-react';
 
 export const Icons = {
@@ -128,4 +129,5 @@ export const Icons = {
   Scale,
   Download,
   Trash2,
+  Menu,
 };

@@ -68,9 +68,9 @@ const Stats: React.FC<StatsProps> = ({ gameData, viewPlayerProfile }) => {
                                     : 'border-white/10 opacity-40'
                             }`}
                         >
-                            <div 
+                            <PlayerAvatar 
+                                player={player} 
                                 className="w-full h-full rounded-full overflow-hidden bg-white/5 p-1"
-                                dangerouslySetInnerHTML={{ __html: player.avatar || '' }}
                             />
                         </button>
                     ))}
@@ -89,9 +89,9 @@ const Stats: React.FC<StatsProps> = ({ gameData, viewPlayerProfile }) => {
 
                         <div className="relative mb-4 md:mb-6">
                             <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-teal-500/20 p-1.5 md:p-2 shadow-[0_0_40px_rgba(20,184,166,0.1)]">
-                                <div 
+                                <PlayerAvatar 
+                                    player={selectedPlayer} 
                                     className="w-full h-full rounded-full bg-white/5 border border-white/10 flex items-center justify-center p-3 md:p-4 overflow-hidden"
-                                    dangerouslySetInnerHTML={{ __html: selectedPlayer.avatar || '' }}
                                 />
                             </div>
                             <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-teal-500 text-black px-3 md:px-4 py-0.5 md:py-1 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest shadow-xl">
@@ -100,7 +100,7 @@ const Stats: React.FC<StatsProps> = ({ gameData, viewPlayerProfile }) => {
                         </div>
 
                         <h3 className="text-2xl md:text-3xl font-black italic uppercase tracking-tighter text-white leading-none mb-1 md:mb-2">{selectedPlayer.name}</h3>
-                        <p className="text-[8px] md:text-[10px] font-black text-white/30 uppercase tracking-[0.4em] mb-6 md:mb-8">PRIMARY_ASSET // {selectedPlayer.teamId}</p>
+                        <p className="text-[8px] md:text-[10px] font-black text-white/30 uppercase tracking-[0.4em] mb-6 md:mb-8">PRIMARY_ASSET // {selectedPlayer.teamName || 'FREE AGENT'}</p>
 
                         {/* Stats Grid */}
                         <div className="w-full grid grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-8">
@@ -149,23 +149,23 @@ const Stats: React.FC<StatsProps> = ({ gameData, viewPlayerProfile }) => {
                             <div className="space-y-2 md:space-y-3">
                                 <div className="flex justify-between text-[8px] md:text-[9px] font-black uppercase tracking-widest text-white/40">
                                     <span>BATTING POWER</span>
-                                    <span>{selectedPlayer.batting}</span>
+                                    <span>{selectedPlayer.battingSkill}</span>
                                 </div>
                                 <div className="relative h-1 flex items-center">
                                     <div className="absolute inset-0 bg-white/5 rounded-full" />
-                                    <div className="absolute h-full bg-teal-500 rounded-full" style={{ width: `${selectedPlayer.batting}%` }} />
-                                    <div className="absolute w-2.5 h-2.5 md:w-3 md:h-3 bg-white border-2 border-teal-500 rounded-full shadow-xl" style={{ left: `${selectedPlayer.batting}%`, transform: 'translateX(-50%)' }} />
+                                    <div className="absolute h-full bg-teal-500 rounded-full" style={{ width: `${selectedPlayer.battingSkill}%` }} />
+                                    <div className="absolute w-2.5 h-2.5 md:w-3 md:h-3 bg-white border-2 border-teal-500 rounded-full shadow-xl" style={{ left: `${selectedPlayer.battingSkill}%`, transform: 'translateX(-50%)' }} />
                                 </div>
                             </div>
                             <div className="space-y-2 md:space-y-3">
                                 <div className="flex justify-between text-[8px] md:text-[9px] font-black uppercase tracking-widest text-white/40">
                                     <span>BOWLING SPEED</span>
-                                    <span>{selectedPlayer.bowling}</span>
+                                    <span>{selectedPlayer.secondarySkill}</span>
                                 </div>
                                 <div className="relative h-1 flex items-center">
                                     <div className="absolute inset-0 bg-white/5 rounded-full" />
-                                    <div className="absolute h-full bg-teal-500 rounded-full" style={{ width: `${selectedPlayer.bowling}%` }} />
-                                    <div className="absolute w-2.5 h-2.5 md:w-3 md:h-3 bg-white border-2 border-teal-500 rounded-full shadow-xl" style={{ left: `${selectedPlayer.bowling}%`, transform: 'translateX(-50%)' }} />
+                                    <div className="absolute h-full bg-teal-500 rounded-full" style={{ width: `${selectedPlayer.secondarySkill}%` }} />
+                                    <div className="absolute w-2.5 h-2.5 md:w-3 md:h-3 bg-white border-2 border-teal-500 rounded-full shadow-xl" style={{ left: `${selectedPlayer.secondarySkill}%`, transform: 'translateX(-50%)' }} />
                                 </div>
                             </div>
                         </div>
@@ -196,7 +196,7 @@ const Stats: React.FC<StatsProps> = ({ gameData, viewPlayerProfile }) => {
                         {milestones.slice(0, 3).map((m, i) => (
                             <div key={i} className="bg-white/[0.02] border border-white/5 p-3 md:p-4 rounded-xl md:rounded-2xl flex items-center gap-3 md:gap-4">
                                 <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-teal-500/10 flex items-center justify-center text-teal-500">
-                                    <Icons.Trophy size={14} md:size={16} />
+                                    <Icons.Trophy className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                 </div>
                                 <div>
                                     <p className="text-[9px] md:text-[10px] font-black text-white uppercase tracking-wider">{m.player}</p>

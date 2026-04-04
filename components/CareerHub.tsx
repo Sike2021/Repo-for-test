@@ -63,7 +63,7 @@ const BottomNavBar = ({ activeScreen, setScreen }: { activeScreen: CareerScreen,
                         className={`flex flex-col items-center justify-center gap-0.5 md:gap-1 transition-all duration-300 w-1/5 ${isActive ? 'text-teal-500 scale-105' : 'text-white/30 hover:text-white/60'}`}
                     >
                         <div className={`p-1.5 md:p-2 rounded-lg md:rounded-xl transition-all duration-300 ${isActive ? 'bg-teal-500/10 shadow-[0_0_15px_rgba(20,184,166,0.2)]' : ''}`}>
-                            <item.icon size={18} md:size={22} strokeWidth={isActive ? 2.5 : 1.5} />
+                            <item.icon className={`w-[18px] h-[18px] md:w-[22px] md:h-[22px] ${isActive ? 'stroke-[2.5px]' : 'stroke-[1.5px]'}`} />
                         </div>
                         <span className="text-[7px] md:text-[9px] font-black uppercase tracking-widest">{item.name}</span>
                     </button>

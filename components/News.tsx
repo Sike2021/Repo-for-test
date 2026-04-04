@@ -71,11 +71,11 @@ const News: React.FC<NewsProps> = ({ news }) => (
                     <div className="mt-8 pt-8 border-t border-white/5 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-teal-500/20 flex items-center justify-center">
-                                <Icons.Activity size={14} className="text-teal-500" />
+                                <Icons.Activity className="w-3.5 h-3.5 text-teal-500" />
                             </div>
                             <span className="text-[9px] font-black uppercase tracking-widest text-white/20">VERIFIED_SOURCE</span>
                         </div>
-                        <Icons.ArrowRight size={18} className="text-teal-500" />
+                        <Icons.ArrowRight className="w-[18px] h-[18px] text-teal-500" />
                     </div>
                 </motion.div>
             ))}
@@ -86,7 +86,7 @@ const News: React.FC<NewsProps> = ({ news }) => (
                         animate={{ scale: 1, opacity: 1 }}
                         className="w-32 h-32 bg-white/[0.02] rounded-[40px] flex items-center justify-center mb-10 border border-white/10 backdrop-blur-3xl shadow-2xl"
                     >
-                        <Icons.News size={64} className="text-white/10" />
+                        <Icons.News className="w-16 h-16 text-white/10" />
                     </motion.div>
                     <p className="font-black text-[11px] uppercase tracking-[0.5em]">NO_INTEL_AVAILABLE_AT_THIS_TIME</p>
                 </div>

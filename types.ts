@@ -118,7 +118,7 @@ export interface Award {
     bestBowler: { playerId: string, playerName: string, teamName: string, wickets: number };
 }
 
-export interface ScoreLimits { maxRuns?: number; maxWickets?: number; }
+export interface ScoreLimits { maxRuns?: number; maxWickets?: number; oversPerMatch?: number; maxOversPerBowler?: number; }
 export type InningLimits = { [key: number]: ScoreLimits; };
 
 export interface BatterVsBowlerRecord { batterId: string; batterName: string; bowlerId: string; bowlerName: string; runs: number; balls: number; dismissals: number; }

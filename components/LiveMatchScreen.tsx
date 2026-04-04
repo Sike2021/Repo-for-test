@@ -18,16 +18,16 @@ interface LiveMatchScreenProps {
 }
 
 const StrategyToggle = ({ label, value, onChange }: { label: string, value: Strategy, onChange: (s: Strategy) => void }) => (
-    <div className="flex flex-col items-center bg-slate-800 rounded p-1 flex-1">
-        <span className="text-[9px] text-slate-400 uppercase mb-1">{label}</span>
-        <div className="flex bg-slate-900 rounded p-0.5 w-full justify-center">
+    <div className="flex flex-col items-center bg-white/[0.03] rounded-xl p-1.5 flex-1 border border-white/5">
+        <span className="text-[8px] text-white/40 uppercase font-black tracking-widest mb-1">{label}</span>
+        <div className="flex bg-black/40 rounded-lg p-0.5 w-full justify-center">
             {(['defensive', 'balanced', 'attacking'] as Strategy[]).map(s => (
                 <button
                     key={s}
                     onClick={() => onChange(s)}
-                    className={`px-2 py-1 text-[9px] uppercase font-bold rounded transition-colors flex-1 ${value === s 
-                        ? s === 'attacking' ? 'bg-red-600 text-white' : s === 'defensive' ? 'bg-blue-600 text-white' : 'bg-yellow-600 text-white' 
-                        : 'text-slate-500 hover:bg-slate-700'}`}
+                    className={`px-1 py-1 text-[8px] uppercase font-black rounded-md transition-all flex-1 ${value === s 
+                        ? s === 'attacking' ? 'bg-red-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.3)]' : s === 'defensive' ? 'bg-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.3)]' : 'bg-teal-500 text-black shadow-[0_0_10px_rgba(20,184,166,0.3)]' 
+                        : 'text-white/20 hover:text-white/40'}`}
                 >
                     {s.slice(0,3)}
                 </button>
@@ -53,85 +53,87 @@ const PreMatchPanel = ({ match, gameData, onStart }: { match: Match, gameData: G
     };
 
     return (
-        <div className="absolute inset-0 z-[120] bg-[#050808] flex flex-col p-6 font-sans overflow-y-auto">
+        <div className="absolute inset-0 z-[120] bg-[#050808] flex flex-col p-4 font-sans overflow-y-auto scrollbar-hide">
             {/* Header */}
-            <header className="broadcast-header">
-                <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 ${sponsorship.logoColor}`} dangerouslySetInnerHTML={{__html: sponsorship.tournamentLogo || TOURNAMENT_LOGOS[0].svg}}></div>
+            <header className="flex justify-between items-center mb-8">
+                <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 ${sponsorship.logoColor} p-1 bg-white/5 rounded-xl border border-white/10`} dangerouslySetInnerHTML={{__html: sponsorship.tournamentLogo || TOURNAMENT_LOGOS[0].svg}}></div>
                     <div>
-                        <p className="text-[9px] font-black text-teal-500 uppercase tracking-[0.4em] mb-0.5">{gameData.currentFormat} // PRE_MATCH</p>
-                        <h1 className="text-2xl font-black italic uppercase tracking-tighter text-white">{sponsorship.sponsorName} {sponsorship.tournamentName}</h1>
+                        <p className="text-[8px] font-black text-teal-500 uppercase tracking-[0.4em] mb-0.5">{gameData.currentFormat} // PRE_MATCH</p>
+                        <h1 className="text-lg font-black italic uppercase tracking-tighter text-white leading-none">{sponsorship.tournamentName}</h1>
                     </div>
                 </div>
-                <div className={`w-16 h-10 opacity-40`} dangerouslySetInnerHTML={{__html: sponsorship.tvLogo || ''}}></div>
+                <div className="w-12 h-8 opacity-20" dangerouslySetInnerHTML={{__html: sponsorship.tvLogo || ''}}></div>
             </header>
 
-            <div className="flex-grow flex flex-col justify-center space-y-12 py-8">
-                <div className="flex items-center justify-between px-4">
+            <div className="flex-grow flex flex-col justify-center space-y-8 py-4">
+                <div className="flex items-center justify-between px-2">
                     <motion.div 
-                        initial={{ x: -50, opacity: 0 }}
+                        initial={{ x: -30, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
-                        className="flex flex-col items-center space-y-4 w-1/3"
+                        className="flex flex-col items-center space-y-3 w-1/3"
                     >
-                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center shadow-[0_0_30px_rgba(20,184,166,0.3)] border-4 border-white/10 overflow-hidden">
-                            <div className="w-16 h-16" dangerouslySetInnerHTML={{__html: gameData.allTeamsData.find(t => t.id === teamA?.id)?.logo || ''}}></div>
+                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-teal-500/20 to-blue-600/20 flex items-center justify-center shadow-[0_0_40px_rgba(20,184,166,0.1)] border border-white/10 overflow-hidden relative group">
+                            <div className="absolute inset-0 bg-teal-500/10 animate-pulse" />
+                            <div className="w-12 h-12 relative z-10" dangerouslySetInnerHTML={{__html: gameData.allTeamsData.find(t => t.id === teamA?.id)?.logo || ''}}></div>
                         </div>
-                        <h2 className="text-xl font-black uppercase tracking-tighter italic text-center text-white">{teamA?.name}</h2>
-                        <div className="px-3 py-1 bg-white/5 rounded-full border border-white/10">
-                            <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">Home</span>
+                        <h2 className="text-sm font-black uppercase tracking-tighter italic text-center text-white leading-tight">{teamA?.name}</h2>
+                        <div className="px-2 py-0.5 bg-white/5 rounded-full border border-white/10">
+                            <span className="text-[7px] font-black text-white/40 uppercase tracking-widest">HOME_SIDE</span>
                         </div>
                     </motion.div>
 
                     <div className="flex flex-col items-center">
-                        <div className="text-5xl font-black italic text-white/10 tracking-tighter mb-2">VS</div>
-                        <div className="w-1 h-12 bg-gradient-to-b from-transparent via-teal-500 to-transparent opacity-30" />
+                        <div className="text-4xl font-black italic text-white/5 tracking-tighter mb-1">VS</div>
+                        <div className="w-px h-10 bg-gradient-to-b from-transparent via-teal-500/40 to-transparent" />
                     </div>
 
                     <motion.div 
-                        initial={{ x: 50, opacity: 0 }}
+                        initial={{ x: 30, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
-                        className="flex flex-col items-center space-y-4 w-1/3"
+                        className="flex flex-col items-center space-y-3 w-1/3"
                     >
-                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center border-4 border-white/10 overflow-hidden">
-                            <div className="w-16 h-16" dangerouslySetInnerHTML={{__html: gameData.allTeamsData.find(t => t.id === teamB?.id)?.logo || ''}}></div>
+                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center border border-white/10 overflow-hidden relative">
+                            <div className="w-12 h-12 relative z-10" dangerouslySetInnerHTML={{__html: gameData.allTeamsData.find(t => t.id === teamB?.id)?.logo || ''}}></div>
                         </div>
-                        <h2 className="text-xl font-black uppercase tracking-tighter italic text-center text-white">{teamB?.name}</h2>
-                        <div className="px-3 py-1 bg-white/5 rounded-full border border-white/10">
-                            <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">Away</span>
+                        <h2 className="text-sm font-black uppercase tracking-tighter italic text-center text-white leading-tight">{teamB?.name}</h2>
+                        <div className="px-2 py-0.5 bg-white/5 rounded-full border border-white/10">
+                            <span className="text-[7px] font-black text-white/40 uppercase tracking-widest">AWAY_SIDE</span>
                         </div>
                     </motion.div>
                 </div>
 
-                <div className="glass-card p-6 mx-auto w-full max-w-md">
-                    <div className="flex justify-between items-center mb-6">
-                        <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Match Conditions</span>
+                <div className="bg-white/[0.02] border border-white/5 rounded-[24px] p-5 mx-auto w-full max-w-sm backdrop-blur-xl">
+                    <div className="flex justify-between items-center mb-4">
+                        <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em]">GROUND_TELEMETRY</span>
                         <div className="flex gap-1">
-                            {[1,2,3].map(i => <div key={i} className="w-1 h-1 bg-teal-500 rounded-full" />)}
+                            {[1,2,3].map(i => <div key={i} className="w-1 h-1 bg-teal-500/40 rounded-full" />)}
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                            <p className="text-[8px] font-black text-white/30 uppercase tracking-widest mb-1">Pitch Report</p>
-                            <p className="text-sm font-bold text-teal-400">{ground?.pitch}</p>
-                            <p className="text-[9px] text-white/20 mt-1 uppercase tracking-tighter">Favors {ground?.pitch.includes('Spin') ? 'Spin' : ground?.pitch.includes('Green') ? 'Pace' : 'Batting'}</p>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                            <p className="text-[7px] font-black text-white/20 uppercase tracking-widest mb-1">PITCH_SURFACE</p>
+                            <p className="text-xs font-black text-teal-500 italic uppercase">{ground?.pitch}</p>
+                            <p className="text-[8px] text-white/10 mt-1 uppercase font-bold">FAVORS: {ground?.pitch.includes('Spin') ? 'SPIN' : ground?.pitch.includes('Green') ? 'PACE' : 'BAT'}</p>
                         </div>
-                        <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                            <p className="text-[8px] font-black text-white/30 uppercase tracking-widest mb-1">Conditions</p>
-                            <p className="text-sm font-bold flex items-center gap-2 text-white">
-                                <span>{getWeatherIcon(ground?.weather)}</span> {ground?.weather || 'Clear'}
+                        <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                            <p className="text-[7px] font-black text-white/20 uppercase tracking-widest mb-1">ATMOSPHERE</p>
+                            <p className="text-xs font-black text-white italic uppercase flex items-center gap-1.5">
+                                <span className="text-sm">{getWeatherIcon(ground?.weather)}</span> {ground?.weather || 'CLEAR'}
                             </p>
-                            <p className="text-[9px] text-white/20 mt-1 uppercase tracking-tighter">{ground?.outfieldSpeed || 'Medium'} Outfield</p>
+                            <p className="text-[8px] text-white/10 mt-1 uppercase font-bold">{ground?.outfieldSpeed || 'MED'} OUTFIELD</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="mt-auto pt-6">
+            <div className="mt-auto pt-4">
                 <button 
                     onClick={onStart}
-                    className="w-full bg-teal-500 text-black font-black py-5 px-6 rounded-[20px] uppercase tracking-[0.2em] text-sm hover:bg-teal-400 transition-all duration-500 shadow-2xl shadow-teal-500/30 active:scale-[0.98]"
+                    className="w-full bg-teal-500 text-black font-black py-4 px-6 rounded-2xl uppercase tracking-[0.2em] text-[10px] hover:bg-teal-400 transition-all duration-500 shadow-[0_10px_30px_rgba(20,184,166,0.2)] active:scale-[0.98] flex items-center justify-center gap-3 group"
                 >
-                    Enter Match Broadcast
+                    INITIALIZE BROADCAST
+                    <Icons.Play className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                 </button>
             </div>
         </div>
@@ -184,33 +186,47 @@ const MatchChat = ({ gameData, onClose }: { gameData: GameData, onClose: () => v
     };
 
     return (
-        <div className="absolute inset-0 bg-slate-900/95 z-[130] flex flex-col p-4 animate-fade-in">
-            <div className="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                        <Icons.Bot />
+        <div className="absolute inset-0 bg-[#050808]/95 z-[130] flex flex-col p-4 animate-fade-in backdrop-blur-3xl">
+            <div className="flex justify-between items-center mb-4 border-b border-white/5 pb-3">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-teal-500 to-blue-500 flex items-center justify-center shadow-lg shadow-teal-500/20 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-white/10 animate-pulse" />
+                        <Icons.Bot className="relative z-10 text-white" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-white text-lg">Match Analyst</h3>
-                        <p className="text-[10px] text-cyan-400 uppercase tracking-wider">Real-Time Analyst</p>
+                        <h3 className="font-black italic uppercase tracking-tighter text-white text-base">MATCH_ANALYST</h3>
+                        <p className="text-[8px] text-teal-500 uppercase tracking-[0.3em] font-black">AI_TACTICAL_ENGINE_v2.5</p>
                     </div>
                 </div>
-                <button onClick={onClose} className="p-2 bg-slate-800 rounded-full hover:bg-slate-700"><Icons.X /></button>
+                <button onClick={onClose} className="p-2 bg-white/5 rounded-xl hover:bg-white/10 border border-white/10 transition-all"><Icons.X className="text-white/40" /></button>
             </div>
-            <div className="flex-grow overflow-y-auto space-y-3 mb-4 pr-2">
+            <div className="flex-grow overflow-y-auto space-y-4 mb-4 pr-2 scrollbar-hide">
                 {messages.map(m => (
                     <div key={m.id} className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${m.sender === 'user' ? 'bg-cyan-600 text-white rounded-tr-sm' : 'bg-slate-800 text-slate-200 rounded-tl-sm border border-slate-700'}`}>
+                        <div className={`max-w-[85%] p-4 rounded-[20px] text-xs font-medium leading-relaxed ${m.sender === 'user' ? 'bg-teal-500 text-black rounded-tr-sm shadow-lg shadow-teal-500/10' : 'bg-white/[0.03] text-white/80 rounded-tl-sm border border-white/5'}`}>
                             {m.text}
                         </div>
                     </div>
                 ))}
-                {isTyping && <div className="text-xs text-cyan-500 animate-pulse">Analyzing...</div>}
+                {isTyping && (
+                    <div className="flex items-center gap-2 text-[8px] text-teal-500 font-black uppercase tracking-widest animate-pulse">
+                        <div className="w-1 h-1 bg-teal-500 rounded-full" />
+                        ANALYZING_LIVE_DATA...
+                    </div>
+                )}
                 <div ref={endRef} />
             </div>
-            <div className="flex gap-2">
-                <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()} placeholder="Ask for tactics..." className="flex-grow bg-slate-800 border border-slate-600 rounded-full px-4 py-2 text-sm text-white focus:ring-2 focus:ring-cyan-500 focus:outline-none" />
-                <button onClick={send} className="bg-cyan-500 hover:bg-cyan-400 text-white p-2 rounded-full"><Icons.Play className="h-5 w-5" /></button>
+            <div className="flex gap-2 bg-white/[0.03] p-1.5 rounded-2xl border border-white/5 backdrop-blur-xl">
+                <input 
+                    value={input} 
+                    onChange={e => setInput(e.target.value)} 
+                    onKeyDown={e => e.key === 'Enter' && send()} 
+                    placeholder="QUERY_TACTICAL_ENGINE..." 
+                    className="flex-grow bg-transparent border-none rounded-xl px-4 py-3 text-[10px] text-white font-black tracking-widest focus:ring-0 focus:outline-none placeholder:text-white/10" 
+                />
+                <button onClick={send} className="bg-white text-black hover:bg-teal-500 hover:text-white p-3 rounded-xl transition-all shadow-xl flex items-center justify-center group">
+                    <Icons.Play className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                </button>
             </div>
         </div>
     );
@@ -1143,58 +1159,47 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                      ))}
                 </div>
 
-                <div className="flex gap-3">
+                <div className="grid grid-cols-4 gap-2">
                     {state.status === 'completed' ? (
                         <button 
                             onClick={handleExit} 
-                            className="flex-1 bg-red-600 text-white font-black py-5 rounded-[20px] uppercase tracking-[0.2em] text-xs hover:bg-red-500 transition-all active:scale-95 shadow-2xl shadow-red-600/20"
+                            className="col-span-4 bg-red-500 text-white font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-[10px] hover:bg-red-600 transition-all active:scale-95 shadow-2xl shadow-red-500/20 flex items-center justify-center gap-3"
                         >
-                            End Match
+                            <Icons.X className="w-3.5 h-3.5" />
+                            TERMINATE BROADCAST
                         </button>
                     ) : (
                         <>
                             {state.autoPlayType ? (
                                 <button 
                                     onClick={stopAutoPlay} 
-                                    className="flex-1 bg-red-600 text-white font-black py-5 rounded-[20px] uppercase tracking-[0.2em] text-xs hover:bg-red-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-2xl shadow-red-600/20"
+                                    className="col-span-4 bg-red-500 text-white font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-[10px] hover:bg-red-600 transition-all active:scale-95 flex items-center justify-center gap-3 shadow-2xl shadow-red-500/20 animate-pulse"
                                 >
-                                    <Icons.Pause className="h-5 w-5" />
-                                    <span>STOP SIM</span>
+                                    <Icons.X className="w-3.5 h-3.5" />
+                                    STOP SIMULATION
                                 </button>
                             ) : (
                                 <>
-                                    {gameData.currentFormat === Format.SHIELD && isUserBatting && (
-                                        <button 
-                                            onClick={declareInning} 
-                                            className="bg-red-600 text-white font-black py-5 px-6 rounded-[20px] uppercase tracking-[0.2em] text-xs hover:bg-red-500 transition-all active:scale-95 flex items-center justify-center shadow-2xl shadow-red-600/20"
-                                        >
-                                            <span className="text-lg">🚩</span>
-                                        </button>
-                                    )}
                                     <button 
                                         onClick={playBall} 
-                                        className={`flex-[2] ${isUserBatting ? 'bg-teal-500' : 'bg-blue-600'} text-black font-black py-5 rounded-[20px] uppercase tracking-[0.2em] text-xs hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-2xl ${isUserBatting ? 'shadow-teal-500/30' : 'shadow-blue-600/30'}`}
+                                        className={`col-span-2 ${isUserBatting ? 'bg-teal-500 text-black' : 'bg-blue-500 text-white'} font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-[10px] hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-2xl ${isUserBatting ? 'shadow-teal-500/30' : 'shadow-blue-500/30'}`}
                                     >
-                                        <Icons.Play className="h-5 w-5" />
-                                        <span>{isUserBatting ? 'PLAY BALL' : 'BOWL BALL'}</span>
+                                        <Icons.Play className="w-3.5 h-3.5" />
+                                        {isUserBatting ? 'PLAY BALL' : 'BOWL BALL'}
                                     </button>
                                     <button 
                                         onClick={playOver} 
-                                        className="flex-1 bg-white/5 text-white font-black py-5 rounded-[20px] uppercase tracking-[0.2em] text-[10px] hover:bg-white/10 transition-all active:scale-95 border border-white/10"
+                                        className="bg-white/[0.05] text-white font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-[10px] hover:bg-white/10 transition-all active:scale-95 border border-white/10 flex flex-col items-center justify-center gap-1"
                                     >
+                                        <Icons.Activity className="w-3 h-3" />
                                         OVER
                                     </button>
                                     <button 
-                                        onClick={simulateInning} 
-                                        className="flex-1 bg-white/5 text-white font-black py-5 rounded-[20px] uppercase tracking-[0.2em] text-[10px] hover:bg-white/10 transition-all active:scale-95 border border-white/10"
+                                        onClick={() => setShowMatchCentre(true)} 
+                                        className="bg-white/[0.05] text-white font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-[10px] hover:bg-white/10 transition-all active:scale-95 border border-white/10 flex flex-col items-center justify-center gap-1"
                                     >
-                                        INN
-                                    </button>
-                                    <button 
-                                        onClick={simulateMatch} 
-                                        className="flex-1 bg-white/5 text-white font-black py-5 rounded-[20px] uppercase tracking-[0.2em] text-[10px] hover:bg-white/10 transition-all active:scale-95 border border-white/10"
-                                    >
-                                        END
+                                        <Icons.Menu className="w-3 h-3" />
+                                        CENTRE
                                     </button>
                                 </>
                             )}

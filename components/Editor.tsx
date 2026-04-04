@@ -25,6 +25,10 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isUploading, setIsUploading] = useState(false);
 
+    const triggerFileInput = () => {
+        fileInputRef.current?.click();
+    };
+
     const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file || !selectedPlayer) return;
@@ -95,6 +99,12 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
             style: 'N',
             isOpener: false,
             isForeign: false,
+            age: 22,
+            fielding: 50,
+            accuracy: 50,
+            potential: 70,
+            form: 50,
+            fitness: 80,
             stats: generateInitialStats(),
             recentPerformances: []
         });
@@ -138,11 +148,18 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
                         <h1 className="text-2xl md:text-3xl font-black italic uppercase tracking-tighter text-white leading-none">PLAYER EDITOR</h1>
                     </div>
                     <div className="flex gap-2 md:gap-3">
-                        <button onClick={() => setSelectedPlayer(null)} className="p-2.5 md:p-3 bg-white/5 rounded-lg md:rounded-xl border border-white/10 text-white/40">
-                            <Icons.X size={18} md:size={20} />
+                        <button 
+                            onClick={savePlayer}
+                            className="px-5 md:px-6 py-2.5 md:py-3 bg-teal-500 hover:bg-teal-400 text-black text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 shadow-lg shadow-teal-500/20 active:scale-95"
+                        >
+                            <Icons.Check className="w-4 h-4 fill-current" />
+                            SAVE
                         </button>
-                        <button onClick={savePlayer} className="p-2.5 md:p-3 bg-teal-500 rounded-lg md:rounded-xl text-black shadow-lg">
-                            <Icons.Check size={18} md:size={20} />
+                        <button 
+                            onClick={() => { setSelectedPlayer(null); setIsCreating(false); }}
+                            className="px-5 md:px-6 py-2.5 md:py-3 bg-white/5 hover:bg-white/10 text-white text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl border border-white/10 transition-all active:scale-95"
+                        >
+                            <Icons.X className="w-4 h-4" />
                         </button>
                     </div>
                 </header>
@@ -152,17 +169,36 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
                         <div className="absolute top-4 left-4 md:top-6 md:left-6 text-[8px] md:text-[10px] font-black text-teal-500/40 uppercase tracking-[0.3em]">DOM</div>
                         <div className="absolute top-4 right-4 md:top-6 md:right-6 text-[8px] md:text-[10px] font-black text-teal-500/40 uppercase tracking-[0.3em]">{selectedPlayer.role.toUpperCase()} // DOM</div>
 
-                        <div className="relative mb-4 md:mb-6">
-                            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-teal-500/20 p-1.5 md:p-2 shadow-[0_0_40px_rgba(20,184,166,0.1)]">
-                                <div className="w-full h-full rounded-full bg-white/5 border border-white/10 flex items-center justify-center p-3 md:p-4 overflow-hidden">
+                        <div className="relative mb-4 md:mb-6 group">
+                            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-teal-500/20 p-1.5 md:p-2 shadow-[0_0_40px_rgba(20,184,166,0.1)] relative">
+                                <div className="w-full h-full rounded-full bg-white/5 border border-white/10 flex items-center justify-center p-3 md:p-4 overflow-hidden relative">
                                     <PlayerAvatar player={selectedPlayer} size="md" className="w-full h-full" />
+                                    {isUploading && (
+                                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                            <Icons.RefreshCw className="w-6 h-6 text-teal-500 animate-spin" />
+                                        </div>
+                                    )}
                                 </div>
+                                <button 
+                                    onClick={triggerFileInput}
+                                    className="absolute bottom-0 right-0 bg-teal-500 text-black p-2 rounded-full shadow-lg hover:scale-110 transition-transform"
+                                    title="Upload Photo"
+                                >
+                                    <Icons.Plus className="w-3.5 h-3.5" />
+                                </button>
+                                <input 
+                                    type="file" 
+                                    ref={fileInputRef} 
+                                    onChange={handlePhotoUpload} 
+                                    className="hidden" 
+                                    accept="image/*"
+                                />
                             </div>
                             <button 
                                 onClick={() => setSelectedPlayer({...selectedPlayer, avatarSeed: `seed-${Math.random()}`})}
-                                className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-teal-500 text-black px-3 md:px-4 py-0.5 md:py-1 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center gap-1.5 md:gap-2"
+                                className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white/10 text-white/60 px-3 md:px-4 py-0.5 md:py-1 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center gap-1.5 md:gap-2 hover:bg-white/20 hover:text-white transition-all"
                             >
-                                <Icons.RefreshCw size={10} md:size={12} />
+                                <Icons.RefreshCw className="w-2.5 h-2.5 md:w-3 md:h-3" />
                                 MUTATE
                             </button>
                         </div>
@@ -189,10 +225,112 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
                                 </select>
                             </div>
 
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5 md:space-y-2 text-left">
+                                    <label className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">NATIONALITY</label>
+                                    <input 
+                                        type="text" 
+                                        value={selectedPlayer.nationality}
+                                        onChange={(e) => setSelectedPlayer({ ...selectedPlayer, nationality: e.target.value })}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-black text-white outline-none focus:border-teal-500 transition-all"
+                                    />
+                                </div>
+                                <div className="space-y-1.5 md:space-y-2 text-left">
+                                    <label className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">BATTING_STYLE</label>
+                                    <select 
+                                        value={selectedPlayer.style}
+                                        onChange={(e) => setSelectedPlayer({ ...selectedPlayer, style: e.target.value as any })}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-black text-white outline-none focus:border-teal-500 transition-all appearance-none"
+                                    >
+                                        {BATTING_STYLE_OPTIONS.map(opt => <option key={opt} value={opt} className="bg-[#050808]">{getBattingStyleLabel(opt)}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4">
+                                <div className="space-y-1.5 md:space-y-2 text-left">
+                                    <label className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">AGE</label>
+                                    <input 
+                                        type="number" 
+                                        value={selectedPlayer.age || 20}
+                                        onChange={(e) => setSelectedPlayer({ ...selectedPlayer, age: parseInt(e.target.value) })}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-black text-white outline-none focus:border-teal-500 transition-all"
+                                    />
+                                </div>
+                                <div className="space-y-1.5 md:space-y-2 text-left">
+                                    <label className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">FORM</label>
+                                    <input 
+                                        type="number" 
+                                        value={selectedPlayer.form || 50}
+                                        onChange={(e) => setSelectedPlayer({ ...selectedPlayer, form: parseInt(e.target.value) })}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-black text-white outline-none focus:border-teal-500 transition-all"
+                                    />
+                                </div>
+                                <div className="space-y-1.5 md:space-y-2 text-left">
+                                    <label className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">FITNESS</label>
+                                    <input 
+                                        type="number" 
+                                        value={selectedPlayer.fitness || 80}
+                                        onChange={(e) => setSelectedPlayer({ ...selectedPlayer, fitness: parseInt(e.target.value) })}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-black text-white outline-none focus:border-teal-500 transition-all"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4">
+                                <div className="space-y-1.5 md:space-y-2 text-left">
+                                    <label className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">AGE</label>
+                                    <input 
+                                        type="number" 
+                                        value={selectedPlayer.age || 20}
+                                        onChange={(e) => setSelectedPlayer({ ...selectedPlayer, age: parseInt(e.target.value) })}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-black text-white outline-none focus:border-teal-500 transition-all"
+                                    />
+                                </div>
+                                <div className="space-y-1.5 md:space-y-2 text-left">
+                                    <label className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">FORM</label>
+                                    <input 
+                                        type="number" 
+                                        value={selectedPlayer.form || 50}
+                                        onChange={(e) => setSelectedPlayer({ ...selectedPlayer, form: parseInt(e.target.value) })}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-black text-white outline-none focus:border-teal-500 transition-all"
+                                    />
+                                </div>
+                                <div className="space-y-1.5 md:space-y-2 text-left">
+                                    <label className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">FITNESS</label>
+                                    <input 
+                                        type="number" 
+                                        value={selectedPlayer.fitness || 80}
+                                        onChange={(e) => setSelectedPlayer({ ...selectedPlayer, fitness: parseInt(e.target.value) })}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-black text-white outline-none focus:border-teal-500 transition-all"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-4 pt-2">
+                                <label className="flex items-center gap-3 cursor-pointer group">
+                                    <div className={`w-10 h-6 rounded-full transition-all relative ${selectedPlayer.isForeign ? 'bg-teal-500' : 'bg-white/10'}`}>
+                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${selectedPlayer.isForeign ? 'left-5' : 'left-1'}`} />
+                                    </div>
+                                    <input type="checkbox" className="hidden" checked={selectedPlayer.isForeign} onChange={e => setSelectedPlayer({...selectedPlayer, isForeign: e.target.checked})} />
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-white/40 group-hover:text-white transition-colors">FOREIGN_ASSET</span>
+                                </label>
+                                <label className="flex items-center gap-3 cursor-pointer group">
+                                    <div className={`w-10 h-6 rounded-full transition-all relative ${selectedPlayer.isOpener ? 'bg-teal-500' : 'bg-white/10'}`}>
+                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${selectedPlayer.isOpener ? 'left-5' : 'left-1'}`} />
+                                    </div>
+                                    <input type="checkbox" className="hidden" checked={selectedPlayer.isOpener} onChange={e => setSelectedPlayer({...selectedPlayer, isOpener: e.target.checked})} />
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-white/40 group-hover:text-white transition-colors">OPENER_STATUS</span>
+                                </label>
+                            </div>
+
                             <div className="space-y-4 md:space-y-6 pt-2 md:pt-4">
                                 {[
                                     { label: 'BATTING_POWER', key: 'battingSkill' },
                                     { label: 'BOWLING_SPEED', key: 'secondarySkill' },
+                                    { label: 'FIELDING_SKILL', key: 'fielding' },
+                                    { label: 'ACCURACY', key: 'accuracy' },
+                                    { label: 'POTENTIAL', key: 'potential' },
                                     { label: 'OVERALL_RATING', key: 'rating' }
                                 ].map((attr) => (
                                     <div key={attr.key} className="space-y-2 md:space-y-3">
@@ -208,6 +346,52 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
                                         />
                                     </div>
                                 ))}
+                            </div>
+
+                            {/* Custom Profiles Section */}
+                            <div className="pt-6 border-t border-white/5 space-y-6">
+                                <div className="flex justify-between items-center">
+                                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60">FORMAT_PROFILES</h3>
+                                    <div className="flex gap-1 bg-white/5 p-1 rounded-lg">
+                                        {Object.values(Format).map(f => (
+                                            <button 
+                                                key={f}
+                                                onClick={() => setEditorFormatTab(f)}
+                                                className={`px-3 py-1 rounded text-[8px] font-black uppercase tracking-widest transition-all ${editorFormatTab === f ? 'bg-teal-500 text-black' : 'text-white/40'}`}
+                                            >
+                                                {f}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5 md:space-y-2 text-left">
+                                        <label className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">AVG_RATING</label>
+                                        <input 
+                                            type="number" 
+                                            step="0.1"
+                                            value={selectedPlayer.customProfiles?.[editorFormatTab]?.avg || ''}
+                                            placeholder={getPlayerProfileForFormat(selectedPlayer, editorFormatTab).avg.toString()}
+                                            onChange={(e) => handleProfileChange('avg', e.target.value)}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-black text-white outline-none focus:border-teal-500 transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 md:space-y-2 text-left">
+                                        <label className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">SR_RATING</label>
+                                        <input 
+                                            type="number" 
+                                            step="0.1"
+                                            value={selectedPlayer.customProfiles?.[editorFormatTab]?.sr || ''}
+                                            placeholder={getPlayerProfileForFormat(selectedPlayer, editorFormatTab).sr.toString()}
+                                            onChange={(e) => handleProfileChange('sr', e.target.value)}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-black text-white outline-none focus:border-teal-500 transition-all"
+                                        />
+                                    </div>
+                                </div>
+                                <p className="text-[8px] font-black text-white/20 uppercase tracking-widest text-center italic">
+                                    * LEAVE EMPTY TO USE SYSTEM DEFAULT BASED ON SKILLS
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -255,7 +439,7 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
                             onClick={handleAddNewPlayer}
                             className="w-full py-5 md:py-6 bg-white text-black rounded-2xl md:rounded-3xl font-black uppercase italic tracking-widest text-[10px] md:text-xs flex items-center justify-center gap-2 md:gap-3 shadow-xl"
                         >
-                            <Icons.Plus size={18} md:size={20} />
+                            <Icons.Plus className="w-[18px] h-[18px] md:w-5 md:h-5" />
                             CREATE_NEW_ASSET
                         </button>
                         <div className="grid grid-cols-1 gap-2 md:gap-3">
@@ -280,38 +464,66 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
                 )}
 
                 {editType === 'grounds' && (
-                    <div className="space-y-3 md:space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         {gameData.grounds.map(g => (
-                            <div key={g.code} className="bg-white/5 border border-white/10 p-5 md:p-6 rounded-[28px] md:rounded-[32px] space-y-5 md:space-y-6">
-                                <div className="flex items-center gap-3 md:gap-4">
-                                    <div className="w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-500">
-                                        <Icons.Venue size={18} md:size={20} />
+                            <div key={g.code} className="bg-white/5 border border-white/10 p-6 md:p-8 rounded-[32px] md:rounded-[40px] space-y-6 md:space-y-8 hover:bg-white/[0.07] transition-all group relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/5 blur-3xl -mr-16 -mt-16 pointer-events-none" />
+                                
+                                <div className="flex items-center gap-4 md:gap-6 relative z-10">
+                                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-teal-500/10 flex items-center justify-center text-teal-500 border border-teal-500/20 shadow-inner">
+                                        <Icons.Venue className="w-6 h-6 md:w-7 md:h-7" />
                                     </div>
                                     <div className="flex-1">
                                         <input 
                                             type="text" 
                                             value={g.name}
                                             onChange={(e) => handleGroundChange(g.code, 'name', e.target.value)}
-                                            className="w-full bg-transparent border-none text-lg md:text-xl font-black italic uppercase tracking-tighter text-white outline-none"
+                                            className="w-full bg-transparent border-none text-xl md:text-2xl font-black italic uppercase tracking-tighter text-white outline-none focus:text-teal-400 transition-colors"
                                         />
-                                        <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest">{g.code}</p>
+                                        <p className="text-[9px] md:text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">{g.code} // STADIUM_ID</p>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-2 md:gap-3">
-                                    <select 
-                                        value={g.pitch}
-                                        onChange={(e) => handleGroundChange(g.code, 'pitch', e.target.value)}
-                                        className="bg-white/5 border border-white/10 rounded-lg md:rounded-xl px-3 md:px-4 py-2.5 md:py-3 text-[9px] md:text-[10px] font-black text-white outline-none"
-                                    >
-                                        {PITCH_TYPES.map(pt => <option key={pt} value={pt} className="bg-[#050808]">{pt}</option>)}
-                                    </select>
-                                    <select 
-                                        value={g.boundarySize || 'Medium'}
-                                        onChange={(e) => handleGroundChange(g.code, 'boundarySize', e.target.value)}
-                                        className="bg-white/5 border border-white/10 rounded-lg md:rounded-xl px-3 md:px-4 py-2.5 md:py-3 text-[9px] md:text-[10px] font-black text-white outline-none"
-                                    >
-                                        {['Small', 'Medium', 'Large'].map(s => <option key={s} value={s} className="bg-[#050808]">{s}</option>)}
-                                    </select>
+
+                                <div className="grid grid-cols-2 gap-4 md:gap-5 relative z-10">
+                                    <div className="space-y-2">
+                                        <label className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest ml-2">PITCH_TYPE</label>
+                                        <select 
+                                            value={g.pitch}
+                                            onChange={(e) => handleGroundChange(g.code, 'pitch', e.target.value)}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 text-xs md:text-sm font-black text-white outline-none focus:border-teal-500 transition-all appearance-none"
+                                        >
+                                            {PITCH_TYPES.map(pt => <option key={pt} value={pt} className="bg-[#050808]">{pt}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest ml-2">BOUNDARY</label>
+                                        <select 
+                                            value={g.boundarySize || 'Medium'}
+                                            onChange={(e) => handleGroundChange(g.code, 'boundarySize', e.target.value)}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 text-xs md:text-sm font-black text-white outline-none focus:border-teal-500 transition-all appearance-none"
+                                        >
+                                            {['Small', 'Medium', 'Large'].map(s => <option key={s} value={s} className="bg-[#050808]">{s}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest ml-2">OUTFIELD</label>
+                                        <select 
+                                            value={g.outfieldSpeed || 'Medium'}
+                                            onChange={(e) => handleGroundChange(g.code, 'outfieldSpeed', e.target.value)}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 text-xs md:text-sm font-black text-white outline-none focus:border-teal-500 transition-all appearance-none"
+                                        >
+                                            {['Slow', 'Medium', 'Fast', 'Lightning'].map(s => <option key={s} value={s} className="bg-[#050808]">{s}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest ml-2">CAPACITY</label>
+                                        <input 
+                                            type="number" 
+                                            value={g.capacity || 0}
+                                            onChange={(e) => handleGroundChange(g.code, 'capacity', parseInt(e.target.value))}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 text-xs md:text-sm font-black text-white outline-none focus:border-teal-500 transition-all"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -319,33 +531,77 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
                 )}
 
                 {editType === 'rules' && (
-                    <div className="space-y-5 md:space-y-6">
+                    <div className="grid grid-cols-1 gap-6 md:gap-8">
                         {gameData.grounds.map(g => (
-                            <div key={g.code} className="bg-white/5 border border-white/10 p-5 md:p-6 rounded-[28px] md:rounded-[32px] space-y-5 md:space-y-6">
-                                <h3 className="text-lg md:text-xl font-black italic uppercase tracking-tighter text-teal-500">{g.name}</h3>
-                                <div className="space-y-3 md:space-y-4">
+                            <div key={g.code} className="bg-white/5 border border-white/10 p-6 md:p-8 rounded-[32px] md:rounded-[40px] space-y-8 md:space-y-10 hover:bg-white/[0.07] transition-all relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-48 h-48 bg-teal-500/5 blur-3xl -ml-24 -mt-24 pointer-events-none" />
+                                
+                                <div className="flex items-center gap-4 md:gap-6 relative z-10">
+                                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-teal-500/10 flex items-center justify-center text-teal-500 border border-teal-500/20">
+                                        <Icons.Trophy className="w-6 h-6 md:w-7 md:h-7" />
+                                    </div>
+                                    <h3 className="text-xl md:text-2xl font-black italic uppercase tracking-tighter text-white">{g.name} // RULES_SET</h3>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 relative z-10">
                                     {Object.values(Format).map(f => (
-                                        <div key={f} className="space-y-2 md:space-y-3">
-                                            <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest">{f} PROTOCOL</p>
-                                            <div className="grid grid-cols-2 gap-2 md:gap-3">
-                                                <div className="space-y-1">
-                                                    <label className="text-[7px] md:text-[8px] font-black text-white/10 uppercase ml-2">MAX_RUNS</label>
-                                                    <input 
-                                                        type="number"
-                                                        value={gameData.scoreLimits?.[g.code]?.[f]?.[1]?.maxRuns || ''}
-                                                        onChange={(e) => handleUpdateScoreLimits(g.code, f, 'maxRuns', e.target.value, 1)}
-                                                        className="w-full bg-white/5 border border-white/10 rounded-lg md:rounded-xl p-2.5 md:p-3 text-[10px] md:text-xs font-black text-white outline-none"
-                                                    />
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <label className="text-[7px] md:text-[8px] font-black text-white/10 uppercase ml-2">MAX_WKTS</label>
-                                                    <input 
-                                                        type="number"
-                                                        value={gameData.scoreLimits?.[g.code]?.[f]?.[1]?.maxWickets || ''}
-                                                        onChange={(e) => handleUpdateScoreLimits(g.code, f, 'maxWickets', e.target.value, 1)}
-                                                        className="w-full bg-white/5 border border-white/10 rounded-lg md:rounded-xl p-2.5 md:p-3 text-[10px] md:text-xs font-black text-white outline-none"
-                                                    />
-                                                </div>
+                                        <div key={f} className="space-y-6 bg-white/5 p-5 md:p-6 rounded-2xl md:rounded-3xl border border-white/5">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-2 h-2 rounded-full bg-teal-500 shadow-[0_0_10px_rgba(20,184,166,0.5)]" />
+                                                <p className="text-[10px] md:text-xs font-black text-white uppercase tracking-[0.2em]">{f.split(' ').pop()}</p>
+                                            </div>
+                                            
+                                            <div className="space-y-6">
+                                                {[1, 2].map(inning => (
+                                                    <div key={inning} className="space-y-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[8px] font-black text-white/20 uppercase tracking-widest">INNING_{inning}</span>
+                                                            <div className="h-px flex-1 bg-white/5" />
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            <div className="space-y-1.5">
+                                                                <label className="text-[7px] font-black text-white/20 uppercase tracking-widest ml-1">MAX_RUNS</label>
+                                                                <input 
+                                                                    type="number"
+                                                                    placeholder="∞"
+                                                                    value={gameData.scoreLimits?.[g.code]?.[f]?.[inning]?.maxRuns || ''}
+                                                                    onChange={(e) => handleUpdateScoreLimits(g.code, f, 'maxRuns', e.target.value, inning)}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-black text-white outline-none focus:border-teal-500 transition-all"
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-1.5">
+                                                                <label className="text-[7px] font-black text-white/20 uppercase tracking-widest ml-1">MAX_WKTS</label>
+                                                                <input 
+                                                                    type="number"
+                                                                    placeholder="10"
+                                                                    value={gameData.scoreLimits?.[g.code]?.[f]?.[inning]?.maxWickets || ''}
+                                                                    onChange={(e) => handleUpdateScoreLimits(g.code, f, 'maxWickets', e.target.value, inning)}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-black text-white outline-none focus:border-teal-500 transition-all"
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-1.5">
+                                                                <label className="text-[7px] font-black text-white/20 uppercase tracking-widest ml-1">OVERS</label>
+                                                                <input 
+                                                                    type="number"
+                                                                    placeholder="20"
+                                                                    value={gameData.scoreLimits?.[g.code]?.[f]?.[inning]?.oversPerMatch || ''}
+                                                                    onChange={(e) => handleUpdateScoreLimits(g.code, f, 'oversPerMatch', e.target.value, inning)}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-black text-white outline-none focus:border-teal-500 transition-all"
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-1.5">
+                                                                <label className="text-[7px] font-black text-white/20 uppercase tracking-widest ml-1">MAX_OVERS_BWL</label>
+                                                                <input 
+                                                                    type="number"
+                                                                    placeholder="4"
+                                                                    value={gameData.scoreLimits?.[g.code]?.[f]?.[inning]?.maxOversPerBowler || ''}
+                                                                    onChange={(e) => handleUpdateScoreLimits(g.code, f, 'maxOversPerBowler', e.target.value, inning)}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-black text-white outline-none focus:border-teal-500 transition-all"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
                                     ))}

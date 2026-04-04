@@ -164,7 +164,7 @@ const GameCover = ({ onStart, isInstallable, onInstall }: { onStart: () => void;
                         onClick={onInstall}
                         className="bg-teal-500 text-black p-1.5 md:p-3 rounded-lg md:rounded-xl shadow-[0_0_20px_rgba(20,184,166,0.4)] flex items-center gap-1.5 md:gap-2"
                     >
-                        <Icons.Download size={12} md:size={14} />
+                        <Icons.Download className="w-3 h-3 md:w-4 md:h-4" />
                         <span className="text-[7px] md:text-[10px] font-black uppercase tracking-widest">INSTALL</span>
                     </motion.button>
                 )}
@@ -177,7 +177,7 @@ const GameCover = ({ onStart, isInstallable, onInstall }: { onStart: () => void;
                     transition={{ delay: 0.5, duration: 0.8 }}
                 >
                     <div className="inline-flex items-center gap-1.5 md:gap-2 bg-teal-500/10 text-teal-500 px-3 md:px-4 py-1 md:py-1.5 rounded-full text-[7px] md:text-[10px] font-black uppercase tracking-[0.4em] mb-4 md:mb-8 border border-teal-500/20 backdrop-blur-md shadow-[0_0_30px_rgba(20,184,166,0.1)]">
-                        <Icons.Trophy size={10} md:size={12} />
+                        <Icons.Trophy className="w-2.5 h-2.5 md:w-3 md:h-3" />
                         NEXT_GEN_STRATEGY
                     </div>
                     
@@ -213,7 +213,7 @@ const GameCover = ({ onStart, isInstallable, onInstall }: { onStart: () => void;
                     <div className="flex flex-col items-center">
                         <span className="text-[6px] md:text-[9px] font-bold text-white/20 uppercase tracking-widest mb-0.5">PLATFORM</span>
                         <div className="flex items-center gap-1">
-                            <Icons.Smartphone size={8} md:size={10} className="text-teal-500" />
+                            <Icons.Smartphone className="w-2 h-2 md:w-2.5 md:h-2.5 text-teal-500" />
                             <span className="text-[8px] md:text-[11px] font-black text-white/80">PWA_MOBILE</span>
                         </div>
                     </div>
@@ -221,7 +221,7 @@ const GameCover = ({ onStart, isInstallable, onInstall }: { onStart: () => void;
                     <div className="flex flex-col items-center">
                         <span className="text-[6px] md:text-[9px] font-bold text-white/20 uppercase tracking-widest mb-0.5">SECURITY</span>
                         <div className="flex items-center gap-1">
-                            <Icons.ShieldCheck size={8} md:size={10} className="text-teal-500" />
+                            <Icons.ShieldCheck className="w-2 h-2 md:w-2.5 md:h-2.5 text-teal-500" />
                             <span className="text-[8px] md:text-[11px] font-black text-white/80">ENCRYPTED</span>
                         </div>
                     </div>

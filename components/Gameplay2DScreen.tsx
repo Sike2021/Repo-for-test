@@ -10,15 +10,15 @@ interface Gameplay2DScreenProps {
 }
 
 // --- Constants ---
-const FIELD_WIDTH = 600;
-const FIELD_HEIGHT = 650;
+const FIELD_WIDTH = 400;
+const FIELD_HEIGHT = 450;
 const CENTER_X = FIELD_WIDTH / 2;
 const CENTER_Y = FIELD_HEIGHT / 2;
-const PITCH_START_Y = 220;
-const PITCH_END_Y = 460;
-const BOUNDARY_RADIUS = 285;
-const BALL_RADIUS = 3.5;
-const FIELDER_RADIUS = 8;
+const PITCH_START_Y = 140;
+const PITCH_END_Y = 310;
+const BOUNDARY_RADIUS = 190;
+const BALL_RADIUS = 2.5;
+const FIELDER_RADIUS = 6;
 
 type BallState = 'dead' | 'runup' | 'bowling' | 'hit' | 'fielding' | 'boundary' | 'wicket';
 type Aggression = 'Defensive' | 'Balanced' | 'Attacking';
@@ -218,19 +218,19 @@ export const Gameplay2DScreen: React.FC<Gameplay2DScreenProps> = ({ match, gameD
         if (p.ball.state === 'dead' || p.gameOver) return;
 
         if (p.ball.state === 'runup') {
-            p.bowlerPos.y += 4.5;
+            p.bowlerPos.y += 3.5;
             if (p.bowlerPos.y >= PITCH_START_Y) {
                 p.ball.state = 'bowling';
                 p.ball.x = p.bowlerPos.x;
                 p.ball.y = p.bowlerPos.y;
-                p.ball.vx = (Math.random() - 0.5) * 2;
-                p.ball.vy = 10;
+                p.ball.vx = (Math.random() - 0.5) * 1.5;
+                p.ball.vy = 8;
             }
         }
         else if (p.ball.state === 'bowling') {
             p.ball.x += p.ball.vx;
             p.ball.y += p.ball.vy;
-            if (p.ball.y >= PITCH_END_Y - 8) determineShotOutcome();
+            if (p.ball.y >= PITCH_END_Y - 6) determineShotOutcome();
         }
         else if (p.ball.state === 'hit') {
             p.ball.x += p.ball.vx;
@@ -363,12 +363,12 @@ export const Gameplay2DScreen: React.FC<Gameplay2DScreenProps> = ({ match, gameD
             processBall();
             if (ctx) {
                 ctx.fillStyle = "#2c4c23"; ctx.fillRect(0, 0, FIELD_WIDTH, FIELD_HEIGHT);
-                ctx.strokeStyle = "rgba(255,255,255,0.08)"; ctx.beginPath(); ctx.arc(CENTER_X, CENTER_Y, 150, 0, Math.PI*2); ctx.stroke();
-                ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(CENTER_X, CENTER_Y, BOUNDARY_RADIUS, 0, Math.PI*2); ctx.stroke();
-                ctx.fillStyle = "#ccb68d"; ctx.fillRect(CENTER_X - 15, PITCH_START_Y, 30, PITCH_END_Y - PITCH_START_Y);
+                ctx.strokeStyle = "rgba(255,255,255,0.08)"; ctx.beginPath(); ctx.arc(CENTER_X, CENTER_Y, 100, 0, Math.PI*2); ctx.stroke();
+                ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(CENTER_X, CENTER_Y, BOUNDARY_RADIUS, 0, Math.PI*2); ctx.stroke();
+                ctx.fillStyle = "#ccb68d"; ctx.fillRect(CENTER_X - 10, PITCH_START_Y, 20, PITCH_END_Y - PITCH_START_Y);
                 ctx.strokeStyle = "white"; ctx.lineWidth = 1;
-                ctx.beginPath(); ctx.moveTo(CENTER_X - 20, PITCH_START_Y); ctx.lineTo(CENTER_X + 20, PITCH_START_Y); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(CENTER_X - 20, PITCH_END_Y); ctx.lineTo(CENTER_X + 20, PITCH_END_Y); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(CENTER_X - 15, PITCH_START_Y); ctx.lineTo(CENTER_X + 15, PITCH_START_Y); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(CENTER_X - 15, PITCH_END_Y); ctx.lineTo(CENTER_X + 15, PITCH_END_Y); ctx.stroke();
                 game.current.fielders.forEach(f => {
                     ctx.fillStyle = "#FDE047"; ctx.beginPath(); ctx.arc(f.x, f.y, FIELDER_RADIUS, 0, Math.PI*2); ctx.fill();
                 });
@@ -455,67 +455,66 @@ export const Gameplay2DScreen: React.FC<Gameplay2DScreenProps> = ({ match, gameD
                 )}
 
                 {/* BROADCAST SCOREBAR (BOTTOM LEFT) */}
-                <div className="absolute bottom-10 left-0 w-full px-4 flex justify-start pointer-events-none z-40">
-                    <div className="flex items-end drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
-                        {/* Team Indicator & Main Score */}
-                        <div className="flex flex-col">
-                            <div className="team-bg-teal slanted-box h-12 flex flex-col justify-center px-4 pr-10 min-w-[140px]">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-5 h-5 bg-white/20 rounded p-0.5" dangerouslySetInnerHTML={{__html: gameData.allTeamsData.find(t => t.id === battingTeam?.id)?.logo || ''}}></div>
-                                    <span className="text-3xl font-black text-white italic leading-none">{currentInning?.score} {'-'} {currentInning?.wickets}</span>
-                                </div>
-                            </div>
-                            <div className="bg-black/90 slanted-box h-6 flex items-center px-3 pr-8 border-l-4 border-teal-500 mt-[-4px]">
-                                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mr-2">OVERS</span>
-                                <span className="text-xs font-black text-white">{currentInning?.overs}</span>
+            <div className="absolute bottom-4 left-0 w-full px-2 flex justify-start pointer-events-none z-40 scale-[0.85] origin-bottom-left">
+                <div className="flex items-end drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
+                    {/* Team Indicator & Main Score */}
+                    <div className="flex flex-col">
+                        <div className="team-bg-teal slanted-box h-10 flex flex-col justify-center px-3 pr-8 min-w-[120px]">
+                            <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 bg-white/20 rounded p-0.5" dangerouslySetInnerHTML={{__html: gameData.allTeamsData.find(t => t.id === battingTeam?.id)?.logo || ''}}></div>
+                                <span className="text-2xl font-black text-white italic leading-none">{currentInning?.score} {'-'} {currentInning?.wickets}</span>
                             </div>
                         </div>
+                        <div className="bg-black/90 slanted-box h-5 flex items-center px-2 pr-6 border-l-4 border-teal-500 mt-[-2px]">
+                            <span className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mr-2">OVERS</span>
+                            <span className="text-[10px] font-black text-white">{currentInning?.overs}</span>
+                        </div>
+                    </div>
 
-                        {/* Player Pods (Joined) */}
-                        <div className="flex scorebar-gradient h-12 ml-[-12px] border-b-4 border-teal-600">
-                            {/* Striker Pod */}
-                            <div className="flex flex-col justify-center px-6 min-w-[130px] border-r border-white/10">
-                                <span className="text-[11px] font-black text-white uppercase italic tracking-tighter">{striker?.playerName.split(' ').pop()}</span>
-                                <div className="flex items-center gap-2 mt-[-2px]">
-                                    <span className="text-xl font-black text-teal-500 italic leading-none">{striker?.runs}</span>
-                                    <span className="text-[11px] font-bold text-zinc-400 mt-1">{striker?.balls}</span>
-                                </div>
-                            </div>
-                            {/* Non-Striker Pod */}
-                            <div className="flex flex-col justify-center px-6 min-w-[130px] border-r border-white/10 opacity-60">
-                                <span className="text-[11px] font-black text-white uppercase italic tracking-tighter">{nonStriker?.playerName.split(' ').pop()}</span>
-                                <div className="flex items-center gap-2 mt-[-2px]">
-                                    <span className="text-xl font-black text-white italic leading-none">{nonStriker?.runs}</span>
-                                    <span className="text-[11px] font-bold text-zinc-400 mt-1">{nonStriker?.balls}</span>
-                                </div>
-                            </div>
-                            {/* Bowler Pod */}
-                            <div className="flex flex-col justify-center px-6 min-w-[130px] bg-teal-900/10">
-                                <span className="text-[11px] font-black text-teal-400 uppercase italic tracking-tighter">BOWLING</span>
-                                <div className="flex items-center gap-2 mt-[-2px]">
-                                    <span className="text-xl font-black text-white italic leading-none">{bowler?.wickets} {'-'} {bowler?.runsConceded}</span>
-                                    <span className="text-[10px] font-bold text-zinc-400 mt-1">({bowler?.overs})</span>
-                                </div>
+                    {/* Player Pods (Joined) */}
+                    <div className="flex scorebar-gradient h-10 ml-[-10px] border-b-2 border-teal-600">
+                        {/* Striker Pod */}
+                        <div className="flex flex-col justify-center px-4 min-w-[100px] border-r border-white/10">
+                            <span className="text-[9px] font-black text-white uppercase italic tracking-tighter">{striker?.playerName.split(' ').pop()}</span>
+                            <div className="flex items-center gap-2 mt-[-1px]">
+                                <span className="text-lg font-black text-teal-500 italic leading-none">{striker?.runs}</span>
+                                <span className="text-[9px] font-bold text-zinc-400 mt-0.5">{striker?.balls}</span>
                             </div>
                         </div>
-
-                        {/* Projection & History Pod */}
-                        <div className="flex bg-black/95 h-10 items-center px-6 ml-[-4px] self-end mb-[-4px]">
-                            <div className="flex flex-col mr-6">
-                                <span className="text-[9px] font-black text-zinc-500 uppercase tracking-tighter leading-none">PROJECTED</span>
-                                <span className="text-xs font-black text-white leading-none mt-0.5">CURRENT {projScore}</span>
+                        {/* Non-Striker Pod */}
+                        <div className="flex flex-col justify-center px-4 min-w-[100px] border-r border-white/10 opacity-60">
+                            <span className="text-[9px] font-black text-white uppercase italic tracking-tighter">{nonStriker?.playerName.split(' ').pop()}</span>
+                            <div className="flex items-center gap-2 mt-[-1px]">
+                                <span className="text-lg font-black text-white italic leading-none">{nonStriker?.runs}</span>
+                                <span className="text-[9px] font-bold text-zinc-400 mt-0.5">{nonStriker?.balls}</span>
                             </div>
-                            <div className="flex gap-1.5 items-center">
-                                {/* Fix: Safe access to recentBalls which is now on Inning type */}
-                                {[...currentInning?.recentBalls || []].slice(0, 6).reverse().map((b, i) => (
-                                    <div key={i} className={`over-history-dot ${b === '4' ? 'border-green-500 text-green-500' : b === '6' ? 'border-teal-500 text-teal-500' : b === 'W' ? 'bg-red-600 border-red-600 text-white' : 'text-zinc-300'}`}>
-                                        {b === '0' ? '●' : b}
-                                    </div>
-                                ))}
+                        </div>
+                        {/* Bowler Pod */}
+                        <div className="flex flex-col justify-center px-4 min-w-[100px] bg-teal-900/10">
+                            <span className="text-[9px] font-black text-teal-400 uppercase italic tracking-tighter">BOWLING</span>
+                            <div className="flex items-center gap-2 mt-[-1px]">
+                                <span className="text-lg font-black text-white italic leading-none">{bowler?.wickets} {'-'} {bowler?.runsConceded}</span>
+                                <span className="text-[9px] font-bold text-zinc-400 mt-0.5">({bowler?.overs})</span>
                             </div>
                         </div>
                     </div>
+
+                    {/* Projection & History Pod */}
+                    <div className="flex bg-black/95 h-8 items-center px-4 ml-[-4px] self-end mb-[-2px]">
+                        <div className="flex flex-col mr-4">
+                            <span className="text-[8px] font-black text-zinc-500 uppercase tracking-tighter leading-none">PROJ</span>
+                            <span className="text-[10px] font-black text-white leading-none mt-0.5">{projScore}</span>
+                        </div>
+                        <div className="flex gap-1 items-center">
+                            {[...currentInning?.recentBalls || []].slice(0, 6).reverse().map((b, i) => (
+                                <div key={i} className={`over-history-dot !w-4 !h-4 !text-[8px] ${b === '4' ? 'border-green-500 text-green-500' : b === '6' ? 'border-teal-500 text-teal-500' : b === 'W' ? 'bg-red-600 border-red-600 text-white' : 'text-zinc-300'}`}>
+                                    {b === '0' ? '●' : b}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
+            </div>
             </div>
 
             {/* Interaction Layer */}

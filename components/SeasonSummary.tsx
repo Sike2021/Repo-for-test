@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Trophy, TrendingUp, TrendingDown, Minus, Award, Star, Users } from 'lucide-react';
+import { Trophy, TrendingUp, TrendingDown, Minus, Award, Star, Users, ArrowRight } from 'lucide-react';
 import { GameData, Player, Format, PlayerStats } from '../types';
 import { getPlayerById, aggregateStats } from '../utils';
 
@@ -101,41 +101,41 @@ const SeasonSummary: React.FC<SeasonSummaryProps> = ({ gameData, onContinue }) =
     }, [gameData.allPlayers]);
 
     return (
-        <div className="p-6 max-w-4xl mx-auto space-y-8">
-            <div className="text-center space-y-2">
+        <div className="p-4 max-w-2xl mx-auto space-y-6 bg-[#050808] min-h-screen">
+            <div className="text-center space-y-2 py-4">
                 <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="inline-block p-3 bg-teal-500/10 rounded-full text-teal-500 mb-2"
+                    className="inline-block p-4 bg-teal-500/10 rounded-full text-teal-500 mb-2 shadow-[0_0_30px_rgba(20,184,166,0.2)]"
                 >
-                    <Trophy size={48} />
+                    <Trophy className="w-10 h-10" />
                 </motion.div>
-                <h1 className="text-4xl font-black tracking-tighter italic uppercase">Season {gameData.currentSeason} Summary</h1>
-                <p className="text-slate-500 dark:text-slate-400 font-medium">The curtains fall on another epic cricketing year.</p>
+                <h1 className="text-3xl font-black tracking-tighter italic uppercase text-white leading-none">SEASON {gameData.currentSeason}</h1>
+                <p className="text-[10px] font-mono font-black text-teal-500 uppercase tracking-[0.4em]">CAMPAIGN_SUMMARY_REPORT</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-4">
                 {/* Top Batters */}
-                <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div className="bg-white/[0.02] rounded-[24px] p-5 border border-white/5 shadow-2xl backdrop-blur-xl">
                     <div className="flex items-center gap-2 mb-4 text-orange-500">
-                        <Star size={20} fill="currentColor" />
-                        <h2 className="font-black uppercase tracking-wider">Top Batters</h2>
+                        <Star className="w-4 h-4" fill="currentColor" />
+                        <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">TOP_BATTERS_INDEX</h2>
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                         {summaryData.topBatters.map((p, i) => {
                             const stats = aggregateStats(p, Object.values(Format));
                             return (
-                                <div key={p.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
+                                <div key={p.id} className="flex items-center justify-between p-3 bg-white/[0.02] rounded-xl border border-white/5 group hover:bg-white/[0.05] transition-all">
                                     <div className="flex items-center gap-3">
-                                        <span className="text-xs font-black text-slate-400">#{i + 1}</span>
+                                        <span className="text-[10px] font-mono font-black text-white/10">0{i + 1}</span>
                                         <div>
-                                            <p className="font-bold text-sm">{p.name}</p>
-                                            <p className="text-[10px] text-slate-500 uppercase font-bold">{p.teamName || 'Free Agent'}</p>
+                                            <p className="font-black italic uppercase tracking-tight text-sm text-white group-hover:text-teal-500 transition-colors">{p.name}</p>
+                                            <p className="text-[8px] text-white/20 uppercase font-black tracking-widest">{p.teamName || 'FREE AGENT'}</p>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="font-black text-teal-500">{stats.runs}</p>
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase">Runs</p>
+                                        <p className="font-black text-lg italic text-teal-500 leading-none">{stats.runs}</p>
+                                        <p className="text-[8px] text-white/20 font-black uppercase tracking-tighter mt-1">RUNS</p>
                                     </div>
                                 </div>
                             );
@@ -144,26 +144,26 @@ const SeasonSummary: React.FC<SeasonSummaryProps> = ({ gameData, onContinue }) =
                 </div>
 
                 {/* Top Bowlers */}
-                <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div className="bg-white/[0.02] rounded-[24px] p-5 border border-white/5 shadow-2xl backdrop-blur-xl">
                     <div className="flex items-center gap-2 mb-4 text-blue-500">
-                        <Award size={20} fill="currentColor" />
-                        <h2 className="font-black uppercase tracking-wider">Top Bowlers</h2>
+                        <Award className="w-4 h-4" fill="currentColor" />
+                        <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">TOP_BOWLERS_INDEX</h2>
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                         {summaryData.topBowlers.map((p, i) => {
                             const stats = aggregateStats(p, Object.values(Format));
                             return (
-                                <div key={p.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
+                                <div key={p.id} className="flex items-center justify-between p-3 bg-white/[0.02] rounded-xl border border-white/5 group hover:bg-white/[0.05] transition-all">
                                     <div className="flex items-center gap-3">
-                                        <span className="text-xs font-black text-slate-400">#{i + 1}</span>
+                                        <span className="text-[10px] font-mono font-black text-white/10">0{i + 1}</span>
                                         <div>
-                                            <p className="font-bold text-sm">{p.name}</p>
-                                            <p className="text-[10px] text-slate-500 uppercase font-bold">{p.teamName || 'Free Agent'}</p>
+                                            <p className="font-black italic uppercase tracking-tight text-sm text-white group-hover:text-blue-500 transition-colors">{p.name}</p>
+                                            <p className="text-[8px] text-white/20 uppercase font-black tracking-widest">{p.teamName || 'FREE AGENT'}</p>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="font-black text-teal-500">{stats.wickets}</p>
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase">Wickets</p>
+                                        <p className="font-black text-lg italic text-blue-500 leading-none">{stats.wickets}</p>
+                                        <p className="text-[8px] text-white/20 font-black uppercase tracking-tighter mt-1">WICKETS</p>
                                     </div>
                                 </div>
                             );
@@ -173,50 +173,50 @@ const SeasonSummary: React.FC<SeasonSummaryProps> = ({ gameData, onContinue }) =
             </div>
 
             {/* Rating Fluctuations */}
-            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div className="flex items-center gap-2 mb-6">
-                    <TrendingUp size={20} className="text-teal-500" />
-                    <h2 className="font-black uppercase tracking-wider">Rating Fluctuations</h2>
+            <div className="bg-white/[0.02] rounded-[24px] p-5 border border-white/5 shadow-2xl backdrop-blur-xl">
+                <div className="flex items-center gap-2 mb-4">
+                    <TrendingUp className="w-4 h-4 text-teal-500" />
+                    <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">RATING_FLUCTUATIONS</h2>
                 </div>
                 
                 {summaryData.ratingChanges.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {summaryData.ratingChanges.slice(0, 12).map(change => (
-                            <div key={change.playerId} className="p-4 border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center justify-between">
-                                <div className="space-y-1">
-                                    <p className="font-bold text-sm">{change.playerName}</p>
-                                    <p className="text-[10px] text-slate-500 italic">{change.reason}</p>
+                    <div className="grid grid-cols-1 gap-2">
+                        {summaryData.ratingChanges.slice(0, 8).map(change => (
+                            <div key={change.playerId} className="p-3 bg-white/[0.02] rounded-xl border border-white/5 flex items-center justify-between group">
+                                <div className="space-y-0.5">
+                                    <p className="font-black italic uppercase tracking-tight text-xs text-white group-hover:text-teal-500 transition-colors">{change.playerName}</p>
+                                    <p className="text-[8px] text-white/30 italic font-medium">{change.reason}</p>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-3">
                                     <div className="text-right">
                                         <div className="flex items-center gap-1 justify-end">
-                                            <span className="text-xs font-bold">{change.oldBatting}</span>
-                                            <ArrowRight size={10} className="text-slate-400" />
-                                            <span className={`text-xs font-black ${change.type === 'up' ? 'text-teal-500' : 'text-rose-500'}`}>
+                                            <span className="text-[10px] font-black text-white/20">{change.oldBatting}</span>
+                                            <ArrowRight className="w-2 h-2 text-white/10" />
+                                            <span className={`text-xs font-black italic ${change.type === 'up' ? 'text-teal-500' : 'text-rose-500'}`}>
                                                 {change.newBatting}
                                             </span>
                                         </div>
-                                        <p className="text-[8px] text-slate-400 uppercase font-bold">Rating</p>
+                                        <p className="text-[7px] text-white/20 uppercase font-black tracking-tighter">RATING</p>
                                     </div>
                                     {change.type === 'up' ? (
-                                        <TrendingUp size={16} className="text-teal-500" />
+                                        <TrendingUp className="w-3.5 h-3.5 text-teal-500" />
                                     ) : (
-                                        <TrendingDown size={16} className="text-rose-500" />
+                                        <TrendingDown className="w-3.5 h-3.5 text-rose-500" />
                                     )}
                                 </div>
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-8 text-slate-400">
-                        <Minus size={32} className="mx-auto mb-2 opacity-20" />
-                        <p className="text-sm font-bold uppercase tracking-widest">No major rating changes this season</p>
+                    <div className="text-center py-6 text-white/10">
+                        <Minus className="w-6 h-6 mx-auto mb-2 opacity-20" />
+                        <p className="text-[9px] font-black uppercase tracking-[0.3em]">STABLE_FORM_DETECTED</p>
                     </div>
                 )}
                 
-                {summaryData.ratingChanges.length > 12 && (
-                    <p className="text-center text-[10px] text-slate-400 mt-4 uppercase font-bold">
-                        + {summaryData.ratingChanges.length - 12} more players affected by form
+                {summaryData.ratingChanges.length > 8 && (
+                    <p className="text-center text-[8px] text-white/20 mt-4 uppercase font-black tracking-widest">
+                        + {summaryData.ratingChanges.length - 8} ADDITIONAL_EVOLUTIONS
                     </p>
                 )}
             </div>
@@ -224,20 +224,14 @@ const SeasonSummary: React.FC<SeasonSummaryProps> = ({ gameData, onContinue }) =
             <div className="flex justify-center pt-4">
                 <button
                     onClick={() => onContinue(summaryData.updatedPlayers)}
-                    className="bg-teal-500 hover:bg-teal-600 text-white font-black px-12 py-4 rounded-2xl shadow-lg shadow-teal-500/20 transition-all active:scale-95 uppercase tracking-widest flex items-center gap-3"
+                    className="w-full bg-teal-500 hover:bg-teal-600 text-black font-black py-4 rounded-2xl shadow-[0_10px_30px_rgba(20,184,166,0.3)] transition-all active:scale-95 uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 group"
                 >
-                    Proceed to Next Season
-                    <ArrowRight size={20} />
+                    PROCEED TO NEXT SEASON
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
             </div>
         </div>
     );
 };
-
-const ArrowRight = ({ size, className }: { size: number, className?: string }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <path d="M5 12h14m-7-7 7 7-7 7" />
-    </svg>
-);
 
 export default SeasonSummary;

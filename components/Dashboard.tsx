@@ -29,7 +29,7 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
                     animate={{ scale: 1, opacity: 1 }}
                     className="w-32 h-32 bg-white/[0.02] rounded-[40px] flex items-center justify-center mb-10 border border-white/10 backdrop-blur-3xl shadow-2xl relative z-10"
                 >
-                    <Icons.Trophy size={64} className="text-teal-500 drop-shadow-[0_0_20px_rgba(20,184,166,0.4)]" />
+                    <Icons.Trophy className="w-12 h-12 md:w-16 md:h-16 text-teal-500 drop-shadow-[0_0_20px_rgba(20,184,166,0.4)]" />
                 </motion.div>
                 <h2 className="text-6xl font-black italic uppercase tracking-tighter text-white mb-4 relative z-10">SEASON_CONCLUDED</h2>
                 <p className="text-[12px] font-mono font-black text-teal-500 uppercase tracking-[0.6em] relative z-10">FINALIZING_TOURNAMENT_METRICS...</p>
@@ -46,6 +46,7 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
     
     const teamAData = gameData.allTeamsData.find(t => t.name === nextMatch.teamA);
     const teamBData = gameData.allTeamsData.find(t => t.name === nextMatch.teamB);
+    const userTeamData = gameData.allTeamsData.find(t => t.id === userTeam?.id);
     const homeGround = teamAData ? gameData.grounds.find(g => g.code === teamAData.homeGround) : null;
 
     return (
@@ -74,7 +75,7 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
                 >
                     <div 
                         className="w-10 h-10 md:w-16 md:h-16 bg-white/5 rounded-lg md:rounded-2xl border border-white/10 flex items-center justify-center p-1.5 md:p-3 shadow-xl"
-                        dangerouslySetInnerHTML={{ __html: userTeam?.logo || `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-8 h-8 opacity-20"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>` }}
+                        dangerouslySetInnerHTML={{ __html: userTeamData?.logo || `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-8 h-8 opacity-20"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>` }}
                     />
                     <div className="flex-1">
                         <h3 className="text-lg md:text-2xl font-black italic uppercase tracking-tighter text-white leading-none mb-0.5 md:mb-1">{userTeam?.name || 'N/A'}</h3>
@@ -128,7 +129,7 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
                                 onClick={handlePlayMatch} 
                                 className="w-full bg-teal-500 text-black font-black py-3.5 md:py-5 rounded-xl md:rounded-[24px] uppercase tracking-[0.3em] text-[9px] md:text-[11px] transition-all shadow-[0_20px_40px_rgba(20,184,166,0.2)] flex items-center justify-center gap-2 md:gap-3"
                             >
-                                <Icons.PlayMatch size={14} md:size={18} />
+                                <Icons.PlayMatch className="w-3.5 h-3.5 md:w-4.5 md:h-4.5" />
                                 PLAY MATCH
                             </motion.button>
                         ) : (
@@ -138,7 +139,7 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
                                 onClick={handleForwardDay} 
                                 className="w-full bg-white text-black font-black py-3.5 md:py-5 rounded-xl md:rounded-[24px] uppercase tracking-[0.3em] text-[9px] md:text-[11px] transition-all shadow-[0_20px_40px_rgba(255,255,255,0.1)] flex items-center justify-center gap-2 md:gap-3"
                             >
-                                <Icons.FastForward size={14} md:size={18} />
+                                <Icons.FastForward className="w-3.5 h-3.5 md:w-4.5 md:h-4.5" />
                                 SIMULATE DAY
                             </motion.button>
                         )}
@@ -148,12 +149,12 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
                 {/* Navigation Grid */}
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                     {[
-                        { screen: 'NEWS', icon: <Icons.News size={16} />, label: 'NEWS', desc: 'MEDIA' },
-                        { screen: 'LINEUPS', icon: <Icons.Lineups size={16} />, label: 'LINEUPS', desc: 'SQUAD' },
-                        { screen: 'PLAYER_DATABASE', icon: <Icons.Database size={16} />, label: 'DATABASE', desc: 'INTEL' },
-                        { screen: 'TRANSFERS', icon: <Icons.Transfers size={16} />, label: 'TRANSFERS', desc: 'MARKET' },
-                        { screen: 'EDITOR', icon: <Icons.Settings size={16} />, label: 'EDITOR', desc: 'SYSTEM' },
-                        { screen: 'STATS', icon: <Icons.Stats size={16} />, label: 'ANALYTICS', desc: 'DATA' },
+                        { screen: 'NEWS', icon: <Icons.News className="w-4 h-4 md:w-5 md:h-5" />, label: 'NEWS', desc: 'MEDIA' },
+                        { screen: 'LINEUPS', icon: <Icons.Lineups className="w-4 h-4 md:w-5 md:h-5" />, label: 'LINEUPS', desc: 'SQUAD' },
+                        { screen: 'PLAYER_DATABASE', icon: <Icons.Database className="w-4 h-4 md:w-5 md:h-5" />, label: 'DATABASE', desc: 'INTEL' },
+                        { screen: 'TRANSFERS', icon: <Icons.Transfers className="w-4 h-4 md:w-5 md:h-5" />, label: 'TRANSFERS', desc: 'MARKET' },
+                        { screen: 'EDITOR', icon: <Icons.Settings className="w-4 h-4 md:w-5 md:h-5" />, label: 'EDITOR', desc: 'SYSTEM' },
+                        { screen: 'STATS', icon: <Icons.Stats className="w-4 h-4 md:w-5 md:h-5" />, label: 'ANALYTICS', desc: 'DATA' },
                     ].map((item, idx) => (
                         <motion.button 
                             key={item.screen}
