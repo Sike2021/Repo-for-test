@@ -13,11 +13,15 @@ export default defineConfig(({ mode }) => {
         tailwindcss(),
         VitePWA({
           registerType: 'autoUpdate',
-          includeAssets: ['favicon.svg'],
+          injectRegister: 'auto',
+          includeAssets: ['favicon.svg', 'robots.txt', 'apple-touch-icon.png', 'cover.svg'],
+          devOptions: {
+            enabled: true
+          },
           manifest: {
             name: 'Cricket Manager 26',
-            short_name: 'CM26',
-            description: 'The ultimate cricket management simulation. Build your legacy, fluctuate your ratings, and dominate the league.',
+            short_name: 'Cricket26',
+            description: 'The ultimate cricket management simulation. Build your legacy and dominate the league.',
             theme_color: '#14b8a6',
             background_color: '#050808',
             display: 'standalone',
@@ -29,19 +33,47 @@ export default defineConfig(({ mode }) => {
                 src: 'favicon.svg',
                 sizes: 'any',
                 type: 'image/svg+xml',
-                purpose: 'any maskable'
+                purpose: 'any'
               },
               {
-                src: 'https://picsum.photos/seed/cricket-ball-red/192/192',
+                src: 'favicon.svg',
                 sizes: '192x192',
-                type: 'image/png',
-                purpose: 'any maskable'
+                type: 'image/svg+xml',
+                purpose: 'any'
               },
               {
-                src: 'https://picsum.photos/seed/cricket-ball-red/512/512',
+                src: 'favicon.svg',
                 sizes: '512x512',
-                type: 'image/png',
-                purpose: 'any maskable'
+                type: 'image/svg+xml',
+                purpose: 'any'
+              },
+              {
+                src: 'favicon.svg',
+                sizes: '192x192',
+                type: 'image/svg+xml',
+                purpose: 'maskable'
+              },
+              {
+                src: 'favicon.svg',
+                sizes: '512x512',
+                type: 'image/svg+xml',
+                purpose: 'maskable'
+              }
+            ],
+            screenshots: [
+              {
+                src: 'cover.svg',
+                sizes: '1280x720',
+                type: 'image/svg+xml',
+                form_factor: 'wide',
+                label: 'Cricket Manager 26 Dashboard'
+              },
+              {
+                src: 'favicon.svg',
+                sizes: '512x512',
+                type: 'image/svg+xml',
+                form_factor: 'narrow',
+                label: 'Cricket Manager 26 Mobile'
               }
             ]
           },

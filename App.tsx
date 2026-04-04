@@ -50,13 +50,12 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
         transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
         className="relative mb-16 z-10"
       >
-        <div className="w-48 h-48 bg-teal-500 rounded-[40px] flex items-center justify-center shadow-[0_0_80px_rgba(20,184,166,0.4)] border-[12px] border-white/10 relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-tr from-black/40 via-transparent to-white/20" />
-            <span className="text-8xl font-black text-white tracking-tighter font-display relative z-10 italic">CM</span>
+        <div className="w-48 h-48 bg-[#050808] rounded-[40px] flex items-center justify-center shadow-[0_0_80px_rgba(20,184,166,0.4)] border-[12px] border-white/10 relative overflow-hidden group">
+            <img src="/favicon.svg" alt="Cricket Manager 26 Logo" className="w-32 h-32 relative z-10 drop-shadow-[0_0_20px_rgba(20,184,166,0.5)]" />
             <motion.div 
               animate={{ x: ["-100%", "200%"] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12"
             />
         </div>
         
@@ -132,7 +131,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
   );
 };
 
-const GameCover = ({ onStart }: { onStart: () => void }) => {
+const GameCover = ({ onStart, isInstallable, onInstall }: { onStart: () => void; isInstallable: boolean; onInstall: () => void }) => {
     return (
         <motion.div 
             initial={{ opacity: 0 }}
@@ -146,9 +145,9 @@ const GameCover = ({ onStart }: { onStart: () => void }) => {
                     initial={{ scale: 1.1 }}
                     animate={{ scale: 1 }}
                     transition={{ duration: 10, repeat: Infinity, repeatType: "reverse" }}
-                    src="https://picsum.photos/seed/cricket-stadium-night/1080/1920?grayscale" 
+                    src="/cover.svg" 
                     alt="Cover" 
-                    className="w-full h-full object-cover opacity-40"
+                    className="w-full h-full object-cover opacity-60"
                     referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-[#050808] via-transparent to-[#050808]" />
@@ -161,9 +160,19 @@ const GameCover = ({ onStart }: { onStart: () => void }) => {
                     <span className="text-[10px] font-black text-teal-500 uppercase tracking-[0.4em]">SIKES_INTERACTIVE</span>
                     <span className="text-[8px] font-mono font-bold text-white/20 uppercase tracking-widest">LICENSED_PRODUCT_2026</span>
                 </div>
-                <div className="w-12 h-12 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-center">
-                    <span className="text-xs font-black text-white/40 italic">26</span>
-                </div>
+                {isInstallable && (
+                    <motion.button
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={onInstall}
+                        className="bg-teal-500 text-black p-3 rounded-xl shadow-[0_0_20px_rgba(20,184,166,0.4)] flex items-center gap-2"
+                    >
+                        <Icons.Download size={18} />
+                        <span className="text-[10px] font-black uppercase tracking-widest">INSTALL</span>
+                    </motion.button>
+                )}
             </div>
 
             <div className="z-10 text-center">
@@ -537,6 +546,33 @@ export const App = () => {
     });
   };
 
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setIsInstallable(false);
+    }
+    setDeferredPrompt(null);
+  };
+
   const renderContent = () => {
     if (isLoading) {
         return (
@@ -591,7 +627,7 @@ export const App = () => {
       <div className="w-full h-screen md:max-w-md md:max-h-[932px] md:h-[90vh] bg-gray-50 dark:bg-[#050808] md:border-4 md:border-gray-300 md:dark:border-gray-700 md:rounded-[60px] md:shadow-2xl md:shadow-black/50 overflow-hidden relative text-gray-900 dark:text-gray-200 flex flex-col">
         <AnimatePresence>
           {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
-          {!showSplash && showCover && <GameCover onStart={() => setShowCover(false)} />}
+          {!showSplash && showCover && <GameCover onStart={() => setShowCover(false)} isInstallable={isInstallable} onInstall={handleInstallClick} />}
         </AnimatePresence>
         {!showSplash && !showCover && renderContent()}
         {feedbackMessage && (
