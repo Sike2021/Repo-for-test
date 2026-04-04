@@ -17,26 +17,26 @@ const StandingRow: React.FC<{ standing: Standing; index: number; isFirstClass: b
         transition={{ delay: index * 0.05 }}
         className={`border-b border-white/5 transition-all duration-500 hover:bg-teal-500/10 group ${index < 4 ? 'bg-teal-500/[0.03]' : ''}`}
     >
-        <td className="p-6">
-            <div className="flex items-center gap-6">
-                <span className={`text-[10px] font-black w-8 h-8 flex items-center justify-center rounded-xl transition-all duration-500 ${index < 4 ? 'bg-teal-500 text-black shadow-[0_0_20px_rgba(20,184,166,0.4)]' : 'bg-white/5 text-white/20 group-hover:text-white/40'}`}>
+        <td className="p-3 md:p-6">
+            <div className="flex items-center gap-3 md:gap-6">
+                <span className={`text-[8px] md:text-[10px] font-black w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-lg md:rounded-xl transition-all duration-500 ${index < 4 ? 'bg-teal-500 text-black shadow-[0_0_20px_rgba(20,184,166,0.4)]' : 'bg-white/5 text-white/20 group-hover:text-white/40'}`}>
                     {(index + 1).toString().padStart(2, '0')}
                 </span>
-                <span className="font-black text-xl uppercase italic tracking-tighter group-hover:text-teal-500 transition-colors text-white">
+                <span className="font-black text-sm md:text-xl uppercase italic tracking-tighter group-hover:text-teal-500 transition-colors text-white">
                     {standing.teamName}
                 </span>
             </div>
         </td>
-        <td className="p-6 text-center font-mono text-sm font-black text-white/20 group-hover:text-white/40 transition-colors">{standing.played}</td>
-        <td className="p-6 text-center font-mono text-sm font-black text-teal-500">{standing.won}</td>
-        <td className="p-6 text-center font-mono text-sm font-black text-red-500">{standing.lost}</td>
-        {isFirstClass && <td className="p-6 text-center font-mono text-sm font-black text-white/20">{standing.drawn}</td>}
-        <td className="p-6 text-center">
-            <span className="font-black text-3xl italic tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+        <td className="p-3 md:p-6 text-center font-mono text-[10px] md:text-sm font-black text-white/20 group-hover:text-white/40 transition-colors">{standing.played}</td>
+        <td className="p-3 md:p-6 text-center font-mono text-[10px] md:text-sm font-black text-teal-500">{standing.won}</td>
+        <td className="p-3 md:p-6 text-center font-mono text-[10px] md:text-sm font-black text-red-500">{standing.lost}</td>
+        {isFirstClass && <td className="p-3 md:p-6 text-center font-mono text-[10px] md:text-sm font-black text-white/20">{standing.drawn}</td>}
+        <td className="p-3 md:p-6 text-center">
+            <span className="font-black text-lg md:text-3xl italic tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
                 {standing.points}
             </span>
         </td>
-        <td className="p-6 text-center font-mono text-xs font-black text-white/20">
+        <td className="p-3 md:p-6 text-center font-mono text-[8px] md:text-xs font-black text-white/20">
             {standing.netRunRate > 0 ? `+${standing.netRunRate.toFixed(2)}` : standing.netRunRate.toFixed(2)}
         </td>
     </motion.tr>
@@ -47,37 +47,37 @@ const FixtureItem: React.FC<{ match: Match; resolved: Match; result?: any; index
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: index * 0.05 }}
-        className={`p-8 rounded-[48px] border transition-all duration-500 relative overflow-hidden group ${result ? 'bg-white/[0.04] border-teal-500/30 shadow-2xl' : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.06] hover:border-teal-500/40 shadow-xl'}`}
+        className={`p-5 md:p-8 rounded-[32px] md:rounded-[48px] border transition-all duration-500 relative overflow-hidden group ${result ? 'bg-white/[0.04] border-teal-500/30 shadow-2xl' : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.06] hover:border-teal-500/40 shadow-xl'}`}
     >
         {result && (
-            <div className="absolute top-0 right-0 bg-teal-500 text-black px-6 py-1 text-[9px] font-black uppercase tracking-widest rounded-bl-[24px] shadow-lg">
+            <div className="absolute top-0 right-0 bg-teal-500 text-black px-4 md:px-6 py-1 text-[7px] md:text-[9px] font-black uppercase tracking-widest rounded-bl-xl md:rounded-bl-[24px] shadow-lg">
                 FINAL_RESULT
             </div>
         )}
         
-        <div className="absolute top-0 left-0 p-8 opacity-[0.02] pointer-events-none group-hover:opacity-[0.05] transition-opacity">
-            <Icons.Calendar className="w-24 h-24" />
+        <div className="absolute top-0 left-0 p-4 md:p-8 opacity-[0.02] pointer-events-none group-hover:opacity-[0.05] transition-opacity">
+            <Icons.Calendar className="w-16 h-16 md:w-24 md:h-24" />
         </div>
 
-        <div className="flex justify-between items-center text-[10px] mb-8 text-white/20 uppercase tracking-[0.4em] font-black relative z-10">
-            <span className="bg-white/5 px-4 py-1 rounded-full border border-white/10 text-white/40">MATCH_0{match.matchNumber}</span>
+        <div className="flex justify-between items-center text-[8px] md:text-[10px] mb-5 md:mb-8 text-white/20 uppercase tracking-[0.4em] font-black relative z-10">
+            <span className="bg-white/5 px-3 md:px-4 py-1 rounded-full border border-white/10 text-white/40">MATCH_0{match.matchNumber}</span>
             <span className="group-hover:text-teal-500 transition-colors">{match.date}</span>
         </div>
 
-        <div className="flex items-center justify-between gap-10 relative z-10">
+        <div className="flex items-center justify-between gap-4 md:gap-10 relative z-10">
             <div className="flex-1 text-right">
-                <p className="text-2xl font-black italic tracking-tighter uppercase text-white group-hover:text-teal-500 transition-colors leading-none mb-2">{resolved.teamA}</p>
-                <p className="text-[9px] font-black text-white/10 uppercase tracking-widest">HOME_ASSET</p>
+                <p className="text-lg md:text-2xl font-black italic tracking-tighter uppercase text-white group-hover:text-teal-500 transition-colors leading-none mb-1 md:mb-2">{resolved.teamA}</p>
+                <p className="text-[7px] md:text-[9px] font-black text-white/10 uppercase tracking-widest">HOME_ASSET</p>
             </div>
             
-            <div className="flex flex-col items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[11px] font-black text-teal-500 italic shadow-inner group-hover:border-teal-500/30 transition-colors">VS</div>
-                <div className="h-10 w-[1px] bg-gradient-to-b from-white/10 to-transparent"></div>
+            <div className="flex flex-col items-center gap-2 md:gap-3">
+                <div className="w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[9px] md:text-[11px] font-black text-teal-500 italic shadow-inner group-hover:border-teal-500/30 transition-colors">VS</div>
+                <div className="h-6 md:h-10 w-[1px] bg-gradient-to-b from-white/10 to-transparent"></div>
             </div>
 
             <div className="flex-1 text-left">
-                <p className="text-2xl font-black italic tracking-tighter uppercase text-white group-hover:text-teal-500 transition-colors leading-none mb-2">{resolved.teamB}</p>
-                <p className="text-[9px] font-black text-white/10 uppercase tracking-widest">AWAY_ASSET</p>
+                <p className="text-lg md:text-2xl font-black italic tracking-tighter uppercase text-white group-hover:text-teal-500 transition-colors leading-none mb-1 md:mb-2">{resolved.teamB}</p>
+                <p className="text-[7px] md:text-[9px] font-black text-white/10 uppercase tracking-widest">AWAY_ASSET</p>
             </div>
         </div>
 
@@ -85,9 +85,9 @@ const FixtureItem: React.FC<{ match: Match; resolved: Match; result?: any; index
             <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mt-8 pt-8 border-t border-white/5 text-center"
+                className="mt-5 md:mt-8 pt-5 md:pt-8 border-t border-white/5 text-center"
             >
-                <p className="text-sm text-teal-500 font-black italic uppercase tracking-tight drop-shadow-[0_0_10px_rgba(20,184,166,0.3)]">
+                <p className="text-xs md:text-sm text-teal-500 font-black italic uppercase tracking-tight drop-shadow-[0_0_10px_rgba(20,184,166,0.3)]">
                     {result.summary}
                 </p>
             </motion.div>
@@ -120,26 +120,26 @@ const Standings: React.FC<StandingsProps> = ({ gameData }) => {
                 <div className="absolute -bottom-24 -left-24 w-[600px] h-[600px] bg-blue-500/5 blur-[160px] rounded-full" />
             </div>
 
-            <header className="px-10 py-12 border-b border-white/5 relative overflow-hidden bg-[#050808]/40 backdrop-blur-3xl z-10">
-                <div className="absolute top-0 right-0 p-12 opacity-[0.02] pointer-events-none">
-                    <Icons.Trophy className="w-64 h-64" />
+            <header className="px-5 py-6 md:px-10 md:py-12 border-b border-white/5 relative overflow-hidden bg-[#050808]/40 backdrop-blur-3xl z-10">
+                <div className="absolute top-0 right-0 p-6 md:p-12 opacity-[0.02] pointer-events-none">
+                    <Icons.Trophy className="w-32 h-32 md:w-64 md:h-64" />
                 </div>
 
-                <div className="flex justify-between items-start mb-12 relative z-10">
+                <div className="flex flex-col md:flex-row justify-between items-start gap-6 md:gap-12 mb-6 md:mb-12 relative z-10">
                     <div>
                         <motion.div 
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="flex items-center gap-3 mb-2"
+                            className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2"
                         >
-                            <div className="w-2 h-8 bg-teal-500 rounded-full shadow-[0_0_20px_rgba(20,184,166,0.5)]" />
-                            <h2 className="text-5xl font-black italic uppercase tracking-tighter text-white">LEAGUE_STANDINGS</h2>
+                            <div className="w-1.5 h-6 md:w-2 md:h-8 bg-teal-500 rounded-full shadow-[0_0_20px_rgba(20,184,166,0.5)]" />
+                            <h2 className="text-2xl md:text-5xl font-black italic uppercase tracking-tighter text-white">LEAGUE_STANDINGS</h2>
                         </motion.div>
                         <motion.p 
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.2 }}
-                            className="text-[11px] font-mono font-black text-teal-500 uppercase tracking-[0.4em] ml-5"
+                            className="text-[8px] md:text-[11px] font-mono font-black text-teal-500 uppercase tracking-[0.4em] ml-4 md:ml-5"
                         >
                             SEASON_0{gameData.currentSeason}_DATABASE
                         </motion.p>
@@ -148,24 +148,24 @@ const Standings: React.FC<StandingsProps> = ({ gameData }) => {
                     <motion.div 
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="flex bg-white/[0.03] p-1.5 rounded-[24px] border border-white/10 backdrop-blur-xl"
+                        className="flex bg-white/[0.03] p-1 rounded-xl md:rounded-[24px] border border-white/10 backdrop-blur-xl w-full md:w-auto"
                     >
                         <button 
                             onClick={() => setView('standings')} 
-                            className={`px-10 py-4 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${view === 'standings' ? 'bg-white text-black shadow-xl' : 'text-white/30 hover:text-white hover:bg-white/5'}`}
+                            className={`flex-1 md:px-10 py-2.5 md:py-4 rounded-lg md:rounded-[18px] text-[8px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${view === 'standings' ? 'bg-white text-black shadow-xl' : 'text-white/30 hover:text-white hover:bg-white/5'}`}
                         >
                             TABLE_DNA
                         </button>
                         <button 
                             onClick={() => setView('fixtures')} 
-                            className={`px-10 py-4 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${view === 'fixtures' ? 'bg-white text-black shadow-xl' : 'text-white/30 hover:text-white hover:bg-white/5'}`}
+                            className={`flex-1 md:px-10 py-2.5 md:py-4 rounded-lg md:rounded-[18px] text-[8px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${view === 'fixtures' ? 'bg-white text-black shadow-xl' : 'text-white/30 hover:text-white hover:bg-white/5'}`}
                         >
                             FIXTURE_FEED
                         </button>
                     </motion.div>
                 </div>
 
-                <div className="flex flex-col md:flex-row gap-8 relative z-10">
+                <div className="flex flex-col md:flex-row gap-4 md:gap-8 relative z-10">
                     <div className="flex-1">
                         <CategoryTabs category={category} setCategory={setCategory} />
                     </div>
@@ -175,7 +175,7 @@ const Standings: React.FC<StandingsProps> = ({ gameData }) => {
                 </div>
             </header>
 
-            <div className="flex-1 overflow-y-auto p-10 scrollbar-hide relative z-10">
+            <div className="flex-1 overflow-y-auto p-4 md:p-10 scrollbar-hide relative z-10">
                 <AnimatePresence mode="wait">
                     {view === 'standings' ? (
                         <motion.div 
@@ -183,18 +183,18 @@ const Standings: React.FC<StandingsProps> = ({ gameData }) => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
-                            className="bg-white/[0.01] border border-white/10 rounded-[48px] overflow-hidden shadow-2xl backdrop-blur-xl"
+                            className="bg-white/[0.01] border border-white/10 rounded-[24px] md:rounded-[48px] overflow-hidden shadow-2xl backdrop-blur-xl overflow-x-auto"
                         >
-                            <table className="w-full text-left">
+                            <table className="w-full text-left min-w-[400px] md:min-w-full">
                                 <thead className="bg-white/[0.03] border-b border-white/10">
                                     <tr>
-                                        <th className="p-8 font-black text-[10px] uppercase tracking-[0.4em] text-teal-500">FRANCHISE_IDENTITY</th>
-                                        <th className="p-8 text-center font-black text-[10px] uppercase tracking-[0.4em] text-white/20">P</th>
-                                        <th className="p-8 text-center font-black text-[10px] uppercase tracking-[0.4em] text-teal-500">W</th>
-                                        <th className="p-8 text-center font-black text-[10px] uppercase tracking-[0.4em] text-red-500">L</th>
-                                        {isFirstClass && <th className="p-8 text-center font-black text-[10px] uppercase tracking-[0.4em] text-white/20">D</th>}
-                                        <th className="p-8 text-center font-black text-[10px] uppercase tracking-[0.4em] text-white">POINTS</th>
-                                        <th className="p-8 text-center font-black text-[10px] uppercase tracking-[0.4em] text-white/20">NRR</th>
+                                        <th className="p-3 md:p-8 font-black text-[8px] md:text-[10px] uppercase tracking-[0.4em] text-teal-500">FRANCHISE_IDENTITY</th>
+                                        <th className="p-3 md:p-8 text-center font-black text-[8px] md:text-[10px] uppercase tracking-[0.4em] text-white/20">P</th>
+                                        <th className="p-3 md:p-8 text-center font-black text-[8px] md:text-[10px] uppercase tracking-[0.4em] text-teal-500">W</th>
+                                        <th className="p-3 md:p-8 text-center font-black text-[8px] md:text-[10px] uppercase tracking-[0.4em] text-red-500">L</th>
+                                        {isFirstClass && <th className="p-3 md:p-8 text-center font-black text-[8px] md:text-[10px] uppercase tracking-[0.4em] text-white/20">D</th>}
+                                        <th className="p-3 md:p-8 text-center font-black text-[8px] md:text-[10px] uppercase tracking-[0.4em] text-white">POINTS</th>
+                                        <th className="p-3 md:p-8 text-center font-black text-[8px] md:text-[10px] uppercase tracking-[0.4em] text-white/20">NRR</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -210,7 +210,7 @@ const Standings: React.FC<StandingsProps> = ({ gameData }) => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
-                            className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-12"
+                            className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 pb-12"
                         >
                             {schedule.map((match, index) => (
                                 <FixtureItem 
@@ -227,14 +227,14 @@ const Standings: React.FC<StandingsProps> = ({ gameData }) => {
             </div>
 
             {/* Bottom Info Bar */}
-            <div className="px-10 py-6 bg-white/[0.02] border-t border-white/5 flex justify-between items-center relative z-20 backdrop-blur-3xl">
-                <div className="flex items-center gap-4">
-                    <div className="w-3 h-3 rounded-full bg-teal-500 animate-pulse shadow-[0_0_10px_rgba(20,184,166,0.5)]" />
-                    <p className="text-[10px] font-black uppercase tracking-widest text-white/40">LIVE_LEAGUE_DATA_STREAM_ACTIVE</p>
+            <div className="px-5 py-4 md:px-10 md:py-6 bg-white/[0.02] border-t border-white/5 flex justify-between items-center relative z-20 backdrop-blur-3xl">
+                <div className="flex items-center gap-3 md:gap-4">
+                    <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-teal-500 animate-pulse shadow-[0_0_10px_rgba(20,184,166,0.5)]" />
+                    <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-white/40">LIVE_DATA_STREAM</p>
                 </div>
                 <div className="text-right">
-                    <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em] mb-1">SYSTEM_STATUS</p>
-                    <p className="text-[11px] font-black text-teal-500 uppercase tracking-widest">ENCRYPTED_FEED_VERIFIED</p>
+                    <p className="text-[7px] md:text-[9px] font-black text-white/20 uppercase tracking-[0.3em] mb-0.5 md:mb-1">SYSTEM_STATUS</p>
+                    <p className="text-[9px] md:text-[11px] font-black text-teal-500 uppercase tracking-widest">VERIFIED</p>
                 </div>
             </div>
         </div>

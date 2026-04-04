@@ -28,7 +28,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
     <motion.div 
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 z-[100] bg-[#050808] flex flex-col items-center justify-center p-8 text-center overflow-hidden"
+      className="absolute inset-0 z-[100] bg-[#050808] flex flex-col items-center justify-center p-6 text-center overflow-hidden"
     >
       {/* Dynamic Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -48,10 +48,10 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
         initial={{ scale: 0.5, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
-        className="relative mb-16 z-10"
+        className="relative mb-8 md:mb-10 z-10"
       >
-        <div className="w-48 h-48 bg-[#050808] rounded-[40px] flex items-center justify-center shadow-[0_0_80px_rgba(20,184,166,0.4)] border-[12px] border-white/10 relative overflow-hidden group">
-            <img src="/favicon.svg" alt="Cricket Manager 26 Logo" className="w-32 h-32 relative z-10 drop-shadow-[0_0_20px_rgba(20,184,166,0.5)]" />
+        <div className="w-24 h-24 md:w-48 md:h-48 bg-[#050808] rounded-[24px] md:rounded-[40px] flex items-center justify-center shadow-[0_0_60px_rgba(20,184,166,0.4)] border-[6px] md:border-[12px] border-white/10 relative overflow-hidden group">
+            <img src="/favicon.svg" alt="Cricket Manager 26 Logo" className="w-14 h-14 md:w-32 md:h-32 relative z-10 drop-shadow-[0_0_20px_rgba(20,184,166,0.5)]" />
             <motion.div 
               animate={{ x: ["-100%", "200%"] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
@@ -62,12 +62,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
         <motion.div 
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -inset-12 border border-dashed border-teal-500/30 rounded-full"
-        />
-        <motion.div 
-          animate={{ rotate: -360 }}
-          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-          className="absolute -inset-16 border border-white/5 rounded-full"
+          className="absolute -inset-6 md:-inset-12 border border-dashed border-teal-500/30 rounded-full"
         />
       </motion.div>
       
@@ -76,18 +71,18 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="flex items-center justify-center gap-4 mb-6"
+            className="flex items-center justify-center gap-2 mb-3 md:mb-4"
         >
-            <div className="h-[1px] w-12 bg-gradient-to-r from-transparent to-teal-500/50" />
-            <span className="text-[10px] font-black text-teal-500 uppercase tracking-[0.6em]">SIKES_INTERACTIVE</span>
-            <div className="h-[1px] w-12 bg-gradient-to-l from-transparent to-teal-500/50" />
+            <div className="h-[1px] w-6 md:w-8 bg-gradient-to-r from-transparent to-teal-500/50" />
+            <span className="text-[7px] md:text-[8px] font-black text-teal-500 uppercase tracking-[0.6em]">SIKES_INTERACTIVE</span>
+            <div className="h-[1px] w-6 md:w-8 bg-gradient-to-l from-transparent to-teal-500/50" />
         </motion.div>
         
         <motion.h1 
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.8, duration: 0.8 }}
-            className="text-7xl md:text-8xl font-black italic uppercase tracking-tighter text-white mb-4 font-display leading-[0.85]"
+            className="text-4xl md:text-8xl font-black italic uppercase tracking-tighter text-white mb-1.5 md:mb-2 font-display leading-[0.85]"
         >
             CRICKET<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-teal-500 to-teal-700">MANAGER</span>
         </motion.h1>
@@ -96,21 +91,21 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.5 }}
-            className="flex items-center justify-center gap-6 mt-8"
+            className="flex items-center justify-center gap-3 md:gap-4 mt-4 md:mt-6"
         >
             <div className="flex flex-col items-center">
-                <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-1">VERSION</span>
-                <span className="text-sm font-black text-white/80">26.0.1_STABLE</span>
+                <span className="text-[7px] md:text-[8px] font-bold text-white/20 uppercase tracking-widest mb-0.5">VERSION</span>
+                <span className="text-[10px] md:text-xs font-black text-white/80">26.0.1</span>
             </div>
-            <div className="w-px h-8 bg-white/10" />
+            <div className="w-px h-5 md:h-6 bg-white/10" />
             <div className="flex flex-col items-center">
-                <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-1">ENGINE</span>
-                <span className="text-sm font-black text-teal-500">APEX_CORE_V3</span>
+                <span className="text-[7px] md:text-[8px] font-bold text-white/20 uppercase tracking-widest mb-0.5">ENGINE</span>
+                <span className="text-[10px] md:text-xs font-black text-teal-500">APEX_V3</span>
             </div>
         </motion.div>
       </div>
 
-      <div className="absolute bottom-24 w-72 h-1 bg-white/5 rounded-full overflow-hidden z-10">
+      <div className="absolute bottom-20 w-40 md:w-72 h-1 bg-white/5 rounded-full overflow-hidden z-10">
         <motion.div 
           initial={{ x: "-100%" }}
           animate={{ x: "0%" }}
@@ -123,9 +118,9 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 3 }}
-        className="absolute bottom-12 text-[9px] font-black text-white/10 uppercase tracking-[0.4em]"
+        className="absolute bottom-8 text-[8px] font-black text-white/10 uppercase tracking-[0.4em]"
       >
-        EST. 2026 // SECURE_BOOT_SEQUENCE_ACTIVE
+        EST. 2026 // SECURE_BOOT
       </motion.p>
     </motion.div>
   );
@@ -137,7 +132,7 @@ const GameCover = ({ onStart, isInstallable, onInstall }: { onStart: () => void;
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[90] bg-[#050808] flex flex-col items-center justify-between p-12 overflow-hidden font-sans"
+            className="absolute inset-0 z-[90] bg-[#050808] flex flex-col items-center justify-between p-6 md:p-12 overflow-hidden font-sans"
         >
             {/* Premium Background */}
             <div className="absolute inset-0 z-0">
@@ -157,8 +152,8 @@ const GameCover = ({ onStart, isInstallable, onInstall }: { onStart: () => void;
             {/* Top Branding */}
             <div className="z-10 w-full flex justify-between items-start">
                 <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-teal-500 uppercase tracking-[0.4em]">SIKES_INTERACTIVE</span>
-                    <span className="text-[8px] font-mono font-bold text-white/20 uppercase tracking-widest">LICENSED_PRODUCT_2026</span>
+                    <span className="text-[7px] md:text-[10px] font-black text-teal-500 uppercase tracking-[0.4em]">SIKES_INTERACTIVE</span>
+                    <span className="text-[6px] md:text-[8px] font-mono font-bold text-white/20 uppercase tracking-widest">LICENSED_2026</span>
                 </div>
                 {isInstallable && (
                     <motion.button
@@ -167,10 +162,10 @@ const GameCover = ({ onStart, isInstallable, onInstall }: { onStart: () => void;
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={onInstall}
-                        className="bg-teal-500 text-black p-3 rounded-xl shadow-[0_0_20px_rgba(20,184,166,0.4)] flex items-center gap-2"
+                        className="bg-teal-500 text-black p-1.5 md:p-3 rounded-lg md:rounded-xl shadow-[0_0_20px_rgba(20,184,166,0.4)] flex items-center gap-1.5 md:gap-2"
                     >
-                        <Icons.Download size={18} />
-                        <span className="text-[10px] font-black uppercase tracking-widest">INSTALL</span>
+                        <Icons.Download size={12} md:size={14} />
+                        <span className="text-[7px] md:text-[10px] font-black uppercase tracking-widest">INSTALL</span>
                     </motion.button>
                 )}
             </div>
@@ -181,30 +176,30 @@ const GameCover = ({ onStart, isInstallable, onInstall }: { onStart: () => void;
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.5, duration: 0.8 }}
                 >
-                    <div className="inline-flex items-center gap-3 bg-teal-500/10 text-teal-500 px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.4em] mb-8 border border-teal-500/20 backdrop-blur-md shadow-[0_0_30px_rgba(20,184,166,0.1)]">
-                        <Icons.Trophy size={14} />
+                    <div className="inline-flex items-center gap-1.5 md:gap-2 bg-teal-500/10 text-teal-500 px-3 md:px-4 py-1 md:py-1.5 rounded-full text-[7px] md:text-[10px] font-black uppercase tracking-[0.4em] mb-4 md:mb-8 border border-teal-500/20 backdrop-blur-md shadow-[0_0_30px_rgba(20,184,166,0.1)]">
+                        <Icons.Trophy size={10} md:size={12} />
                         NEXT_GEN_STRATEGY
                     </div>
                     
-                    <h1 className="text-7xl md:text-8xl font-black italic uppercase tracking-tighter text-white mb-4 font-display leading-[0.8] drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
+                    <h1 className="text-4xl md:text-8xl font-black italic uppercase tracking-tighter text-white mb-1.5 md:mb-4 font-display leading-[0.8] drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
                         CRICKET<br/>
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-teal-500 to-teal-700">MANAGER</span>
                     </h1>
                     
-                    <div className="flex items-center justify-center gap-6 mt-4">
-                        <div className="h-[1px] w-16 bg-gradient-to-r from-transparent to-white/20" />
-                        <span className="text-5xl font-black italic text-teal-500 font-display tracking-widest drop-shadow-[0_0_20px_rgba(20,184,166,0.5)]">26</span>
-                        <div className="h-[1px] w-16 bg-gradient-to-l from-transparent to-white/20" />
+                    <div className="flex items-center justify-center gap-3 md:gap-4 mt-1.5 md:mt-2">
+                        <div className="h-[1px] w-10 md:w-12 bg-gradient-to-r from-transparent to-white/20" />
+                        <span className="text-2xl md:text-5xl font-black italic text-teal-500 font-display tracking-widest drop-shadow-[0_0_20px_rgba(20,184,166,0.5)]">26</span>
+                        <div className="h-[1px] w-10 md:w-12 bg-gradient-to-l from-transparent to-white/20" />
                     </div>
                 </motion.div>
             </div>
 
-            <div className="z-10 w-full flex flex-col items-center gap-12 mb-8">
+            <div className="z-10 w-full flex flex-col items-center gap-6 md:gap-12 mb-4 md:mb-8">
                 <motion.button
                     whileHover={{ scale: 1.05, y: -5 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={onStart}
-                    className="group relative w-full max-w-xs py-6 bg-white text-black font-black uppercase italic tracking-[0.2em] text-lg rounded-2xl overflow-hidden transition-all shadow-[0_20px_40px_rgba(0,0,0,0.4)] hover:bg-teal-500 hover:text-white"
+                    className="group relative w-full max-w-[200px] md:max-w-xs py-4 md:py-6 bg-white text-black font-black uppercase italic tracking-[0.2em] text-sm md:text-lg rounded-xl md:rounded-2xl overflow-hidden transition-all shadow-[0_20px_40px_rgba(0,0,0,0.4)] hover:bg-teal-500 hover:text-white"
                 >
                     <span className="relative z-10">INITIALIZE_SYSTEM</span>
                     <motion.div 
@@ -214,31 +209,31 @@ const GameCover = ({ onStart, isInstallable, onInstall }: { onStart: () => void;
                     />
                 </motion.button>
 
-                <div className="flex items-center gap-12">
+                <div className="flex items-center gap-6 md:gap-12">
                     <div className="flex flex-col items-center">
-                        <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-1">PLATFORM</span>
-                        <div className="flex items-center gap-2">
-                            <Icons.Smartphone size={12} className="text-teal-500" />
-                            <span className="text-[11px] font-black text-white/80">PWA_MOBILE</span>
+                        <span className="text-[6px] md:text-[9px] font-bold text-white/20 uppercase tracking-widest mb-0.5">PLATFORM</span>
+                        <div className="flex items-center gap-1">
+                            <Icons.Smartphone size={8} md:size={10} className="text-teal-500" />
+                            <span className="text-[8px] md:text-[11px] font-black text-white/80">PWA_MOBILE</span>
                         </div>
                     </div>
-                    <div className="w-px h-10 bg-white/10" />
+                    <div className="w-px h-6 md:h-10 bg-white/10" />
                     <div className="flex flex-col items-center">
-                        <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-1">SECURITY</span>
-                        <div className="flex items-center gap-2">
-                            <Icons.ShieldCheck size={12} className="text-teal-500" />
-                            <span className="text-[11px] font-black text-white/80">ENCRYPTED</span>
+                        <span className="text-[6px] md:text-[9px] font-bold text-white/20 uppercase tracking-widest mb-0.5">SECURITY</span>
+                        <div className="flex items-center gap-1">
+                            <Icons.ShieldCheck size={8} md:size={10} className="text-teal-500" />
+                            <span className="text-[8px] md:text-[11px] font-black text-white/80">ENCRYPTED</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Bottom Accent */}
-            <div className="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-transparent via-teal-500 to-transparent opacity-50" />
+            <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-teal-500 to-transparent opacity-50" />
             
             {/* Corner Decor */}
-            <div className="absolute top-12 left-12 w-24 h-24 border-t-2 border-l-2 border-white/10 rounded-tl-3xl pointer-events-none" />
-            <div className="absolute bottom-12 right-12 w-24 h-24 border-b-2 border-r-2 border-white/10 rounded-br-3xl pointer-events-none" />
+            <div className="absolute top-8 left-8 w-16 h-16 border-t border-l border-white/10 rounded-tl-2xl pointer-events-none" />
+            <div className="absolute bottom-8 right-8 w-16 h-16 border-b border-r border-white/10 rounded-br-2xl pointer-events-none" />
         </motion.div>
     );
 };

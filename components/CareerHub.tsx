@@ -46,33 +46,26 @@ interface CareerHubProps {
 
 const BottomNavBar = ({ activeScreen, setScreen }: { activeScreen: CareerScreen, setScreen: (screen: CareerScreen) => void }) => {
     const navItems = [
-        { name: 'HOME', screen: 'DASHBOARD' as CareerScreen, icon: Home },
-        { name: 'STANDINGS', screen: 'LEAGUES' as CareerScreen, icon: Trophy },
-        { name: 'RATINGS', screen: 'RATING_BOARD' as CareerScreen, icon: Star },
-        { name: 'STATS', screen: 'STATS' as CareerScreen, icon: BarChart3 },
-        { name: 'SETTINGS', screen: 'SETTINGS' as CareerScreen, icon: SettingsIcon },
+        { name: 'Home', screen: 'DASHBOARD' as CareerScreen, icon: Home },
+        { name: 'Table', screen: 'LEAGUES' as CareerScreen, icon: Trophy },
+        { name: 'Ratings', screen: 'RATING_BOARD' as CareerScreen, icon: Star },
+        { name: 'Stats', screen: 'STATS' as CareerScreen, icon: BarChart3 },
+        { name: 'Settings', screen: 'SETTINGS' as CareerScreen, icon: SettingsIcon },
     ];
     return (
-        <nav className="bg-[#050808]/90 border-t border-white/5 flex justify-around items-center h-[90px] pb-[max(2rem,env(safe-area-inset-bottom))] backdrop-blur-3xl sticky bottom-0 z-50">
+        <nav className="bg-[#050808]/95 border-t border-white/5 flex justify-around items-center h-16 md:h-20 backdrop-blur-3xl sticky bottom-0 z-50 px-1 md:px-2">
             {navItems.map(item => {
                 const isActive = activeScreen === item.screen;
                 return (
                     <button
                         key={item.name}
                         onClick={() => setScreen(item.screen)}
-                        className={`relative flex flex-col items-center justify-center space-y-1.5 w-1/5 pt-4 transition-all duration-500 ${isActive ? 'text-teal-400' : 'text-white/30 hover:text-white/60'}`}
+                        className={`flex flex-col items-center justify-center gap-0.5 md:gap-1 transition-all duration-300 w-1/5 ${isActive ? 'text-teal-500 scale-105' : 'text-white/30 hover:text-white/60'}`}
                     >
-                        {isActive && (
-                            <motion.div 
-                                layoutId="nav-active"
-                                className="absolute -top-[1px] w-12 h-[2px] bg-gradient-to-r from-teal-500 to-teal-700 rounded-full shadow-[0_0_20px_rgba(20,184,166,0.8)]"
-                                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                            />
-                        )}
-                        <div className={`p-2.5 rounded-2xl transition-all duration-500 ${isActive ? 'bg-teal-500/10 shadow-[inset_0_0_20px_rgba(20,184,166,0.1)]' : 'bg-transparent'}`}>
-                            <item.icon size={20} strokeWidth={isActive ? 2.5 : 1.5} />
+                        <div className={`p-1.5 md:p-2 rounded-lg md:rounded-xl transition-all duration-300 ${isActive ? 'bg-teal-500/10 shadow-[0_0_15px_rgba(20,184,166,0.2)]' : ''}`}>
+                            <item.icon size={18} md:size={22} strokeWidth={isActive ? 2.5 : 1.5} />
                         </div>
-                        <span className={`text-[8px] font-black tracking-[0.3em] uppercase transition-all duration-500 ${isActive ? 'opacity-100' : 'opacity-40'}`}>{item.name}</span>
+                        <span className="text-[7px] md:text-[9px] font-black uppercase tracking-widest">{item.name}</span>
                     </button>
                 );
             })}
@@ -623,15 +616,15 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
     }
 
     return (
-        <div className="flex flex-col h-full bg-slate-50 dark:bg-[#050808] text-slate-900 dark:text-slate-100">
-            <main className="flex-grow overflow-y-auto relative">
+        <div className="flex flex-col h-full bg-[#050808] text-[#E4E3E0] font-sans">
+            <main className="flex-grow overflow-y-auto relative scrollbar-hide">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={screen}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
                         className="h-full"
                     >
                         {renderScreen()}
