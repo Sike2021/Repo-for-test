@@ -161,39 +161,39 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
                 layout
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                whileHover={{ y: -5, scale: 1.02 }}
+                whileHover={{ y: -3, scale: 1.01 }}
                 onClick={() => isXI ? selectPlayerForSwap(player) : completeSwap(player)}
-                className={`relative group cursor-pointer p-2.5 md:p-6 rounded-[16px] md:rounded-[40px] border transition-all duration-500 overflow-hidden ${
+                className={`relative group cursor-pointer p-2 md:p-4 rounded-[12px] md:rounded-[24px] border transition-all duration-500 overflow-hidden ${
                     isSelected 
-                    ? 'bg-teal-500 border-teal-400 shadow-[0_20px_40px_rgba(20,184,166,0.3)]' 
+                    ? 'bg-teal-500 border-teal-400 shadow-[0_15px_30px_rgba(20,184,166,0.3)]' 
                     : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.06] hover:border-teal-500/40 shadow-xl'
                 } ${dropStatus ? 'border-l-4 border-l-red-500' : ''}`}
             >
-                <div className={`absolute -right-4 -bottom-4 text-4xl md:text-8xl font-black italic opacity-[0.03] pointer-events-none transition-colors ${isSelected ? 'text-black' : 'text-white'}`}>
+                <div className={`absolute -right-2 -bottom-2 text-3xl md:text-6xl font-black italic opacity-[0.03] pointer-events-none transition-colors ${isSelected ? 'text-black' : 'text-white'}`}>
                     {index + 1}
                 </div>
 
-                <div className="flex items-center gap-2.5 md:gap-6 relative z-10">
+                <div className="flex items-center gap-2 md:gap-4 relative z-10">
                     <div className="relative">
-                        <div className={`absolute inset-0 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${isSelected ? 'bg-white/40' : 'bg-teal-500/20'}`} />
-                        <PlayerAvatar player={player} size="sm" className={`w-10 h-10 md:w-20 md:h-20 border-2 md:border-4 relative z-10 transition-colors ${isSelected ? 'border-white/40' : 'border-white/5 group-hover:border-teal-500/30'}`} />
+                        <div className={`absolute inset-0 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${isSelected ? 'bg-white/40' : 'bg-teal-500/20'}`} />
+                        <PlayerAvatar player={player} size="sm" className={`w-8 h-8 md:w-12 md:h-12 border-2 md:border-3 relative z-10 transition-colors ${isSelected ? 'border-white/40' : 'border-white/5 group-hover:border-teal-500/30'}`} />
                         {isCaptain && (
-                            <div className="absolute -top-1 -right-1 bg-yellow-500 text-black w-4 h-4 md:w-8 md:h-8 rounded-full flex items-center justify-center text-[6px] md:text-[10px] font-black shadow-lg border-2 border-[#050808] z-20">
+                            <div className="absolute -top-1 -right-1 bg-yellow-500 text-black w-3.5 h-3.5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-[5px] md:text-[8px] font-black shadow-lg border-2 border-[#050808] z-20">
                                 C
                             </div>
                         )}
                     </div>
 
                     <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 md:gap-3 mb-0.5 md:mb-2">
-                            <h4 className={`text-sm md:text-2xl font-black italic uppercase tracking-tighter truncate transition-colors ${isSelected ? 'text-black' : 'text-white group-hover:text-teal-500'}`}>
+                        <div className="flex items-center gap-1 md:gap-2 mb-0.5 md:mb-1">
+                            <h4 className={`text-xs md:text-lg font-black italic uppercase tracking-tighter truncate transition-colors ${isSelected ? 'text-black' : 'text-white group-hover:text-teal-500'}`}>
                                 {player.name}
                             </h4>
-                            {player.isForeign && <Icons.Globe className={isSelected ? 'text-black/40 w-1.5 h-1.5 md:w-2.5 md:h-2.5' : 'text-white/20 w-1.5 h-1.5 md:w-2.5 md:h-2.5'} />}
+                            {player.isForeign && <Icons.Globe className={isSelected ? 'text-black/40 w-1.5 h-1.5 md:w-2 md:h-2' : 'text-white/20 w-1.5 h-1.5 md:w-2 md:h-2'} />}
                         </div>
                         
-                        <div className="flex items-center gap-1.5 md:gap-3">
-                            <span className={`text-[5px] md:text-[9px] font-black uppercase tracking-widest px-1 md:px-3 py-0.5 md:py-1 rounded-full border transition-colors ${
+                        <div className="flex items-center gap-1 md:gap-2">
+                            <span className={`text-[5px] md:text-[8px] font-black uppercase tracking-widest px-1 md:px-2 py-0.5 rounded-full border transition-colors ${
                                 isSelected 
                                 ? 'bg-black/10 border-black/10 text-black' 
                                 : `bg-white/5 border-white/10 ${getRoleColor(player.role)}`
@@ -201,7 +201,7 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
                                 {player.role}
                             </span>
                             {dropStatus && (
-                                <span className="text-[5px] md:text-[8px] font-black text-red-500 uppercase tracking-widest bg-red-500/10 px-1 md:px-2 py-0.5 rounded-full border border-red-500/20">
+                                <span className="text-[5px] md:text-[7px] font-black text-red-500 uppercase tracking-widest bg-red-500/10 px-1 py-0.5 rounded-full border border-red-500/20">
                                     AT_RISK
                                 </span>
                             )}
@@ -209,10 +209,10 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
                     </div>
 
                     <div className="text-right">
-                        <p className={`text-base md:text-3xl font-black italic leading-none mb-0.5 md:mb-1 transition-colors ${isSelected ? 'text-black' : 'text-teal-500'}`}>
+                        <p className={`text-sm md:text-xl font-black italic leading-none mb-0.5 transition-colors ${isSelected ? 'text-black' : 'text-teal-500'}`}>
                             {Math.max(player.battingSkill, player.secondarySkill)}
                         </p>
-                        <p className={`text-[5px] md:text-[8px] font-black uppercase tracking-widest transition-colors ${isSelected ? 'text-black/40' : 'text-white/20'}`}>
+                        <p className={`text-[5px] md:text-[7px] font-black uppercase tracking-widest transition-colors ${isSelected ? 'text-black/40' : 'text-white/20'}`}>
                             RATING
                         </p>
                     </div>
@@ -241,45 +241,45 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
                 <div className="absolute -bottom-24 -left-24 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-blue-500/5 blur-[100px] md:blur-[160px] rounded-full" />
             </div>
 
-            <header className="px-3 md:px-10 py-3 md:py-12 border-b border-white/5 relative overflow-hidden bg-[#050808]/40 backdrop-blur-3xl z-10">
-                <div className="absolute top-0 right-0 p-4 md:p-12 opacity-[0.02] pointer-events-none">
-                    <Icons.Users className="w-16 h-16 md:w-64 md:h-64" />
+            <header className="px-3 md:px-6 py-3 md:py-6 border-b border-white/5 relative overflow-hidden bg-[#050808]/40 backdrop-blur-3xl z-10">
+                <div className="absolute top-0 right-0 p-4 md:p-6 opacity-[0.02] pointer-events-none">
+                    <Icons.Users className="w-16 h-16 md:w-32 md:h-32" />
                 </div>
 
-                <div className="flex flex-col md:flex-row justify-between items-start gap-2 md:gap-12 mb-3 md:mb-12 relative z-10">
+                <div className="flex flex-col md:flex-row justify-between items-start gap-2 md:gap-6 mb-3 md:mb-6 relative z-10">
                     <div>
                         <motion.div 
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="flex items-center gap-2 md:gap-3 mb-0.5 md:mb-2"
+                            className="flex items-center gap-2 md:gap-3 mb-0.5"
                         >
-                            <div className="w-1 md:w-2 h-4 md:h-8 bg-teal-500 rounded-full shadow-[0_0_20px_rgba(20,184,166,0.5)]" />
-                            <h2 className="text-lg md:text-5xl font-black italic uppercase tracking-tighter text-white leading-none">SQUAD_LINEUP</h2>
+                            <div className="w-1 md:w-1.5 h-4 md:h-6 bg-teal-500 rounded-full shadow-[0_0_20px_rgba(20,184,166,0.5)]" />
+                            <h2 className="text-lg md:text-2xl font-black italic uppercase tracking-tighter text-white leading-none">SQUAD_LINEUP</h2>
                         </motion.div>
-                        <div className="flex items-center gap-2 md:gap-4 ml-3 md:ml-5">
+                        <div className="flex items-center gap-2 md:gap-3 ml-3 md:ml-4">
                             <select 
                                 value={selectedTeamId} 
                                 onChange={(e) => setSelectedTeamId(e.target.value)}
-                                className="bg-transparent text-[6px] md:text-[11px] font-mono font-black text-teal-500 uppercase tracking-[0.4em] outline-none cursor-pointer hover:text-white transition-colors"
+                                className="bg-transparent text-[6px] md:text-[9px] font-mono font-black text-teal-500 uppercase tracking-[0.4em] outline-none cursor-pointer hover:text-white transition-colors"
                             >
                                 {gameData.teams.map(team => <option key={team.id} value={team.id} className="bg-[#050808]">{team.name.toUpperCase()}</option>)}
                             </select>
                             <span className="text-white/10">//</span>
-                            <span className="text-[6px] md:text-[11px] font-mono font-black text-white/40 uppercase tracking-[0.4em]">ROSTER_MGMT</span>
+                            <span className="text-[6px] md:text-[9px] font-mono font-black text-white/40 uppercase tracking-[0.4em]">ROSTER_MGMT</span>
                         </div>
                     </div>
                     
-                    <div className="flex flex-col items-start md:items-end gap-2 md:gap-6 w-full md:w-auto">
+                    <div className="flex flex-col items-start md:items-end gap-2 md:gap-3 w-full md:w-auto">
                         <motion.div 
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="flex bg-white/[0.03] p-0.5 md:p-1 rounded-lg md:rounded-[24px] border border-white/10 backdrop-blur-xl w-full md:w-auto overflow-x-auto scrollbar-hide"
+                            className="flex bg-white/[0.03] p-0.5 md:p-1 rounded-lg md:rounded-[16px] border border-white/10 backdrop-blur-xl w-full md:w-auto overflow-x-auto scrollbar-hide"
                         >
                             {['T20', 'List A', 'First Class'].map((cat) => (
                                 <button 
                                     key={cat} 
                                     onClick={() => setCategory(cat as any)} 
-                                    className={`flex-1 md:flex-none px-2 md:px-8 py-1 md:py-3 rounded-md md:rounded-[18px] text-[5px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-500 whitespace-nowrap ${
+                                    className={`flex-1 md:flex-none px-2 md:px-6 py-1 md:py-2 rounded-md md:rounded-[14px] text-[5px] md:text-[9px] font-black uppercase tracking-widest transition-all duration-500 whitespace-nowrap ${
                                         category === cat 
                                         ? 'bg-white text-black shadow-xl' 
                                         : 'text-white/30 hover:text-white hover:bg-white/5'
@@ -292,7 +292,7 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
                         <select
                             value={selectedFormat}
                             onChange={(e) => setSelectedFormat(e.target.value as Format)}
-                            className="bg-white/[0.03] border border-white/10 px-2 md:px-6 py-1 md:py-2 rounded-full text-[5px] md:text-[10px] font-black uppercase tracking-widest text-white/60 outline-none cursor-pointer hover:bg-white/[0.08] transition-all w-full md:w-auto"
+                            className="bg-white/[0.03] border border-white/10 px-2 md:px-4 py-1 md:py-1.5 rounded-full text-[5px] md:text-[9px] font-black uppercase tracking-widest text-white/60 outline-none cursor-pointer hover:bg-white/[0.08] transition-all w-full md:w-auto"
                         >
                             {getFormatsForCategory(category).map(f => (
                                 <option key={f} value={f} className="bg-[#050808]">{f}</option>
@@ -303,24 +303,24 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
 
                 {/* Team Ratings Summary */}
                 {teamRatings && (
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6 relative z-10">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 relative z-10">
                         {[
-                            { label: 'STRENGTH', value: teamRatings.strength, icon: <Icons.Activity className="w-1.5 h-1.5 md:w-3 md:h-3" /> },
-                            { label: 'BOWLING', value: teamRatings.bowling, icon: <Icons.Target className="w-1.5 h-1.5 md:w-3 md:h-3" /> },
-                            { label: 'BATTING', value: teamRatings.batting, icon: <Icons.Zap className="w-1.5 h-1.5 md:w-3 md:h-3" /> },
-                            { label: 'STARS', value: teamRatings.starPlayers, icon: <Icons.Trophy className="w-1.5 h-1.5 md:w-3 md:h-3" /> }
+                            { label: 'STRENGTH', value: teamRatings.strength, icon: <Icons.Activity className="w-1.5 h-1.5 md:w-2.5 md:h-2.5" /> },
+                            { label: 'BOWLING', value: teamRatings.bowling, icon: <Icons.Target className="w-1.5 h-1.5 md:w-2.5 md:h-2.5" /> },
+                            { label: 'BATTING', value: teamRatings.batting, icon: <Icons.Zap className="w-1.5 h-1.5 md:w-2.5 md:h-2.5" /> },
+                            { label: 'STARS', value: teamRatings.starPlayers, icon: <Icons.Trophy className="w-1.5 h-1.5 md:w-2.5 md:h-2.5" /> }
                         ].map(stat => (
                             <motion.div 
                                 key={stat.label} 
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="bg-white/[0.03] border border-white/10 p-1.5 md:p-6 rounded-lg md:rounded-[24px] hover:bg-white/[0.06] transition-all duration-500 group"
+                                className="bg-white/[0.03] border border-white/10 p-1.5 md:p-4 rounded-lg md:rounded-[20px] hover:bg-white/[0.06] transition-all duration-500 group"
                             >
-                                <div className="flex items-center gap-1 md:gap-2 mb-0.5 md:mb-3">
+                                <div className="flex items-center gap-1 md:gap-2 mb-0.5 md:mb-2">
                                     <span className="text-teal-500 group-hover:scale-110 transition-transform">{stat.icon}</span>
-                                    <p className="text-[5px] md:text-[9px] font-black text-white/20 uppercase tracking-widest">{stat.label}</p>
+                                    <p className="text-[5px] md:text-[8px] font-black text-white/20 uppercase tracking-widest">{stat.label}</p>
                                 </div>
-                                <p className="text-sm md:text-3xl font-black text-white italic tracking-tighter leading-none">{stat.value}</p>
+                                <p className="text-sm md:text-2xl font-black text-white italic tracking-tighter leading-none">{stat.value}</p>
                             </motion.div>
                         ))}
                     </div>

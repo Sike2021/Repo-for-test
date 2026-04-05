@@ -75,6 +75,7 @@ const BottomNavBar = ({ activeScreen, setScreen }: { activeScreen: CareerScreen,
 
 const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGame, theme, setTheme, saveGame, loadGame, showFeedback }) => {
     const [screen, setScreen] = useState<CareerScreen>('DASHBOARD');
+    const [matchStartMode, setMatchStartMode] = useState<'play' | 'simulate'>('play');
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
     const [playerProfileFormat, setPlayerProfileFormat] = useState<Format>(gameData.currentFormat);
     const [selectedMatchResult, setSelectedMatchResult] = useState<MatchResult | null>(null);
@@ -410,6 +411,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
         const isUserTeamMatch = matchToSim.teamA === userTeam.name || matchToSim.teamB === userTeam.name;
 
         if (isUserTeamMatch) {
+             setMatchStartMode('play');
              setScreen('LIVE_MATCH');
         } else {
              const result = runSimulationForCurrentFormat(matchToSim, gameData);
@@ -424,6 +426,89 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
              setSelectedMatchResult(result);
              setScreen('MATCH_RESULT');
         }
+    };
+
+    const handleSimulateWithPlay = () => {
+        if (!userTeam || !gameData.schedule || !gameData.currentMatchIndex) return;
+        
+        const schedule = gameData.schedule[gameData.currentFormat];
+        const currentMatchIndex = gameData.currentMatchIndex[gameData.currentFormat];
+        if (schedule === undefined || currentMatchIndex === undefined || currentMatchIndex >= schedule.length) return;
+
+        const matchToSim = JSON.parse(JSON.stringify(schedule[currentMatchIndex]));
+
+        if (matchToSim.group !== 'Round-Robin') {
+             const standings = gameData.standings?.[gameData.currentFormat] || [];
+             const getTeamName = (pos: number) => standings[pos - 1]?.teamName;
+             const resolvePlaceholder = (placeholder: string) => {
+                if (['1st', '2nd', '3rd', '4th'].includes(placeholder)) return getTeamName(parseInt(placeholder[0]));
+                if (placeholder.startsWith('SF')) {
+                    const sfMatchNumber = placeholder.split(' ')[0];
+                    const sfResult = gameData.matchResults?.[gameData.currentFormat]?.find(r => r && r.matchNumber === sfMatchNumber);
+                    return gameData.teams?.find(t => t.id === sfResult?.winnerId)?.name || null;
+                }
+                return placeholder;
+            };
+            matchToSim.teamA = resolvePlaceholder(matchToSim.teamA) || 'TBD';
+            matchToSim.teamB = resolvePlaceholder(matchToSim.teamB) || 'TBD';
+        }
+
+        if (matchToSim.teamA === 'TBD' || matchToSim.teamB === 'TBD') {
+            showFeedback("Waiting for league stage to conclude.", "error");
+            return;
+        }
+
+        const isUserTeamMatch = matchToSim.teamA === userTeam.name || matchToSim.teamB === userTeam.name;
+
+        if (isUserTeamMatch) {
+             setMatchStartMode('simulate');
+             setScreen('LIVE_MATCH');
+        } else {
+             handlePlayMatch();
+        }
+    };
+
+    const handleQuickSimulate = () => {
+        if (!userTeam || !gameData.schedule || !gameData.currentMatchIndex) return;
+        
+        const schedule = gameData.schedule[gameData.currentFormat];
+        const currentMatchIndex = gameData.currentMatchIndex[gameData.currentFormat];
+        if (schedule === undefined || currentMatchIndex === undefined || currentMatchIndex >= schedule.length) return;
+
+        const matchToSim = JSON.parse(JSON.stringify(schedule[currentMatchIndex]));
+
+        if (matchToSim.group !== 'Round-Robin') {
+             const standings = gameData.standings?.[gameData.currentFormat] || [];
+             const getTeamName = (pos: number) => standings[pos - 1]?.teamName;
+             const resolvePlaceholder = (placeholder: string) => {
+                if (['1st', '2nd', '3rd', '4th'].includes(placeholder)) return getTeamName(parseInt(placeholder[0]));
+                if (placeholder.startsWith('SF')) {
+                    const sfMatchNumber = placeholder.split(' ')[0];
+                    const sfResult = gameData.matchResults?.[gameData.currentFormat]?.find(r => r && r.matchNumber === sfMatchNumber);
+                    return gameData.teams?.find(t => t.id === sfResult?.winnerId)?.name || null;
+                }
+                return placeholder;
+            };
+            matchToSim.teamA = resolvePlaceholder(matchToSim.teamA) || 'TBD';
+            matchToSim.teamB = resolvePlaceholder(matchToSim.teamB) || 'TBD';
+        }
+
+        if (matchToSim.teamA === 'TBD' || matchToSim.teamB === 'TBD') {
+            showFeedback("Waiting for league stage to conclude.", "error");
+            return;
+        }
+
+        const result = runSimulationForCurrentFormat(matchToSim, gameData);
+        const updatedData = updateStatsFromMatch(result, gameData.currentFormat, gameData);
+        if (updatedData.currentMatchIndex && updatedData.currentMatchIndex[gameData.currentFormat] !== undefined) {
+            updatedData.currentMatchIndex[gameData.currentFormat]++;
+        }
+        const sponsorship = updatedData.sponsorships?.[updatedData.currentFormat] || INITIAL_SPONSORSHIPS[updatedData.currentFormat];
+        const newsItem = generateMatchNews(result, updatedData.currentFormat, sponsorship);
+        updatedData.news = [newsItem, ...(updatedData.news || [])].slice(0, 50);
+        setGameData(updatedData);
+        setSelectedMatchResult(result);
+        setScreen('MATCH_RESULT');
     };
 
     const handleLiveMatchComplete = (result: MatchResult) => {
@@ -563,7 +648,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
     const renderScreen = () => {
         const commonProps = { gameData, userTeam, setGameData, setScreen, showFeedback };
         switch(screen) {
-            case 'DASHBOARD': return <Dashboard {...commonProps} handlePlayMatch={handlePlayMatch} handleForwardDay={handleForwardDay} />;
+            case 'DASHBOARD': return <Dashboard {...commonProps} handlePlayMatch={handlePlayMatch} handleForwardDay={handleForwardDay} handleQuickSimulate={handleQuickSimulate} handleSimulateWithPlay={handleSimulateWithPlay} />;
             case 'LEAGUES': return <Standings gameData={gameData} />; 
             case 'SCHEDULE': return <Schedule gameData={gameData} userTeam={userTeam} viewMatchResult={result => { setSelectedMatchResult(result); setScreen('MATCH_RESULT'); }} />;
             case 'LINEUPS': return <Lineups {...commonProps} handleUpdatePlayingXI={handleUpdatePlayingXI} handleUpdateCaptain={handleUpdateCaptain} />;
@@ -572,8 +657,8 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
             case 'NEWS': return <News news={gameData.news} />;
             case 'STATS': return <Stats gameData={gameData} viewPlayerProfile={(p, f) => { setSelectedPlayer(p); setPlayerProfileFormat(f); setScreen('PLAYER_PROFILE'); }} />;
             case 'SETTINGS': return <Settings onResetGame={onResetGame} theme={theme} setTheme={setTheme} saveGame={saveGame} loadGame={loadGame} />;
-            case 'PLAYER_PROFILE': return <PlayerProfile player={selectedPlayer} onBack={() => setScreen('STATS')} initialFormat={playerProfileFormat} />;
-            case 'MATCH_RESULT': return <MatchResultScreen result={selectedMatchResult} onBack={() => setScreen('DASHBOARD')} userTeamId={gameData.userTeamId} />;
+            case 'PLAYER_PROFILE': return <PlayerProfile player={selectedPlayer} onBack={() => setScreen('STATS')} initialFormat={playerProfileFormat} onUpdatePlayer={handleUpdatePlayer} />;
+            case 'MATCH_RESULT': return <MatchResultScreen result={selectedMatchResult} onBack={() => setScreen('DASHBOARD')} userTeamId={gameData.userTeamId} allPlayers={gameData.allPlayers} />;
             case 'FORWARD_RESULTS': return <ForwardResultsScreen results={forwardSimResults} onBack={() => setScreen('DASHBOARD')} userTeamId={gameData.userTeamId} onViewResult={result => { setSelectedMatchResult(result); setScreen('MATCH_RESULT'); }} />;
             case 'AWARDS_RECORDS': return <AwardsAndRecordsScreen gameData={gameData} />;
             case 'END_OF_FORMAT': return <EndOfFormatScreen gameData={gameData} handleFormatChange={handleFormatChange} handleEndSeason={handleEndOfSeason} />;
@@ -608,7 +693,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                     resolvedMatch.teamB = resolvePlaceholder(resolvedMatch.teamB);
                 }
                 return resolvedMatch ? (
-                    <LiveMatchScreen match={resolvedMatch} gameData={gameData} onMatchComplete={handleLiveMatchComplete} onExit={handleLiveMatchExit} /> 
+                    <LiveMatchScreen match={resolvedMatch} gameData={gameData} onMatchComplete={handleLiveMatchComplete} onExit={handleLiveMatchExit} startMode={matchStartMode} /> 
                 ) : <div className="p-4 text-center"><p>Tournament finished.</p><button onClick={() => setScreen('DASHBOARD')} className="mt-4 bg-teal-500 text-white px-4 py-2 rounded">Back</button></div>;
             }
             default: return <div>Coming Soon</div>

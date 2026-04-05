@@ -111,9 +111,17 @@ export const PlayerAvatar: React.FC<PlayerAvatarProps> = ({ player, size = 'md',
   return (
     <div className={`relative rounded-full overflow-hidden border-2 flex-shrink-0 ${borderClass} ${sizeClasses[size]} ${className}`}>
       {player.avatarUrl && (player.avatarUrl.startsWith('http') || player.avatarUrl.startsWith('data:image/')) ? (
-        <img src={player.avatarUrl} alt={player.name} className="w-full h-full object-cover" />
+        <img 
+          src={player.avatarUrl} 
+          alt={player.name} 
+          className="w-full h-full object-cover object-top" 
+          referrerPolicy="no-referrer"
+        />
       ) : (
-        <img src={`data:image/svg+xml;utf8,${encodeURIComponent(svgContent)}`} alt={player.name} className="w-full h-full object-cover" />
+        <div 
+          className="w-full h-full"
+          dangerouslySetInnerHTML={{ __html: svgContent }}
+        />
       )}
     </div>
   );

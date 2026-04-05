@@ -15,17 +15,18 @@ interface LiveMatchScreenProps {
     onMatchComplete: (result: MatchResult) => void;
     onExit: (stateToSave?: LiveMatchState) => void;
     savedState?: LiveMatchState | null;
+    startMode?: 'play' | 'simulate';
 }
 
 const StrategyToggle = ({ label, value, onChange }: { label: string, value: Strategy, onChange: (s: Strategy) => void }) => (
-    <div className="flex flex-col items-center bg-white/[0.03] rounded-xl p-1.5 flex-1 border border-white/5">
-        <span className="text-[8px] text-white/40 uppercase font-black tracking-widest mb-1">{label}</span>
-        <div className="flex bg-black/40 rounded-lg p-0.5 w-full justify-center">
+    <div className="flex flex-col items-center bg-white/[0.03] rounded-lg p-1 flex-1 border border-white/5">
+        <span className="text-[7px] text-white/40 uppercase font-black tracking-widest mb-0.5">{label}</span>
+        <div className="flex bg-black/40 rounded-md p-0.5 w-full justify-center">
             {(['defensive', 'balanced', 'attacking'] as Strategy[]).map(s => (
                 <button
                     key={s}
                     onClick={() => onChange(s)}
-                    className={`px-1 py-1 text-[8px] uppercase font-black rounded-md transition-all flex-1 ${value === s 
+                    className={`px-0.5 py-0.5 text-[7px] uppercase font-black rounded transition-all flex-1 ${value === s 
                         ? s === 'attacking' ? 'bg-red-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.3)]' : s === 'defensive' ? 'bg-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.3)]' : 'bg-teal-500 text-black shadow-[0_0_10px_rgba(20,184,166,0.3)]' 
                         : 'text-white/20 hover:text-white/40'}`}
                 >
@@ -36,7 +37,7 @@ const StrategyToggle = ({ label, value, onChange }: { label: string, value: Stra
     </div>
 );
 
-const PreMatchPanel = ({ match, gameData, onStart }: { match: Match, gameData: GameData, onStart: () => void }) => {
+const PreMatchPanel = ({ match, gameData, onStart, onSimulate }: { match: Match, gameData: GameData, onStart: () => void, onSimulate: () => void }) => {
     const sponsorship = gameData.sponsorships?.[gameData.currentFormat] || INITIAL_SPONSORSHIPS[gameData.currentFormat];
     const teamA = gameData.teams.find(t => t.name === match.teamA);
     const teamB = gameData.teams.find(t => t.name === match.teamB);
@@ -53,87 +54,94 @@ const PreMatchPanel = ({ match, gameData, onStart }: { match: Match, gameData: G
     };
 
     return (
-        <div className="absolute inset-0 z-[120] bg-[#050808] flex flex-col p-4 font-sans overflow-y-auto scrollbar-hide">
+        <div className="absolute inset-0 z-[120] bg-[#050808] flex flex-col p-2 font-sans overflow-y-auto scrollbar-hide">
             {/* Header */}
-            <header className="flex justify-between items-center mb-8">
-                <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 ${sponsorship.logoColor} p-1 bg-white/5 rounded-xl border border-white/10`} dangerouslySetInnerHTML={{__html: sponsorship.tournamentLogo || TOURNAMENT_LOGOS[0].svg}}></div>
+            <header className="flex justify-between items-center mb-2">
+                <div className="flex items-center gap-1.5">
+                    <div className={`w-6 h-6 ${sponsorship.logoColor} p-1 bg-white/5 rounded-lg border border-white/10`} dangerouslySetInnerHTML={{__html: sponsorship.tournamentLogo || TOURNAMENT_LOGOS[0].svg}}></div>
                     <div>
-                        <p className="text-[8px] font-black text-teal-500 uppercase tracking-[0.4em] mb-0.5">{gameData.currentFormat} // PRE_MATCH</p>
-                        <h1 className="text-lg font-black italic uppercase tracking-tighter text-white leading-none">{sponsorship.tournamentName}</h1>
+                        <p className="text-[5px] font-black text-teal-500 uppercase tracking-[0.4em] mb-0.5">{gameData.currentFormat} // PRE_MATCH</p>
+                        <h1 className="text-xs font-black italic uppercase tracking-tighter text-white leading-none">{sponsorship.tournamentName}</h1>
                     </div>
                 </div>
-                <div className="w-12 h-8 opacity-20" dangerouslySetInnerHTML={{__html: sponsorship.tvLogo || ''}}></div>
+                <div className="w-8 h-4 opacity-20" dangerouslySetInnerHTML={{__html: sponsorship.tvLogo || ''}}></div>
             </header>
 
-            <div className="flex-grow flex flex-col justify-center space-y-8 py-4">
-                <div className="flex items-center justify-between px-2">
+            <div className="flex-grow flex flex-col justify-center space-y-3 py-1">
+                <div className="flex items-center justify-between px-1">
                     <motion.div 
                         initial={{ x: -30, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
-                        className="flex flex-col items-center space-y-3 w-1/3"
+                        className="flex flex-col items-center space-y-1.5 w-1/3"
                     >
-                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-teal-500/20 to-blue-600/20 flex items-center justify-center shadow-[0_0_40px_rgba(20,184,166,0.1)] border border-white/10 overflow-hidden relative group">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500/20 to-blue-600/20 flex items-center justify-center shadow-[0_0_30px_rgba(20,184,166,0.1)] border border-white/10 overflow-hidden relative group">
                             <div className="absolute inset-0 bg-teal-500/10 animate-pulse" />
-                            <div className="w-12 h-12 relative z-10" dangerouslySetInnerHTML={{__html: gameData.allTeamsData.find(t => t.id === teamA?.id)?.logo || ''}}></div>
+                            <div className="w-7 h-7 relative z-10" dangerouslySetInnerHTML={{__html: gameData.allTeamsData.find(t => t.id === teamA?.id)?.logo || ''}}></div>
                         </div>
-                        <h2 className="text-sm font-black uppercase tracking-tighter italic text-center text-white leading-tight">{teamA?.name}</h2>
-                        <div className="px-2 py-0.5 bg-white/5 rounded-full border border-white/10">
-                            <span className="text-[7px] font-black text-white/40 uppercase tracking-widest">HOME_SIDE</span>
+                        <h2 className="text-[9px] font-black uppercase tracking-tighter italic text-center text-white leading-tight">{teamA?.name}</h2>
+                        <div className="px-1 py-0.5 bg-white/5 rounded-full border border-white/10">
+                            <span className="text-[5px] font-black text-white/40 uppercase tracking-widest">HOME_SIDE</span>
                         </div>
                     </motion.div>
 
                     <div className="flex flex-col items-center">
-                        <div className="text-4xl font-black italic text-white/5 tracking-tighter mb-1">VS</div>
-                        <div className="w-px h-10 bg-gradient-to-b from-transparent via-teal-500/40 to-transparent" />
+                        <div className="text-xl font-black italic text-white/5 tracking-tighter mb-0.5">VS</div>
+                        <div className="w-px h-4 bg-gradient-to-b from-transparent via-teal-500/40 to-transparent" />
                     </div>
 
                     <motion.div 
                         initial={{ x: 30, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
-                        className="flex flex-col items-center space-y-3 w-1/3"
+                        className="flex flex-col items-center space-y-1.5 w-1/3"
                     >
-                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center border border-white/10 overflow-hidden relative">
-                            <div className="w-12 h-12 relative z-10" dangerouslySetInnerHTML={{__html: gameData.allTeamsData.find(t => t.id === teamB?.id)?.logo || ''}}></div>
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center border border-white/10 overflow-hidden relative">
+                            <div className="w-7 h-7 relative z-10" dangerouslySetInnerHTML={{__html: gameData.allTeamsData.find(t => t.id === teamB?.id)?.logo || ''}}></div>
                         </div>
-                        <h2 className="text-sm font-black uppercase tracking-tighter italic text-center text-white leading-tight">{teamB?.name}</h2>
-                        <div className="px-2 py-0.5 bg-white/5 rounded-full border border-white/10">
-                            <span className="text-[7px] font-black text-white/40 uppercase tracking-widest">AWAY_SIDE</span>
+                        <h2 className="text-[9px] font-black uppercase tracking-tighter italic text-center text-white leading-tight">{teamB?.name}</h2>
+                        <div className="px-1 py-0.5 bg-white/5 rounded-full border border-white/10">
+                            <span className="text-[5px] font-black text-white/40 uppercase tracking-widest">AWAY_SIDE</span>
                         </div>
                     </motion.div>
                 </div>
 
-                <div className="bg-white/[0.02] border border-white/5 rounded-[24px] p-5 mx-auto w-full max-w-sm backdrop-blur-xl">
-                    <div className="flex justify-between items-center mb-4">
-                        <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em]">GROUND_TELEMETRY</span>
+                <div className="bg-white/[0.02] border border-white/5 rounded-xl p-2 mx-auto w-full max-w-xs backdrop-blur-xl">
+                    <div className="flex justify-between items-center mb-1.5">
+                        <span className="text-[5px] font-black text-white/20 uppercase tracking-[0.3em]">GROUND_TELEMETRY</span>
                         <div className="flex gap-1">
-                            {[1,2,3].map(i => <div key={i} className="w-1 h-1 bg-teal-500/40 rounded-full" />)}
+                            {[1,2,3].map(i => <div key={i} className="w-0.5 h-0.5 bg-teal-500/40 rounded-full" />)}
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-black/40 p-3 rounded-xl border border-white/5">
-                            <p className="text-[7px] font-black text-white/20 uppercase tracking-widest mb-1">PITCH_SURFACE</p>
-                            <p className="text-xs font-black text-teal-500 italic uppercase">{ground?.pitch}</p>
-                            <p className="text-[8px] text-white/10 mt-1 uppercase font-bold">FAVORS: {ground?.pitch.includes('Spin') ? 'SPIN' : ground?.pitch.includes('Green') ? 'PACE' : 'BAT'}</p>
+                    <div className="grid grid-cols-2 gap-1.5">
+                        <div className="bg-black/40 p-1.5 rounded-lg border border-white/5">
+                            <p className="text-[5px] font-black text-white/20 uppercase tracking-widest mb-0.5">PITCH_SURFACE</p>
+                            <p className="text-[8px] font-black text-teal-500 italic uppercase">{ground?.pitch}</p>
+                            <p className="text-[6px] text-white/10 mt-0.5 uppercase font-bold">FAVORS: {ground?.pitch.includes('Spin') ? 'SPIN' : ground?.pitch.includes('Green') ? 'PACE' : 'BAT'}</p>
                         </div>
-                        <div className="bg-black/40 p-3 rounded-xl border border-white/5">
-                            <p className="text-[7px] font-black text-white/20 uppercase tracking-widest mb-1">ATMOSPHERE</p>
-                            <p className="text-xs font-black text-white italic uppercase flex items-center gap-1.5">
-                                <span className="text-sm">{getWeatherIcon(ground?.weather)}</span> {ground?.weather || 'CLEAR'}
+                        <div className="bg-black/40 p-1.5 rounded-lg border border-white/5">
+                            <p className="text-[5px] font-black text-white/20 uppercase tracking-widest mb-0.5">ATMOSPHERE</p>
+                            <p className="text-[8px] font-black text-white italic uppercase flex items-center gap-1">
+                                <span className="text-xs">{getWeatherIcon(ground?.weather)}</span> {ground?.weather || 'CLEAR'}
                             </p>
-                            <p className="text-[8px] text-white/10 mt-1 uppercase font-bold">{ground?.outfieldSpeed || 'MED'} OUTFIELD</p>
+                            <p className="text-[6px] text-white/10 mt-0.5 uppercase font-bold">{ground?.outfieldSpeed || 'MED'} OUTFIELD</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="mt-auto pt-4">
+            <div className="mt-auto pt-1.5 space-y-1.5">
                 <button 
                     onClick={onStart}
-                    className="w-full bg-teal-500 text-black font-black py-4 px-6 rounded-2xl uppercase tracking-[0.2em] text-[10px] hover:bg-teal-400 transition-all duration-500 shadow-[0_10px_30px_rgba(20,184,166,0.2)] active:scale-[0.98] flex items-center justify-center gap-3 group"
+                    className="w-full bg-teal-500 text-black font-black py-2.5 px-4 rounded-lg uppercase tracking-[0.2em] text-[7px] hover:bg-teal-400 transition-all duration-500 shadow-[0_10px_30px_rgba(20,184,166,0.2)] active:scale-[0.98] flex items-center justify-center gap-2 group"
                 >
-                    INITIALIZE BROADCAST
-                    <Icons.Play className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                    PLAY MATCH
+                    <Icons.PlayMatch className="w-2.5 h-2.5 group-hover:translate-x-1 transition-transform" />
+                </button>
+                <button 
+                    onClick={onSimulate}
+                    className="w-full bg-white/5 border border-white/10 text-white font-black py-2 px-4 rounded-lg uppercase tracking-[0.2em] text-[7px] hover:bg-white/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group"
+                >
+                    SIMULATE WITH PLAY
+                    <Icons.FastForward className="w-2.5 h-2.5 group-hover:translate-x-1 transition-transform" />
                 </button>
             </div>
         </div>
@@ -141,17 +149,17 @@ const PreMatchPanel = ({ match, gameData, onStart }: { match: Match, gameData: G
 };
 
 const AutoArrivalNotification = ({ playerName, onOverride, secondsLeft }: { playerName: string, onOverride: () => void, secondsLeft: number }) => (
-    <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-30 bg-slate-900/90 border border-teal-500/50 rounded-lg shadow-2xl p-4 flex items-center gap-4 animate-slide-up min-w-[300px]">
-        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-teal-900 flex items-center justify-center text-teal-400 animate-pulse">
-            <Icons.User className="w-6 h-6" />
+    <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-30 bg-slate-900/90 border border-teal-500/50 rounded-lg shadow-2xl p-2.5 flex items-center gap-3 animate-slide-up min-w-[240px]">
+        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-900 flex items-center justify-center text-teal-400 animate-pulse">
+            <Icons.User className="w-4 h-4" />
         </div>
         <div className="flex-grow">
-            <p className="text-[10px] text-teal-400 uppercase font-bold">Next Batter Arriving</p>
-            <p className="text-white font-bold text-lg">{playerName}</p>
+            <p className="text-[8px] text-teal-400 uppercase font-black tracking-widest">Next Batter Arriving</p>
+            <p className="text-white font-black text-sm leading-tight">{playerName}</p>
         </div>
-        <div className="flex flex-col items-end gap-1">
-            <span className="text-xs font-mono text-slate-400">{secondsLeft}s</span>
-            <div className="text-[9px] text-gray-500 uppercase">Click to skip</div>
+        <div className="flex flex-col items-end gap-0.5">
+            <span className="text-[10px] font-mono text-slate-400">{secondsLeft}s</span>
+            <div className="text-[7px] text-gray-500 uppercase font-black">Click to skip</div>
         </div>
     </div>
 );
@@ -186,53 +194,53 @@ const MatchChat = ({ gameData, onClose }: { gameData: GameData, onClose: () => v
     };
 
     return (
-        <div className="absolute inset-0 bg-[#050808]/95 z-[130] flex flex-col p-4 animate-fade-in backdrop-blur-3xl">
-            <div className="flex justify-between items-center mb-4 border-b border-white/5 pb-3">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-teal-500 to-blue-500 flex items-center justify-center shadow-lg shadow-teal-500/20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[#050808]/95 z-[130] flex flex-col p-2.5 animate-fade-in backdrop-blur-3xl">
+            <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-1.5">
+                <div className="flex items-center gap-1.5">
+                    <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-teal-500 to-blue-500 flex items-center justify-center shadow-lg shadow-teal-500/20 relative overflow-hidden">
                         <div className="absolute inset-0 bg-white/10 animate-pulse" />
-                        <Icons.Bot className="relative z-10 text-white" />
+                        <Icons.Bot className="relative z-10 text-white w-3.5 h-3.5" />
                     </div>
                     <div>
-                        <h3 className="font-black italic uppercase tracking-tighter text-white text-base">MATCH_ANALYST</h3>
-                        <p className="text-[8px] text-teal-500 uppercase tracking-[0.3em] font-black">AI_TACTICAL_ENGINE_v2.5</p>
+                        <h3 className="font-black italic uppercase tracking-tighter text-white text-xs leading-none">MATCH_ANALYST</h3>
+                        <p className="text-[5px] text-teal-500 uppercase tracking-[0.3em] font-black leading-none mt-0.5">AI_TACTICAL_ENGINE</p>
                     </div>
                 </div>
-                <button onClick={onClose} className="p-2 bg-white/5 rounded-xl hover:bg-white/10 border border-white/10 transition-all"><Icons.X className="text-white/40" /></button>
+                <button onClick={onClose} className="p-1 bg-white/5 rounded-lg hover:bg-white/10 border border-white/10 transition-all"><Icons.X className="text-white/40 w-3.5 h-3.5" /></button>
             </div>
-            <div className="flex-grow overflow-y-auto space-y-4 mb-4 pr-2 scrollbar-hide">
+            <div className="flex-grow overflow-y-auto space-y-2.5 mb-2.5 pr-1 scrollbar-hide">
                 {messages.map(m => (
                     <div key={m.id} className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[85%] p-4 rounded-[20px] text-xs font-medium leading-relaxed ${m.sender === 'user' ? 'bg-teal-500 text-black rounded-tr-sm shadow-lg shadow-teal-500/10' : 'bg-white/[0.03] text-white/80 rounded-tl-sm border border-white/5'}`}>
+                        <div className={`max-w-[85%] p-2.5 rounded-xl text-[9px] font-medium leading-relaxed ${m.sender === 'user' ? 'bg-teal-500 text-black rounded-tr-sm shadow-lg shadow-teal-500/10' : 'bg-white/[0.03] text-white/80 rounded-tl-sm border border-white/5'}`}>
                             {m.text}
                         </div>
                     </div>
                 ))}
                 {isTyping && (
-                    <div className="flex items-center gap-2 text-[8px] text-teal-500 font-black uppercase tracking-widest animate-pulse">
-                        <div className="w-1 h-1 bg-teal-500 rounded-full" />
-                        ANALYZING_LIVE_DATA...
+                    <div className="flex items-center gap-1 text-[5px] text-teal-500 font-black uppercase tracking-widest animate-pulse">
+                        <div className="w-0.5 h-0.5 bg-teal-500 rounded-full" />
+                        ANALYZING...
                     </div>
                 )}
                 <div ref={endRef} />
             </div>
-            <div className="flex gap-2 bg-white/[0.03] p-1.5 rounded-2xl border border-white/5 backdrop-blur-xl">
+            <div className="flex gap-1.5 bg-white/[0.03] p-1 rounded-lg border border-white/5 backdrop-blur-xl">
                 <input 
                     value={input} 
                     onChange={e => setInput(e.target.value)} 
                     onKeyDown={e => e.key === 'Enter' && send()} 
                     placeholder="QUERY_TACTICAL_ENGINE..." 
-                    className="flex-grow bg-transparent border-none rounded-xl px-4 py-3 text-[10px] text-white font-black tracking-widest focus:ring-0 focus:outline-none placeholder:text-white/10" 
+                    className="flex-grow bg-transparent border-none rounded-lg px-2.5 py-1.5 text-[8px] text-white font-black tracking-widest focus:ring-0 focus:outline-none placeholder:text-white/10" 
                 />
-                <button onClick={send} className="bg-white text-black hover:bg-teal-500 hover:text-white p-3 rounded-xl transition-all shadow-xl flex items-center justify-center group">
-                    <Icons.Play className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                <button onClick={send} className="bg-white text-black hover:bg-teal-500 hover:text-white p-1.5 rounded-lg transition-all shadow-xl flex items-center justify-center group">
+                    <Icons.PlayMatch className="h-3 w-3 group-hover:scale-110 transition-transform" />
                 </button>
             </div>
         </div>
     );
 };
 
-const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMatchComplete, onExit, savedState }) => {
+const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMatchComplete, onExit, savedState, startMode = 'play' }) => {
     const { state, playBall, playOver, autoSimulate, simulateInning, simulateMatch, setBattingStrategy, setBowlingStrategy, selectOpeners, selectNextBatter, selectNextBowler, startMatch, beginMatch, declareInning, stopAutoPlay } = useLiveMatch(match, gameData, onMatchComplete, savedState);
     const commentaryRef = useRef<HTMLDivElement>(null);
     const [lastBallSpeed, setLastBallSpeed] = useState<string>("-");
@@ -248,6 +256,13 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
     const [selectedBowler, setSelectedBowler] = useState('');
     const [tossState, setTossState] = useState<'coin' | 'result'>('coin');
     const [showPreMatch, setShowPreMatch] = useState(() => state?.status === 'ready' && !savedState);
+
+    // Auto-Simulation effect
+    useEffect(() => {
+        if (state?.status === 'inprogress' && startMode === 'simulate' && !state.autoPlayType) {
+            simulateMatch();
+        }
+    }, [state?.status, startMode, state?.autoPlayType, simulateMatch]);
 
     // Auto Arrival State
     const [autoArrivalSeconds, setAutoArrivalSeconds] = useState<number | null>(null);
@@ -446,7 +461,18 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
     };
 
     if (showPreMatch && state.status === 'ready') {
-        return <PreMatchPanel match={match} gameData={gameData} onStart={() => { setShowPreMatch(false); beginMatch(); }} />;
+        return (
+            <PreMatchPanel 
+                match={match} 
+                gameData={gameData} 
+                onStart={() => { setShowPreMatch(false); beginMatch(); }} 
+                onSimulate={() => {
+                    setShowPreMatch(false);
+                    beginMatch();
+                    // The useEffect will handle the simulation start once status is 'inprogress'
+                }}
+            />
+        );
     }
 
     if (state.status === 'toss') {
@@ -593,22 +619,25 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
         // If auto-arrival is active, don't show modal yet
         if (autoArrivalSeconds !== null) return null;
 
-        if (state.autoPlayType === 'inning' || state.autoPlayType === 'match') return <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center text-white font-bold animate-pulse">Simulating...</div>;
+        if (state.autoPlayType === 'inning' || state.autoPlayType === 'match') return <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center text-white font-black animate-pulse text-[10px] uppercase tracking-widest">Simulating...</div>;
         return (
-            <div className="absolute inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center p-6">
-                <h3 className="text-xl font-bold mb-4 text-white text-center">{title}</h3>
-                <div className="w-full max-w-sm space-y-4 bg-slate-800 p-4 rounded-lg shadow-xl">
+            <div className="absolute inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center p-3 backdrop-blur-md">
+                <h3 className="text-sm font-black italic uppercase tracking-tighter mb-2 text-white text-center leading-none">{title}</h3>
+                <div className="w-full max-w-[240px] space-y-2.5 bg-slate-800/80 p-3 rounded-xl shadow-2xl border border-white/10 backdrop-blur-xl">
                     {extraSelect}
-                    <select className="w-full p-2 bg-slate-900 text-white rounded border border-slate-600" value={selectedValue} onChange={e => setValue(e.target.value)}>
-                        <option value="">Select Player</option>
-                        {options.map(p => <option key={p.playerId} value={p.playerId}>{p.playerName} {p.overs ? `(${p.overs})` : ''}</option>)}
-                    </select>
+                    <div className="space-y-1">
+                        <label className="text-[6px] font-black text-white/40 uppercase tracking-widest ml-1">SELECT_PLAYER</label>
+                        <select className="w-full p-1.5 bg-slate-900 text-white rounded-lg border border-white/10 text-[9px] font-black focus:ring-1 focus:ring-teal-500 outline-none" value={selectedValue} onChange={e => setValue(e.target.value)}>
+                            <option value="">Select Player</option>
+                            {options.map(p => <option key={p.playerId} value={p.playerId}>{p.playerName} {p.overs ? `(${p.overs})` : ''}</option>)}
+                        </select>
+                    </div>
                     <button 
                         disabled={!selectedValue || (extraSelect && !selectedOpener1)} // Hacky check for openers
                         onClick={onConfirm}
-                        className="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-teal-500 hover:bg-teal-400 text-black font-black py-2 rounded-lg text-[8px] uppercase tracking-[0.2em] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
                     >
-                        Confirm
+                        CONFIRM_SELECTION
                     </button>
                 </div>
             </div>
@@ -617,41 +646,46 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
 
     // --- Match Centre Overlay ---
     const renderMatchCentre = () => (
-        <div className="absolute inset-0 bg-slate-900/95 z-40 flex flex-col p-4 animate-fade-in">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-teal-400">Match Centre</h2>
-                <button onClick={() => setShowMatchCentre(false)} className="p-2 bg-slate-800 rounded-full"><Icons.X className="h-5 w-5" /></button>
+        <div className="absolute inset-0 bg-[#050808]/95 z-40 flex flex-col p-3 animate-fade-in backdrop-blur-3xl">
+            <div className="flex justify-between items-center mb-3">
+                <div className="flex items-center gap-2">
+                    <div className="w-1 h-4 bg-teal-500 rounded-full" />
+                    <h2 className="text-sm font-black italic uppercase tracking-tighter text-white">MATCH_CENTRE</h2>
+                </div>
+                <button onClick={() => setShowMatchCentre(false)} className="p-1.5 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-all">
+                    <Icons.X className="h-4 w-4 text-white/40" />
+                </button>
             </div>
             
-            <div className="flex bg-slate-800 rounded-lg p-1 mb-4">
+            <div className="flex bg-white/[0.03] rounded-xl p-0.5 mb-3 border border-white/5">
                 {['scorecard', 'commentary', 'analysis'].map(tab => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab as any)}
-                        className={`flex-1 py-2 text-xs font-bold uppercase rounded-md ${activeTab === tab ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+                        className={`flex-1 py-1.5 text-[8px] font-black uppercase tracking-widest rounded-lg transition-all duration-500 ${activeTab === tab ? 'bg-white text-black shadow-xl' : 'text-white/30 hover:text-white hover:bg-white/5'}`}
                     >
                         {tab}
                     </button>
                 ))}
             </div>
 
-            <div className="flex-1 overflow-y-auto pr-1">
+            <div className="flex-1 overflow-y-auto pr-1 scrollbar-hide">
                 {activeTab === 'scorecard' && (
-                    <div className="space-y-4">
-                        <div className="bg-slate-800 rounded-lg p-3">
-                            <div className="flex justify-between items-center mb-2 border-b border-slate-700 pb-1">
-                                <h3 className="text-sm font-bold text-yellow-400">Batting - {battingTeam.name}</h3>
-                                <div className="text-[10px] text-slate-500 font-mono">{currentInning.score}/{currentInning.wickets} ({currentInning.overs})</div>
+                    <div className="space-y-3">
+                        <div className="bg-white/[0.02] rounded-xl p-2.5 border border-white/5">
+                            <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-1.5">
+                                <h3 className="text-[9px] font-black italic uppercase tracking-tighter text-teal-500">Batting - {battingTeam.name}</h3>
+                                <div className="text-[8px] text-white/40 font-mono font-black">{currentInning.score}/{currentInning.wickets} ({currentInning.overs})</div>
                             </div>
-                            <table className="w-full text-xs">
+                            <table className="w-full text-[9px]">
                                 <thead>
-                                    <tr className="text-slate-500 text-left border-b border-slate-700/30">
-                                        <th className="pb-1 font-black uppercase tracking-widest text-[8px]">Batter</th>
-                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[8px]">R</th>
-                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[8px]">B</th>
-                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[8px]">4s</th>
-                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[8px]">6s</th>
-                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[8px]">SR</th>
+                                    <tr className="text-white/20 text-left border-b border-white/5">
+                                        <th className="pb-1 font-black uppercase tracking-widest text-[7px]">Batter</th>
+                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[7px]">R</th>
+                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[7px]">B</th>
+                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[7px]">4s</th>
+                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[7px]">6s</th>
+                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[7px]">SR</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -662,25 +696,25 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                                         if (!hasBatted) return null;
 
                                         return (
-                                            <tr key={b.playerId} className={`border-b border-slate-700/50 ${b.isOut ? 'text-slate-500' : 'text-white'}`}>
-                                                <td className="py-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-[9px] text-slate-600 font-mono w-3">{idx + 1}</span>
+                                            <tr key={b.playerId} className={`border-b border-white/[0.02] ${b.isOut ? 'text-white/30' : 'text-white'}`}>
+                                                <td className="py-1.5">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="text-[7px] text-white/10 font-mono w-2">{idx + 1}</span>
                                                         <div className="flex flex-col">
-                                                            <span className="font-bold italic">
+                                                            <span className="font-black italic uppercase tracking-tighter">
                                                                 {b.playerName} {b.playerId === currentBatters.strikerId ? '*' : ''}
                                                             </span>
-                                                            <span className="text-[9px] text-slate-500 font-normal uppercase tracking-tighter">
-                                                                {b.isOut ? b.dismissalText : isBatting ? 'batting' : ''}
+                                                            <span className="text-[6px] text-teal-500/60 font-black uppercase tracking-widest">
+                                                                {b.isOut ? b.dismissalText : isBatting ? 'BATTING' : ''}
                                                             </span>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="text-right font-black text-sm">{b.runs}</td>
-                                                <td className="text-right opacity-60">{b.balls}</td>
-                                                <td className="text-right opacity-60">{b.fours}</td>
-                                                <td className="text-right opacity-60">{b.sixes}</td>
-                                                <td className="text-right font-mono text-[10px] text-teal-500">{b.balls > 0 ? Math.round((b.runs/b.balls)*100) : 0}</td>
+                                                <td className="text-right font-black text-[10px]">{b.runs}</td>
+                                                <td className="text-right opacity-40">{b.balls}</td>
+                                                <td className="text-right opacity-40">{b.fours}</td>
+                                                <td className="text-right opacity-40">{b.sixes}</td>
+                                                <td className="text-right font-mono text-[8px] text-teal-500/60">{b.balls > 0 ? Math.round((b.runs/b.balls)*100) : 0}</td>
                                             </tr>
                                         );
                                     })}
@@ -689,9 +723,9 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                             
                             {/* Did Not Bat Section */}
                             {currentInning.batting.some(b => !b.isOut && b.playerId !== currentBatters.strikerId && b.playerId !== currentBatters.nonStrikerId && b.runs === 0 && b.balls === 0) && (
-                                <div className="mt-3 pt-2 border-t border-slate-700/50">
-                                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Did Not Bat</p>
-                                    <p className="text-[10px] text-slate-400 italic">
+                                <div className="mt-2 pt-1.5 border-t border-white/5">
+                                    <p className="text-[6px] font-black text-white/20 uppercase tracking-widest mb-0.5">DID_NOT_BAT</p>
+                                    <p className="text-[8px] text-white/40 italic font-medium">
                                         {currentInning.batting
                                             .filter(b => !b.isOut && b.playerId !== currentBatters.strikerId && b.playerId !== currentBatters.nonStrikerId && b.runs === 0 && b.balls === 0)
                                             .map(b => b.playerName)
@@ -701,30 +735,30 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                             )}
                         </div>
 
-                        <div className="bg-slate-800 rounded-lg p-3">
-                            <h3 className="text-sm font-bold text-blue-400 mb-2 border-b border-slate-700 pb-1">Bowling - {bowlingTeam.name}</h3>
-                            <table className="w-full text-xs">
+                        <div className="bg-white/[0.02] rounded-xl p-2.5 border border-white/5">
+                            <h3 className="text-[9px] font-black italic uppercase tracking-tighter text-blue-500 mb-2 border-b border-white/5 pb-1.5">Bowling - {bowlingTeam.name}</h3>
+                            <table className="w-full text-[9px]">
                                 <thead>
-                                    <tr className="text-slate-500 text-left border-b border-slate-700/30">
-                                        <th className="pb-1 font-black uppercase tracking-widest text-[8px]">Bowler</th>
-                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[8px]">O</th>
-                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[8px]">M</th>
-                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[8px]">R</th>
-                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[8px]">W</th>
-                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[8px]">Econ</th>
+                                    <tr className="text-white/20 text-left border-b border-white/5">
+                                        <th className="pb-1 font-black uppercase tracking-widest text-[7px]">Bowler</th>
+                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[7px]">O</th>
+                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[7px]">M</th>
+                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[7px]">R</th>
+                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[7px]">W</th>
+                                        <th className="text-right pb-1 font-black uppercase tracking-widest text-[7px]">ECN</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {currentInning.bowling.filter(b => parseFloat(b.overs) > 0 || b.playerId === currentBowlerId).map(b => (
-                                        <tr key={b.playerId} className="border-b border-slate-700/50 text-white">
-                                            <td className="py-2 font-bold italic">
+                                        <tr key={b.playerId} className="border-b border-white/[0.02] text-white">
+                                            <td className="py-1.5 font-black italic uppercase tracking-tighter">
                                                 {b.playerName} {b.playerId === currentBowlerId ? '🥎' : ''}
                                             </td>
                                             <td className="text-right font-mono">{b.overs}</td>
                                             <td className="text-right">{b.maidens}</td>
                                             <td className="text-right">{b.runsConceded}</td>
-                                            <td className="text-right font-black text-sm text-yellow-400">{b.wickets}</td>
-                                            <td className="text-right font-mono text-[10px] text-blue-400">{b.ballsBowled > 0 ? ((b.runsConceded/b.ballsBowled)*6).toFixed(1) : '0.0'}</td>
+                                            <td className="text-right font-black text-[10px] text-teal-500">{b.wickets}</td>
+                                            <td className="text-right font-mono text-[8px] text-blue-500/60">{b.ballsBowled > 0 ? ((b.runsConceded/b.ballsBowled)*6).toFixed(1) : '0.0'}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -733,13 +767,13 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
 
                         {/* Fall of Wickets */}
                         {state.fallOfWickets.length > 0 && (
-                            <div className="bg-slate-800 rounded-lg p-3">
-                                <h3 className="text-sm font-bold text-red-400 mb-2 border-b border-slate-700 pb-1">Fall of Wickets</h3>
-                                <div className="flex flex-wrap gap-2">
+                            <div className="bg-white/[0.02] rounded-xl p-2.5 border border-white/5">
+                                <h3 className="text-[9px] font-black italic uppercase tracking-tighter text-red-500 mb-2 border-b border-white/5 pb-1.5">Fall of Wickets</h3>
+                                <div className="flex flex-wrap gap-1.5">
                                     {state.fallOfWickets.map((fow, i) => (
-                                        <div key={i} className="bg-slate-900/50 px-2 py-1 rounded border border-slate-700 text-[10px]">
-                                            <span className="font-bold text-white">{fow.score}-{fow.wicket}</span>
-                                            <span className="text-slate-500 ml-1">({fow.player}, {fow.over} ov)</span>
+                                        <div key={i} className="bg-black/40 px-2 py-1 rounded-lg border border-white/5 text-[8px]">
+                                            <span className="font-black text-white">{fow.score}-{fow.wicket}</span>
+                                            <span className="text-white/20 ml-1 font-bold">({fow.player}, {fow.over} ov)</span>
                                         </div>
                                     ))}
                                 </div>
@@ -749,9 +783,9 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                 )}
 
                 {activeTab === 'commentary' && (
-                    <div className="space-y-2" ref={commentaryRef}>
+                    <div className="space-y-1.5" ref={commentaryRef}>
                         {commentary.map((line, i) => (
-                            <div key={i} className="bg-slate-800 p-2 rounded text-xs font-mono text-slate-300 border-l-2 border-teal-500">
+                            <div key={i} className="bg-white/[0.02] p-2 rounded-lg text-[9px] font-mono text-white/60 border-l-2 border-teal-500/40 backdrop-blur-sm">
                                 {line}
                             </div>
                         ))}
@@ -759,47 +793,47 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                 )}
 
                 {activeTab === 'analysis' && predictions && (
-                    <div className="space-y-4">
-                        <div className="bg-slate-800 rounded-lg p-4">
-                            <h3 className="text-sm font-bold text-white mb-3">Win Probability</h3>
-                            <div className="h-4 bg-slate-700 rounded-full overflow-hidden relative">
-                                <div className="h-full bg-teal-500 transition-all duration-1000" style={{ width: `${battingTeam.id === gameData.userTeamId ? predictions.winProb : 100 - predictions.winProb}%` }}></div>
+                    <div className="space-y-3">
+                        <div className="bg-white/[0.02] rounded-xl p-3 border border-white/5">
+                            <h3 className="text-[9px] font-black italic uppercase tracking-tighter text-white mb-2.5">WIN_PROBABILITY</h3>
+                            <div className="h-2 bg-white/5 rounded-full overflow-hidden relative border border-white/5">
+                                <div className="h-full bg-teal-500 shadow-[0_0_10px_rgba(20,184,166,0.5)] transition-all duration-1000" style={{ width: `${battingTeam.id === gameData.userTeamId ? predictions.winProb : 100 - predictions.winProb}%` }}></div>
                             </div>
-                            <div className="flex justify-between text-xs mt-1 font-bold">
-                                <span className="text-teal-400">{gameData.userTeamId === battingTeam.id ? battingTeam.name : bowlingTeam.name} {battingTeam.id === gameData.userTeamId ? predictions.winProb : 100 - predictions.winProb}%</span>
-                                <span className="text-slate-400">{gameData.userTeamId !== battingTeam.id ? battingTeam.name : bowlingTeam.name} {battingTeam.id !== gameData.userTeamId ? predictions.winProb : 100 - predictions.winProb}%</span>
-                            </div>
-                        </div>
-
-                        <div className="bg-slate-800 rounded-lg p-4">
-                            <h3 className="text-sm font-bold text-white mb-3">Projected Score</h3>
-                            <div className="grid grid-cols-2 gap-3 text-center">
-                                <div className="bg-slate-700/50 p-2 rounded">
-                                    <div className="text-[10px] text-slate-400 uppercase">Current Rate</div>
-                                    <div className="text-xl font-bold text-white">{predictions.projCurrent}</div>
-                                </div>
-                                <div className="bg-slate-700/50 p-2 rounded">
-                                    <div className="text-[10px] text-slate-400 uppercase">At 8 RPO</div>
-                                    <div className="text-xl font-bold text-white">{predictions.proj8}</div>
-                                </div>
-                                <div className="bg-slate-700/50 p-2 rounded">
-                                    <div className="text-[10px] text-slate-400 uppercase">At 10 RPO</div>
-                                    <div className="text-xl font-bold text-white">{predictions.proj10}</div>
-                                </div>
-                                 <div className="bg-slate-700/50 p-2 rounded border border-yellow-600/30">
-                                    <div className="text-[10px] text-yellow-400 uppercase">Safe Score</div>
-                                    <div className="text-xl font-bold text-yellow-400">{gameData.currentFormat.includes('T20') ? 175 : 285}</div>
-                                </div>
+                            <div className="flex justify-between text-[8px] mt-1.5 font-black uppercase tracking-widest">
+                                <span className="text-teal-500">{gameData.userTeamId === battingTeam.id ? battingTeam.name : bowlingTeam.name} {battingTeam.id === gameData.userTeamId ? predictions.winProb : 100 - predictions.winProb}%</span>
+                                <span className="text-white/20">{gameData.userTeamId !== battingTeam.id ? battingTeam.name : bowlingTeam.name} {battingTeam.id !== gameData.userTeamId ? predictions.winProb : 100 - predictions.winProb}%</span>
                             </div>
                         </div>
 
-                        <div className="bg-slate-800 rounded-lg p-4">
-                            <h3 className="text-sm font-bold text-white mb-2">Player Prediction</h3>
+                        <div className="bg-white/[0.02] rounded-xl p-3 border border-white/5">
+                            <h3 className="text-[9px] font-black italic uppercase tracking-tighter text-white mb-2.5">PROJECTED_SCORE</h3>
+                            <div className="grid grid-cols-2 gap-2 text-center">
+                                <div className="bg-black/40 p-2 rounded-lg border border-white/5">
+                                    <div className="text-[6px] text-white/20 uppercase font-black tracking-widest mb-0.5">CURRENT_RATE</div>
+                                    <div className="text-base font-black text-white italic">{predictions.projCurrent}</div>
+                                </div>
+                                <div className="bg-black/40 p-2 rounded-lg border border-white/5">
+                                    <div className="text-[6px] text-white/20 uppercase font-black tracking-widest mb-0.5">AT_8_RPO</div>
+                                    <div className="text-base font-black text-white italic">{predictions.proj8}</div>
+                                </div>
+                                <div className="bg-black/40 p-2 rounded-lg border border-white/5">
+                                    <div className="text-[6px] text-white/20 uppercase font-black tracking-widest mb-0.5">AT_10_RPO</div>
+                                    <div className="text-base font-black text-white italic">{predictions.proj10}</div>
+                                </div>
+                                 <div className="bg-teal-500/10 p-2 rounded-lg border border-teal-500/20">
+                                    <div className="text-[6px] text-teal-500 uppercase font-black tracking-widest mb-0.5">SAFE_SCORE</div>
+                                    <div className="text-base font-black text-teal-500 italic">{gameData.currentFormat.includes('T20') ? 175 : 285}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white/[0.02] rounded-xl p-3 border border-white/5">
+                            <h3 className="text-[9px] font-black italic uppercase tracking-tighter text-white mb-2">PLAYER_PREDICTION</h3>
                             <div className="flex justify-between items-center">
-                                <span className="text-sm text-slate-300">{striker?.playerName} to score</span>
-                                <span className="text-xl font-bold text-teal-400">{predictions.playerProj}</span>
+                                <span className="text-[10px] text-white/60 font-black italic uppercase tracking-tighter">{striker?.playerName} TO_SCORE</span>
+                                <span className="text-xl font-black text-teal-500 italic tracking-tighter">{predictions.playerProj}</span>
                             </div>
-                            <p className="text-[10px] text-slate-500 mt-1">Based on current strike rate and match situation.</p>
+                            <p className="text-[6px] text-white/20 mt-1 uppercase font-black tracking-widest">BASED_ON_CURRENT_SR_AND_SITUATION</p>
                         </div>
                     </div>
                 )}
@@ -880,38 +914,34 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
             {showAnalyst && <MatchChat gameData={gameData} onClose={() => setShowAnalyst(false)} />}
 
             {/* TOP BAR - Broadcast Style */}
-            <div className="bg-[#050808] p-3 flex justify-between items-center z-20 border-b border-white/10 flex-shrink-0 relative overflow-hidden">
+            <div className="bg-[#050808] p-2 flex justify-between items-center z-20 border-b border-white/10 flex-shrink-0 relative overflow-hidden">
                  <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-teal-500/5 to-transparent pointer-events-none" />
                  
-                 <div className="flex items-center gap-4 relative z-10">
+                 <div className="flex items-center gap-3 relative z-10">
                      <div className="flex flex-col">
-                         <div className="flex items-center gap-2 mb-0.5">
-                            <p className="text-[8px] font-black text-teal-500 uppercase tracking-[0.4em]">LIVE_STREAM</p>
-                            <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_#ef4444]" />
+                         <div className="flex items-center gap-1.5 mb-0.5">
+                            <p className="text-[6px] font-black text-teal-500 uppercase tracking-[0.4em]">LIVE_STREAM</p>
+                            <div className="w-1 h-1 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_#ef4444]" />
                          </div>
-                         <h2 className="text-sm font-black italic uppercase tracking-tighter text-white">
+                         <h2 className="text-xs font-black italic uppercase tracking-tighter text-white">
                             {match.teamA} <span className="text-white/30 not-italic">v</span> {match.teamB}
                          </h2>
                      </div>
-                     <div className="h-8 w-px bg-white/10" />
+                     <div className="h-6 w-px bg-white/10" />
                      <div className="flex flex-col">
-                         <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Format</p>
-                         <p className="text-[10px] font-black text-white/80 uppercase tracking-widest">{gameData.currentFormat}</p>
+                         <p className="text-[6px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Format</p>
+                         <p className="text-[8px] font-black text-white/80 uppercase tracking-widest">{gameData.currentFormat}</p>
                      </div>
                  </div>
 
-                 <div className="flex items-center gap-6 relative z-10">
-                     <div className="hidden md:flex flex-col items-end">
-                         <p className="text-[8px] font-black text-teal-500/40 uppercase tracking-[0.5em] italic">Apex Broadcast</p>
-                         <div className="h-0.5 w-12 bg-teal-500/20 mt-1" />
-                     </div>
+                 <div className="flex items-center gap-4 relative z-10">
                      <div className="text-right">
-                         <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Overs</p>
-                         <p className="text-lg font-black text-teal-500 tracking-tighter leading-none">{currentInning.overs}</p>
+                         <p className="text-[6px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Overs</p>
+                         <p className="text-base font-black text-teal-500 tracking-tighter leading-none">{currentInning.overs}</p>
                      </div>
                      <button 
                         onClick={handleExit} 
-                        className="bg-white/5 hover:bg-white/10 text-[9px] font-black text-white/60 uppercase tracking-[0.2em] px-3 py-2 rounded-lg border border-white/10 transition-all active:scale-95"
+                        className="bg-white/5 hover:bg-white/10 text-[7px] font-black text-white/60 uppercase tracking-[0.2em] px-2 py-1.5 rounded-lg border border-white/10 transition-all active:scale-95"
                      >
                         {state.status === 'completed' ? 'Exit' : 'Save_Exit'}
                      </button>
@@ -934,25 +964,25 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                 <motion.div 
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
-                    className="absolute top-6 left-6 z-10"
+                    className="absolute top-3 left-3 z-10"
                 >
-                    <div className="bg-black/80 backdrop-blur-xl border-l-4 border-teal-500 p-4 rounded-r-2xl shadow-2xl min-w-[160px]">
-                        <div className="flex justify-between items-center mb-2">
-                            <span className="text-[9px] font-black text-teal-500 uppercase tracking-[0.3em]">{battingTeam.name}</span>
-                            <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+                    <div className="bg-black/80 backdrop-blur-xl border-l-2 border-teal-500 p-2 rounded-r-xl shadow-2xl min-w-[100px]">
+                        <div className="flex justify-between items-center mb-0.5">
+                            <span className="text-[6px] font-black text-teal-500 uppercase tracking-[0.3em]">{battingTeam.name}</span>
+                            <div className="w-1 h-1 rounded-full bg-teal-500 animate-pulse" />
                         </div>
-                        <div className="text-4xl font-black text-white tracking-tighter italic leading-none mb-3">
-                            {currentInning.score}<span className="text-white/30 not-italic mx-1">/</span>{currentInning.wickets}
+                        <div className="text-xl font-black text-white tracking-tighter italic leading-none mb-1.5">
+                            {currentInning.score}<span className="text-white/30 not-italic mx-0.5">/</span>{currentInning.wickets}
                         </div>
-                        <div className="flex justify-between items-center pt-2 border-t border-white/10">
+                        <div className="flex justify-between items-center pt-1 border-t border-white/10">
                             <div className="flex flex-col">
-                                <span className="text-[8px] font-black text-white/30 uppercase tracking-widest">CRR</span>
-                                <span className="text-xs font-black text-white/80">{runRate}</span>
+                                <span className="text-[5px] font-black text-white/30 uppercase tracking-widest">CRR</span>
+                                <span className="text-[9px] font-black text-white/80">{runRate}</span>
                             </div>
                             {target && (
                                 <div className="flex flex-col text-right">
-                                    <span className="text-[8px] font-black text-white/30 uppercase tracking-widest">RRR</span>
-                                    <span className="text-xs font-black text-teal-500">{reqRate}</span>
+                                    <span className="text-[5px] font-black text-white/30 uppercase tracking-widest">RRR</span>
+                                    <span className="text-[9px] font-black text-teal-500">{reqRate}</span>
                                 </div>
                             )}
                         </div>
@@ -963,27 +993,27 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                 <motion.div 
                     initial={{ x: 20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
-                    className="absolute top-6 right-6 z-10"
+                    className="absolute top-3 right-3 z-10"
                 >
-                    <div className="bg-black/80 backdrop-blur-xl border-r-4 border-blue-500 p-4 rounded-l-2xl shadow-2xl min-w-[160px] text-right">
-                        <div className="flex justify-between items-center mb-2 flex-row-reverse">
-                            <span className="text-[9px] font-black text-blue-500 uppercase tracking-[0.3em]">{bowlingTeam.name}</span>
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                    <div className="bg-black/80 backdrop-blur-xl border-r-2 border-blue-500 p-2 rounded-l-xl shadow-2xl min-w-[100px] text-right">
+                        <div className="flex justify-between items-center mb-0.5 flex-row-reverse">
+                            <span className="text-[6px] font-black text-blue-500 uppercase tracking-[0.3em]">{bowlingTeam.name}</span>
+                            <div className="w-1 h-1 rounded-full bg-blue-500" />
                         </div>
                         
                         {target ? (
                             <>
-                                <div className="text-3xl font-black text-white tracking-tighter italic leading-none mb-1">
-                                    {runsNeeded} <span className="text-sm font-light not-italic text-white/40 uppercase tracking-widest">Needed</span>
+                                <div className="text-lg font-black text-white tracking-tighter italic leading-none mb-0.5">
+                                    {runsNeeded} <span className="text-[7px] font-light not-italic text-white/40 uppercase tracking-widest">Needed</span>
                                 </div>
-                                <p className="text-[10px] font-black text-white/60 uppercase tracking-widest">from {ballsRemaining} balls</p>
+                                <p className="text-[7px] font-black text-white/60 uppercase tracking-widest leading-none">from {ballsRemaining} balls</p>
                             </>
                         ) : (
                             <>
-                                <div className="text-3xl font-black text-white tracking-tighter italic leading-none mb-1">
+                                <div className="text-lg font-black text-white tracking-tighter italic leading-none mb-0.5">
                                     {predictions?.projCurrent || '-'}
                                 </div>
-                                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Projected Score</p>
+                                <p className="text-[7px] font-black text-white/40 uppercase tracking-widest leading-none">Projected Score</p>
                             </>
                         )}
                     </div>
@@ -1071,19 +1101,19 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
             </div>
 
             {/* BOTTOM INFO BAR - Broadcast Style */}
-            <div className="bg-[#050808] border-t border-white/10 p-2 flex-shrink-0">
-                <div className="flex items-stretch bg-white/[0.03] rounded-2xl overflow-hidden text-xs border border-white/5">
+            <div className="bg-[#050808] border-t border-white/10 p-1.5 flex-shrink-0">
+                <div className="flex items-stretch bg-white/[0.03] rounded-xl overflow-hidden text-[10px] border border-white/5">
                     
                     {/* Bowler Stats */}
-                    <div className="flex-1 p-3 border-r border-white/5 bg-gradient-to-b from-white/[0.02] to-transparent">
-                        <p className="text-[8px] font-black text-blue-500 uppercase tracking-[0.3em] mb-1">Bowling</p>
-                        <div className="flex items-center gap-2">
+                    <div className="flex-1 p-2 border-r border-white/5 bg-gradient-to-b from-white/[0.02] to-transparent">
+                        <p className="text-[6px] font-black text-blue-500 uppercase tracking-[0.3em] mb-0.5">Bowling</p>
+                        <div className="flex items-center gap-1.5">
                             {bowler && <PlayerAvatar player={getPlayerById(bowler.playerId, gameData.allPlayers)!} size="xs" />}
                             <div>
-                                <div className="font-black text-white truncate text-sm italic">{bowler?.playerName}</div>
-                                <div className="text-white/40 font-black tracking-tighter mt-0.5">
+                                <div className="font-black text-white truncate text-xs italic">{bowler?.playerName}</div>
+                                <div className="text-white/40 font-black tracking-tighter">
                                     {bowler?.wickets}<span className="text-white/20 mx-0.5">-</span>{bowler?.runsConceded} 
-                                    <span className="text-[9px] font-light ml-1 text-white/20">({bowler?.overs})</span>
+                                    <span className="text-[8px] font-light ml-1 text-white/20">({bowler?.overs})</span>
                                 </div>
                             </div>
                         </div>
@@ -1091,31 +1121,31 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
 
                     {/* Batters Stats - Enhanced */}
                     <div className="flex-[2.5] flex">
-                        <div className={`flex-1 p-3 border-r border-white/5 transition-all duration-500 bg-teal-500/10`}>
-                            <div className="flex justify-between items-center mb-1">
-                                <p className="text-[8px] font-black uppercase tracking-[0.3em] text-teal-500">Striker</p>
-                                <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse shadow-[0_0_5px_#14b8a6]" />
+                        <div className={`flex-1 p-2 border-r border-white/5 transition-all duration-500 bg-teal-500/10`}>
+                            <div className="flex justify-between items-center mb-0.5">
+                                <p className="text-[6px] font-black uppercase tracking-[0.3em] text-teal-500">Striker</p>
+                                <div className="w-1 h-1 rounded-full bg-teal-500 animate-pulse shadow-[0_0_5px_#14b8a6]" />
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
                                 {striker && <PlayerAvatar player={getPlayerById(striker.playerId, gameData.allPlayers)!} size="xs" />}
                                 <div>
-                                    <div className="font-black truncate text-sm italic transition-colors text-white">{striker?.playerName}</div>
-                                    <div className="text-white/40 font-black tracking-tighter mt-0.5">
-                                        {striker?.runs} <span className="text-[9px] font-light ml-1 text-white/20">({striker?.balls})</span>
+                                    <div className="font-black truncate text-xs italic transition-colors text-white">{striker?.playerName}</div>
+                                    <div className="text-white/40 font-black tracking-tighter">
+                                        {striker?.runs} <span className="text-[8px] font-light ml-1 text-white/20">({striker?.balls})</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className={`flex-1 p-3 border-r border-white/5 transition-all duration-500`}>
-                            <div className="flex justify-between items-center mb-1">
-                                <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/20">Non-Striker</p>
+                        <div className={`flex-1 p-2 border-r border-white/5 transition-all duration-500`}>
+                            <div className="flex justify-between items-center mb-0.5">
+                                <p className="text-[6px] font-black uppercase tracking-[0.3em] text-white/20">Non-Striker</p>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
                                 {nonStriker && <PlayerAvatar player={getPlayerById(nonStriker.playerId, gameData.allPlayers)!} size="xs" />}
                                 <div>
-                                    <div className="font-black truncate text-sm italic transition-colors text-white/40">{nonStriker?.playerName}</div>
-                                    <div className="text-white/40 font-black tracking-tighter mt-0.5">
-                                        {nonStriker?.runs} <span className="text-[9px] font-light ml-1 text-white/20">({nonStriker?.balls})</span>
+                                    <div className="font-black truncate text-xs italic transition-colors text-white/40">{nonStriker?.playerName}</div>
+                                    <div className="text-white/40 font-black tracking-tighter">
+                                        {nonStriker?.runs} <span className="text-[8px] font-light ml-1 text-white/20">({nonStriker?.balls})</span>
                                     </div>
                                 </div>
                             </div>
@@ -1123,10 +1153,10 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                     </div>
 
                     {/* Last Ball */}
-                    <div className="flex-1 p-3 text-right bg-gradient-to-b from-white/[0.02] to-transparent">
-                        <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] mb-1">Last Ball</p>
-                        <div className="text-white/40 font-mono text-[9px] mb-0.5 tracking-widest">{lastBallSpeed}</div>
-                        <div className={`font-black text-2xl italic tracking-tighter leading-none ${isWicket ? 'text-red-500' : isBoundary ? 'text-teal-400' : 'text-white'}`}>
+                    <div className="flex-1 p-2 text-right bg-gradient-to-b from-white/[0.02] to-transparent">
+                        <p className="text-[6px] font-black text-white/30 uppercase tracking-[0.3em] mb-0.5">Last Ball</p>
+                        <div className="text-white/40 font-mono text-[8px] mb-0.5 tracking-widest">{lastBallSpeed}</div>
+                        <div className={`font-black text-xl italic tracking-tighter leading-none ${isWicket ? 'text-red-500' : isBoundary ? 'text-teal-400' : 'text-white'}`}>
                             {lastBall || '-'}
                         </div>
                     </div>
@@ -1134,8 +1164,8 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
             </div>
 
             {/* CONTROL PANEL - Apex Style */}
-            <div className="bg-[#050808] p-4 pb-8 flex-shrink-0">
-                 <div className="flex gap-3 mb-4">
+            <div className="bg-[#050808] p-3 pb-6 flex-shrink-0">
+                 <div className="flex gap-2 mb-3">
                     {isUserBatting && (
                         <StrategyToggle label="Batting Tactics" value={strategies.batting} onChange={setBattingStrategy} />
                     )}
@@ -1144,11 +1174,11 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                     )}
                  </div>
 
-                <div className="flex items-center gap-3 mb-6 overflow-x-auto py-2 scrollbar-hide">
-                     <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em] flex-shrink-0">This Over:</span>
+                <div className="flex items-center gap-2 mb-4 overflow-x-auto py-1 scrollbar-hide">
+                     <span className="text-[7px] font-black text-white/20 uppercase tracking-[0.3em] flex-shrink-0">This Over:</span>
                      {recentBalls.slice(0, 8).map((b, i) => (
                          <div key={i} className={`
-                            h-8 w-8 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 border transition-all
+                            h-6 w-6 rounded-full flex items-center justify-center text-[9px] font-black flex-shrink-0 border transition-all
                             ${b === 'W' ? 'bg-red-600 border-red-500 text-white shadow-[0_0_10px_rgba(220,38,38,0.3)]' : 
                               b === '6' ? 'bg-teal-500 border-teal-400 text-black shadow-[0_0_10px_rgba(20,184,166,0.3)]' : 
                               b === '4' ? 'bg-blue-600 border-blue-500 text-white shadow-[0_0_10px_rgba(37,99,235,0.3)]' : 
@@ -1163,9 +1193,9 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                     {state.status === 'completed' ? (
                         <button 
                             onClick={handleExit} 
-                            className="col-span-4 bg-red-500 text-white font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-[10px] hover:bg-red-600 transition-all active:scale-95 shadow-2xl shadow-red-500/20 flex items-center justify-center gap-3"
+                            className="col-span-4 bg-red-500 text-white font-black py-3 rounded-xl uppercase tracking-[0.2em] text-[8px] hover:bg-red-600 transition-all active:scale-95 shadow-2xl shadow-red-500/20 flex items-center justify-center gap-2"
                         >
-                            <Icons.X className="w-3.5 h-3.5" />
+                            <Icons.X className="w-3 h-3" />
                             TERMINATE BROADCAST
                         </button>
                     ) : (
@@ -1173,32 +1203,32 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                             {state.autoPlayType ? (
                                 <button 
                                     onClick={stopAutoPlay} 
-                                    className="col-span-4 bg-red-500 text-white font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-[10px] hover:bg-red-600 transition-all active:scale-95 flex items-center justify-center gap-3 shadow-2xl shadow-red-500/20 animate-pulse"
+                                    className="col-span-4 bg-red-500 text-white font-black py-3 rounded-xl uppercase tracking-[0.2em] text-[8px] hover:bg-red-600 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-2xl shadow-red-500/20 animate-pulse"
                                 >
-                                    <Icons.X className="w-3.5 h-3.5" />
+                                    <Icons.X className="w-3 h-3" />
                                     STOP SIMULATION
                                 </button>
                             ) : (
                                 <>
                                     <button 
                                         onClick={playBall} 
-                                        className={`col-span-2 ${isUserBatting ? 'bg-teal-500 text-black' : 'bg-blue-500 text-white'} font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-[10px] hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-2xl ${isUserBatting ? 'shadow-teal-500/30' : 'shadow-blue-500/30'}`}
+                                        className={`col-span-2 ${isUserBatting ? 'bg-teal-500 text-black' : 'bg-blue-500 text-white'} font-black py-3 rounded-xl uppercase tracking-[0.2em] text-[8px] hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-2xl ${isUserBatting ? 'shadow-teal-500/30' : 'shadow-blue-500/30'}`}
                                     >
-                                        <Icons.Play className="w-3.5 h-3.5" />
+                                        <Icons.PlayMatch className="w-3 h-3" />
                                         {isUserBatting ? 'PLAY BALL' : 'BOWL BALL'}
                                     </button>
                                     <button 
                                         onClick={playOver} 
-                                        className="bg-white/[0.05] text-white font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-[10px] hover:bg-white/10 transition-all active:scale-95 border border-white/10 flex flex-col items-center justify-center gap-1"
+                                        className="bg-white/[0.05] text-white font-black py-3 rounded-xl uppercase tracking-[0.2em] text-[8px] hover:bg-white/10 transition-all active:scale-95 border border-white/10 flex flex-col items-center justify-center gap-0.5"
                                     >
-                                        <Icons.Activity className="w-3 h-3" />
+                                        <Icons.Activity className="w-2.5 h-2.5" />
                                         OVER
                                     </button>
                                     <button 
                                         onClick={() => setShowMatchCentre(true)} 
-                                        className="bg-white/[0.05] text-white font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-[10px] hover:bg-white/10 transition-all active:scale-95 border border-white/10 flex flex-col items-center justify-center gap-1"
+                                        className="bg-white/[0.05] text-white font-black py-3 rounded-xl uppercase tracking-[0.2em] text-[8px] hover:bg-white/10 transition-all active:scale-95 border border-white/10 flex flex-col items-center justify-center gap-0.5"
                                     >
-                                        <Icons.Menu className="w-3 h-3" />
+                                        <Icons.Menu className="w-2.5 h-2.5" />
                                         CENTRE
                                     </button>
                                 </>

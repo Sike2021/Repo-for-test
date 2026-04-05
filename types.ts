@@ -31,6 +31,8 @@ export interface PlayerStats {
     wickets: number; economy: number; bestBowling: string; bestBowlingWickets: number; bestBowlingRuns: number; bowlingAverage: number;
     ballsBowled: number; runsConceded: number; threeWicketHauls: number; fiveWicketHauls: number; catches: number; runOuts: number;
     manOfTheMatchAwards: number;
+    dotBallPercentage?: number;
+    boundaryPercentage?: number;
 }
 
 export interface PlayerPerformanceSummary {
