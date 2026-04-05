@@ -61,9 +61,9 @@ export const useLiveMatch = (
         setGroundCode(homeGround?.code || "KCG");
 
         const initInning = (team: Team, opponent: Team): Inning => {
-            const battingLineup: BattingPerformance[] = team.squad.map(p => {
+            const battingLineup: BattingPerformance[] = team.squad.map((p, i) => {
                 const d = getPlayerById(p.id, matchPlayers);
-                return { playerId: d.id, playerName: d.name, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false, dismissalText: 'not out', dismissal: { type: 'not out', bowlerId: '' } };
+                return { playerId: d.id, playerName: d.name, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false, dismissalText: 'not out', dismissal: { type: 'not out', bowlerId: '' }, battingOrder: i + 1 };
             });
             
             const bowlingLineup: BowlingPerformance[] = opponent.squad
@@ -145,9 +145,9 @@ export const useLiveMatch = (
 
             // Re-initialize innings with correct order
             const initInning = (team: Team, opponent: Team): Inning => {
-                const battingLineup: BattingPerformance[] = team.squad.map(p => {
+                const battingLineup: BattingPerformance[] = team.squad.map((p, i) => {
                     const d = getPlayerById(p.id, allPlayers);
-                    return { playerId: d.id, playerName: d.name, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false, dismissalText: 'not out', dismissal: { type: 'not out', bowlerId: '' } };
+                    return { playerId: d.id, playerName: d.name, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false, dismissalText: 'not out', dismissal: { type: 'not out', bowlerId: '' }, battingOrder: i + 1 };
                 });
                 
                 const bowlingLineup: BowlingPerformance[] = opponent.squad
@@ -278,6 +278,39 @@ export const useLiveMatch = (
             const strikerDetails = getPlayerById(currentBatters.strikerId, allPlayers);
             const bowlerDetails = getPlayerById(currentBowlerId, allPlayers);
 
+            // --- SKILL BASED PENALTIES ---
+            // Bowlers with low skill (secondarySkill < 40) are more prone to extras and boundaries
+            const lowSkillBowler = bowlerDetails.secondarySkill < 40;
+            const extraChance = lowSkillBowler ? 0.08 : 0.03; // Chance for Wide or No Ball
+            
+            let runs = 0;
+            let isOut = false;
+            let ballLabel = "";
+            let commentary = "";
+            let isExtra = false;
+
+            if (Math.random() < extraChance) {
+                isExtra = true;
+                const isWide = Math.random() > 0.3; // 70% chance it's a wide
+                runs = 1; // 1 run for the extra
+                currentInning.score += runs;
+                currentInning.extras += runs;
+                bowler.runsConceded += runs;
+                // Note: Balls bowled doesn't increment for wides/no-balls in most formats for the bowler's over count, 
+                // but for simplicity we'll follow standard rules: ballsBowled stays same, score increases.
+                
+                ballLabel = isWide ? "wd" : "nb";
+                commentary = isWide 
+                    ? `${bowlerDetails.name} bowls a wide. Down the leg side.` 
+                    : `${bowlerDetails.name} oversteps. No ball! Free hit (if applicable).`;
+                
+                newState.recentBalls = [ballLabel, ...newState.recentBalls].slice(0, 12);
+                newState.commentary = [commentary, ...newState.commentary].slice(0, 50);
+                
+                // Don't proceed with normal ball logic
+                return newState;
+            }
+
             // AI Strategy
             const isUserBatting = battingTeam.id === gameData.userTeamId;
             if (!isUserBatting) {
@@ -310,6 +343,11 @@ export const useLiveMatch = (
             const baseWicketProb = (batterProfile.avg > 0 ? expectedRunsPerBall / batterProfile.avg : 0.05) * strategyWicketMod;
             let wicketProbability = baseWicketProb * formatMods.wicketChance;
             
+            // Low skill bowler penalty: harder to get wickets, easier to concede boundaries
+            if (lowSkillBowler) {
+                wicketProbability *= 0.8;
+            }
+
             const currentOvers = currentInning.bowling.reduce((a,b)=>a+b.ballsBowled,0) / 6;
             const isT20 = gameData.currentFormat.includes('T20');
             const isODI = gameData.currentFormat.includes('ODI');
@@ -325,10 +363,10 @@ export const useLiveMatch = (
 
             wicketProbability = Math.max(0.005, Math.min(0.5, wicketProbability));
 
-            let runs = 0;
-            let isOut = false;
-            let ballLabel;
-            let commentary;
+            runs = 0;
+            isOut = false;
+            ballLabel = "";
+            commentary = "";
 
             if (Math.random() < wicketProbability) {
                 isOut = true;
@@ -354,6 +392,13 @@ export const useLiveMatch = (
                 }
                 if (strategies.batting === 'defensive') { 
                     p_dot *= 1.3; p_4 *= 0.5; p_6 *= 0.2; 
+                }
+
+                // Low skill bowler penalty: more boundaries
+                if (lowSkillBowler) {
+                    p_4 *= 1.4;
+                    p_6 *= 1.4;
+                    p_dot *= 0.8;
                 }
 
                 const totalP = p_dot+p_1+p_2+p_3+p_4+p_6;
@@ -766,6 +811,54 @@ export const useLiveMatch = (
         setState(prev => prev ? { ...prev, status: 'inprogress' } : null);
     };
 
+    const swapPlayers = (teamId: string, player1Id: string, player2Id: string) => {
+        setState(prev => {
+            if (!prev) return null;
+            const newState = JSON.parse(JSON.stringify(prev)) as LiveMatchState;
+            const team = newState.battingTeam.id === teamId ? newState.battingTeam : newState.bowlingTeam;
+            
+            const idx1 = team.squad.findIndex(p => p.id === player1Id);
+            const idx2 = team.squad.findIndex(p => p.id === player2Id);
+            
+            if (idx1 !== -1 && idx2 !== -1) {
+                const temp = team.squad[idx1];
+                team.squad[idx1] = team.squad[idx2];
+                team.squad[idx2] = team.squad[idx1];
+            }
+            
+            // Also need to update the innings lineups if they were already initialized
+            newState.innings.forEach(inning => {
+                if (inning.teamId === teamId) {
+                    const bIdx1 = inning.batting.findIndex(b => b.playerId === player1Id);
+                    const bIdx2 = inning.batting.findIndex(b => b.playerId === player2Id);
+                    if (bIdx1 !== -1 && bIdx2 !== -1) {
+                        const temp = inning.batting[bIdx1];
+                        inning.batting[bIdx1] = inning.batting[bIdx2];
+                        inning.batting[bIdx2] = temp;
+                    }
+                } else {
+                    // It's the bowling team for this inning
+                    const boIdx1 = inning.bowling.findIndex(b => b.playerId === player1Id);
+                    const boIdx2 = inning.bowling.findIndex(b => b.playerId === player2Id);
+                    if (boIdx1 !== -1 && boIdx2 !== -1) {
+                        const temp = inning.bowling[boIdx1];
+                        inning.bowling[boIdx1] = inning.bowling[boIdx2];
+                        inning.bowling[boIdx2] = temp;
+                    }
+                }
+            });
+
+            return newState;
+        });
+    };
+
+    const requestBowlerChange = () => {
+        setState(prev => {
+            if (!prev || prev.status !== 'inprogress' || prev.waitingFor) return prev;
+            return { ...prev, waitingFor: 'bowler' };
+        });
+    };
+
     return {
         state,
         playBall,
@@ -781,6 +874,8 @@ export const useLiveMatch = (
         declareInning,
         stopAutoPlay,
         startMatch,
-        beginMatch
+        beginMatch,
+        swapPlayers,
+        requestBowlerChange
     };
 };

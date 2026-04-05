@@ -100,8 +100,8 @@ export const Gameplay2DScreen: React.FC<Gameplay2DScreenProps> = ({ match, gameD
 
         const createInning = (team: Team, opp: Team, pList: Player[]): Inning => ({
             teamId: team.id, teamName: team.name, score: 0, wickets: 0, overs: '0.0', extras: 0,
-            batting: pList.map(p => ({ 
-                playerId: p.id, playerName: p.name, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false, dismissalText: 'not out', dismissal: { type: 'not out', bowlerId: '' } 
+            batting: pList.map((p, i) => ({ 
+                playerId: p.id, playerName: p.name, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false, dismissalText: 'not out', dismissal: { type: 'not out', bowlerId: '' }, battingOrder: i + 1 
             })),
             bowling: getXI(opp).map(p => ({ 
                 playerId: p.id, playerName: p.name, overs: '0.0', maidens: 0, runsConceded: 0, wickets: 0, ballsBowled: 0 

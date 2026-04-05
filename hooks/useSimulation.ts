@@ -25,7 +25,7 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
         }
         const maxWicketsForInning = (limits?.maxWickets && limits.maxWickets > 0 && limits.maxWickets <= 10) ? limits.maxWickets : 10;
 
-        const battingLineup: BattingPerformance[] = battingTeam.squad.map(p => { 
+        const battingLineup: BattingPerformance[] = battingTeam.squad.map((p, i) => { 
             const d = getPlayerById(p.id, allPlayers); 
             return { 
                 playerId: d.id, 
@@ -38,7 +38,8 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
                 dismissalText: 'not out', 
                 dismissal: { type: 'not out', bowlerId: '' }, 
                 ballsToFifty: 0, 
-                ballsToHundred: 0 
+                ballsToHundred: 0,
+                battingOrder: i + 1
             }; 
         });
         

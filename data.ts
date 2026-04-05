@@ -183,7 +183,7 @@ const playersRaw: any[] = [
   { id: 'l-haw-5', name: 'Qasim', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 45, secondarySkill: 12, style: 'N', isOpener: false, isForeign: false },
   { id: 'l-haw-6', name: 'A. Usman', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 53, secondarySkill: 22, style: 'N', isOpener: true, isForeign: false },
   { id: 'l-haw-7', name: 'Abass', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 72, secondarySkill: 0, style: 'A', isOpener: false, isForeign: false },
-  { id: 'l-haw-8', name: 'Sike', nationality: 'Local', role: PlayerRole.ALL_ROUNDER, battingSkill: 87, secondarySkill: 85, style: 'NA', isOpener: true, isForeign: false },
+  { id: 'l-haw-8', name: 'Sike', nationality: 'Local', role: PlayerRole.ALL_ROUNDER, battingSkill: 87, secondarySkill: 85, style: 'NA', isOpener: true, isForeign: false, avatarUrl: 'https://picsum.photos/seed/sike/200/200' },
   { id: 'l-haw-9', name: 'Wahab', nationality: 'Local', role: PlayerRole.ALL_ROUNDER, battingSkill: 50, secondarySkill: 51, style: 'N', isOpener: false, isForeign: false },
   { id: 'l-haw-10', name: 'M. Tahir', nationality: 'Local', role: PlayerRole.ALL_ROUNDER, battingSkill: 60, secondarySkill: 56, style: 'A', isOpener: false, isForeign: false },
   { id: 'l-haw-11', name: 'Faraz Khan', nationality: 'Local', role: PlayerRole.FAST_BOWLER, battingSkill: 15, secondarySkill: 86, style: 'N', isOpener: false, isForeign: false },

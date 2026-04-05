@@ -47,6 +47,11 @@ export interface PlayerCustomization {
     hairStyle: number;
     hairColor: string;
     facialHair: number;
+    facialHairColor: string;
+    beardStyle: number;
+    beardColor: string;
+    mustacheStyle: number;
+    mustacheColor: string;
     eyeColor: string;
     accessories?: string[];
 }
@@ -96,6 +101,7 @@ export interface Inning {
 
 export interface BattingPerformance {
     playerId: string; playerName: string; runs: number; balls: number; fours: number; sixes: number; isOut: boolean; dismissalText: string; dismissal: { type: 'not out' | 'bowled' | 'caught'; bowlerId: string; fielderId?: string; }; ballsToFifty?: number; ballsToHundred?: number;
+    battingOrder: number;
 }
 
 export interface BowlingPerformance {

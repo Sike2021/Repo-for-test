@@ -153,7 +153,7 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 }}
-                            className="text-7xl font-black italic uppercase tracking-tighter leading-[0.8]"
+                            className="text-5xl font-black italic uppercase tracking-tighter leading-[0.8]"
                         >
                             TRANSFER<br/>
                             <span className="text-teal-500">HUB</span>
@@ -163,11 +163,11 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.2 }}
-                        className="text-right bg-white/[0.03] backdrop-blur-xl p-6 rounded-[32px] border border-white/10 shadow-2xl"
+                        className="text-right bg-white/[0.03] backdrop-blur-xl p-4 rounded-[24px] border border-white/10 shadow-2xl"
                     >
-                        <p className="text-[10px] font-black opacity-40 uppercase tracking-widest mb-1">AVAILABLE_PURSE</p>
-                        <p className="text-4xl font-black font-mono text-teal-400 tracking-tighter drop-shadow-[0_0_15px_rgba(20,184,166,0.3)]">
-                            {userTeam?.purse.toFixed(2)}<span className="text-sm ml-1 opacity-40">CR</span>
+                        <p className="text-[8px] font-black opacity-40 uppercase tracking-widest mb-1">AVAILABLE_PURSE</p>
+                        <p className="text-2xl font-black font-mono text-teal-400 tracking-tighter drop-shadow-[0_0_15px_rgba(20,184,166,0.3)]">
+                            {userTeam?.purse.toFixed(2)}<span className="text-xs ml-1 opacity-40">CR</span>
                         </p>
                     </motion.div>
                 </div>
@@ -276,14 +276,14 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                                         <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-teal-500/20 to-transparent" />
                                         <p className="text-[10px] font-black uppercase tracking-widest text-teal-500 mb-6 relative z-10">Your Player</p>
                                         <PlayerAvatar player={selectedMyPlayerForSwap} size="lg" />
-                                        <h2 className="text-4xl font-black italic uppercase tracking-tighter mt-6 mb-2 relative z-10">{selectedMyPlayerForSwap.name}</h2>
+                                        <h2 className="text-5xl font-black italic uppercase tracking-tighter mt-6 mb-2 relative z-10">{selectedMyPlayerForSwap.name}</h2>
                                         <p className="text-xs font-bold uppercase tracking-widest text-white/40 mb-8 relative z-10">{selectedMyPlayerForSwap.role}</p>
                                     </div>
 
                                     {/* Center VS & Stats Comparison */}
-                                    <div className="w-80 flex flex-col items-center justify-center z-10">
-                                        <div className="w-24 h-24 rounded-full bg-teal-500 flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(20,184,166,0.4)]">
-                                            <span className="text-4xl font-black italic text-black">VS</span>
+                                    <div className="w-64 flex flex-col items-center justify-center z-10">
+                                        <div className="w-16 h-16 rounded-full bg-teal-500 flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(20,184,166,0.4)]">
+                                            <span className="text-2xl font-black italic text-black">VS</span>
                                         </div>
                                         
                                         <div className="w-full space-y-6">
@@ -333,15 +333,15 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                                         <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white/10 to-transparent" />
                                         <p className="text-[10px] font-black uppercase tracking-widest text-white/60 mb-6 relative z-10">Target Player</p>
                                         <PlayerAvatar player={selectedOtherPlayerForSwap} size="lg" />
-                                        <h2 className="text-4xl font-black italic uppercase tracking-tighter mt-6 mb-2 relative z-10">{selectedOtherPlayerForSwap.name}</h2>
+                                        <h2 className="text-5xl font-black italic uppercase tracking-tighter mt-6 mb-2 relative z-10">{selectedOtherPlayerForSwap.name}</h2>
                                         <p className="text-xs font-bold uppercase tracking-widest text-white/40 mb-8 relative z-10">{selectedOtherPlayerForSwap.role}</p>
                                     </div>
                                 </div>
 
-                                <div className="mt-12 flex flex-col items-center gap-4">
+                                <div className="mt-8 flex flex-col items-center gap-4">
                                     {(selectedOtherPlayerForSwap.battingSkill >= 80 || selectedOtherPlayerForSwap.secondarySkill >= 80) && (
-                                        <p className="text-xs font-black text-red-500 uppercase tracking-widest flex items-center gap-2 bg-red-500/10 px-6 py-3 rounded-full">
-                                            <TrendingUp className="w-3.5 h-3.5" /> -10Cr Next Season Penalty
+                                        <p className="text-[10px] font-black text-red-500 uppercase tracking-widest flex items-center gap-2 bg-red-500/10 px-4 py-2 rounded-full">
+                                            <TrendingUp className="w-3 h-3" /> -10Cr Next Season Penalty
                                         </p>
                                     )}
                                     <div className="flex gap-4">
@@ -350,13 +350,13 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                                                 setSelectedMyPlayerForSwap(null);
                                                 setSelectedOtherPlayerForSwap(null);
                                             }}
-                                            className="px-8 py-4 rounded-full border-2 border-white/20 text-white font-black uppercase tracking-widest hover:bg-white/10 transition-all"
+                                            className="px-6 py-3 rounded-full border-2 border-white/20 text-white text-sm font-black uppercase tracking-widest hover:bg-white/10 transition-all"
                                         >
                                             Cancel
                                         </button>
                                         <button 
                                             onClick={handleSwap}
-                                            className="bg-teal-500 text-black px-12 py-4 rounded-full font-black italic text-xl uppercase tracking-tighter hover:bg-white transition-all shadow-[0_0_30px_rgba(20,184,166,0.3)]"
+                                            className="bg-teal-500 text-black px-8 py-3 rounded-full font-black italic text-lg uppercase tracking-tighter hover:bg-white transition-all shadow-[0_0_30px_rgba(20,184,166,0.3)]"
                                         >
                                             Confirm Swap
                                         </button>
@@ -445,36 +445,36 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                                 <div className="flex justify-between items-start mb-12">
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-3">
-                                            <span className={`px-3 py-1 text-[10px] font-black rounded-lg uppercase tracking-[0.2em] ${getRoleColor(selectedPlayer.role)} bg-white/10`}>
+                                            <span className={`px-2 py-0.5 text-[8px] font-black rounded-lg uppercase tracking-[0.2em] ${getRoleColor(selectedPlayer.role)} bg-white/10`}>
                                                 {getRoleFullName(selectedPlayer.role)}
                                             </span>
-                                            {selectedPlayer.isForeign && <span className="px-3 py-1 text-[10px] font-black rounded-lg uppercase tracking-[0.2em] bg-blue-500/20 text-blue-400 border border-blue-500/20">International</span>}
+                                            {selectedPlayer.isForeign && <span className="px-2 py-0.5 text-[8px] font-black rounded-lg uppercase tracking-[0.2em] bg-blue-500/20 text-blue-400 border border-blue-500/20">International</span>}
                                         </div>
-                                        <h2 className="text-8xl font-black italic uppercase tracking-tighter leading-[0.8] text-white">
+                                        <h2 className="text-5xl font-black italic uppercase tracking-tighter leading-[0.8] text-white">
                                             {selectedPlayer.name.split(' ')[0]}<br/>
                                             <span className="text-teal-500">{selectedPlayer.name.split(' ')[1] || ''}</span>
                                         </h2>
                                     </div>
                                     <div className="flex flex-col items-center">
-                                        <div className="w-32 h-32 rounded-[40px] bg-gradient-to-br from-teal-500 to-blue-600 p-1 shadow-2xl shadow-teal-500/20">
-                                            <div className="w-full h-full rounded-[38px] bg-[#050808] flex flex-col items-center justify-center">
-                                                <span className="text-5xl font-black italic text-white leading-none">
+                                        <div className="w-24 h-24 rounded-[32px] bg-gradient-to-br from-teal-500 to-blue-600 p-1 shadow-2xl shadow-teal-500/20">
+                                            <div className="w-full h-full rounded-[30px] bg-[#050808] flex flex-col items-center justify-center">
+                                                <span className="text-3xl font-black italic text-white leading-none">
                                                     {Math.max(selectedPlayer.battingSkill, selectedPlayer.secondarySkill)}
                                                 </span>
-                                                <span className="text-[9px] font-black uppercase tracking-widest text-teal-500 mt-1">Rating</span>
+                                                <span className="text-[8px] font-black uppercase tracking-widest text-teal-500 mt-1">Rating</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-6 mb-12">
-                                    <div className="bg-white/5 p-8 rounded-[32px] border border-white/5 relative overflow-hidden group">
-                                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                            <Zap className="w-16 h-16" />
+                                <div className="grid grid-cols-2 gap-4 mb-8">
+                                    <div className="bg-white/5 p-6 rounded-[24px] border border-white/5 relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity">
+                                            <Zap className="w-12 h-12" />
                                         </div>
-                                        <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2">Batting_Skill</p>
-                                        <div className="text-5xl font-black font-mono text-white tracking-tighter">{selectedPlayer.battingSkill}</div>
-                                        <div className="h-2 w-full bg-white/5 rounded-full mt-6 overflow-hidden">
+                                        <p className="text-[8px] font-black uppercase tracking-widest opacity-40 mb-2">Batting_Skill</p>
+                                        <div className="text-3xl font-black font-mono text-white tracking-tighter">{selectedPlayer.battingSkill}</div>
+                                        <div className="h-1.5 w-full bg-white/5 rounded-full mt-4 overflow-hidden">
                                             <motion.div 
                                                 initial={{ width: 0 }}
                                                 animate={{ width: `${selectedPlayer.battingSkill}%` }}
@@ -482,13 +482,13 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                                             />
                                         </div>
                                     </div>
-                                    <div className="bg-white/5 p-8 rounded-[32px] border border-white/5 relative overflow-hidden group">
-                                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                            <Target className="w-16 h-16" />
+                                    <div className="bg-white/5 p-6 rounded-[24px] border border-white/5 relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity">
+                                            <Target className="w-12 h-12" />
                                         </div>
-                                        <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2">Bowling_Skill</p>
-                                        <div className="text-5xl font-black font-mono text-white tracking-tighter">{selectedPlayer.secondarySkill}</div>
-                                        <div className="h-2 w-full bg-white/5 rounded-full mt-6 overflow-hidden">
+                                        <p className="text-[8px] font-black uppercase tracking-widest opacity-40 mb-2">Bowling_Skill</p>
+                                        <div className="text-3xl font-black font-mono text-white tracking-tighter">{selectedPlayer.secondarySkill}</div>
+                                        <div className="h-1.5 w-full bg-white/5 rounded-full mt-4 overflow-hidden">
                                             <motion.div 
                                                 initial={{ width: 0 }}
                                                 animate={{ width: `${selectedPlayer.secondarySkill}%` }}
@@ -498,9 +498,9 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                                     </div>
                                 </div>
 
-                                <div className="bg-white/5 p-8 rounded-[32px] border border-white/5 mb-12">
-                                    <div className="flex justify-between items-center mb-6">
-                                        <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Career_Metrics</p>
+                                <div className="bg-white/5 p-6 rounded-[24px] border border-white/5 mb-8">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <p className="text-[8px] font-black uppercase tracking-widest opacity-40">Career_Metrics</p>
                                         <div className="flex gap-1">
                                             {[1,2,3].map(i => <div key={i} className="w-1 h-1 rounded-full bg-teal-500" />)}
                                         </div>
@@ -508,22 +508,22 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                                     {(() => {
                                         const stats = aggregateStats(selectedPlayer, Object.values(Format));
                                         return (
-                                            <div className="grid grid-cols-4 gap-8">
+                                            <div className="grid grid-cols-4 gap-4">
                                                 <div className="space-y-1">
-                                                    <p className="text-[9px] font-black opacity-30 uppercase tracking-widest">Matches</p>
-                                                    <p className="text-3xl font-black font-mono tracking-tighter">{stats.matches}</p>
+                                                    <p className="text-[8px] font-black opacity-30 uppercase tracking-widest">Matches</p>
+                                                    <p className="text-xl font-black font-mono tracking-tighter">{stats.matches}</p>
                                                 </div>
                                                 <div className="space-y-1">
-                                                    <p className="text-[9px] font-black opacity-30 uppercase tracking-widest">Runs</p>
-                                                    <p className="text-3xl font-black font-mono tracking-tighter text-teal-500">{stats.runs}</p>
+                                                    <p className="text-[8px] font-black opacity-30 uppercase tracking-widest">Runs</p>
+                                                    <p className="text-xl font-black font-mono tracking-tighter text-teal-500">{stats.runs}</p>
                                                 </div>
                                                 <div className="space-y-1">
-                                                    <p className="text-[9px] font-black opacity-30 uppercase tracking-widest">Wickets</p>
-                                                    <p className="text-3xl font-black font-mono tracking-tighter text-blue-500">{stats.wickets}</p>
+                                                    <p className="text-[8px] font-black opacity-30 uppercase tracking-widest">Wickets</p>
+                                                    <p className="text-xl font-black font-mono tracking-tighter text-blue-500">{stats.wickets}</p>
                                                 </div>
                                                 <div className="space-y-1">
-                                                    <p className="text-[9px] font-black opacity-30 uppercase tracking-widest">Average</p>
-                                                    <p className="text-3xl font-black font-mono tracking-tighter">{stats.average.toFixed(1)}</p>
+                                                    <p className="text-[8px] font-black opacity-30 uppercase tracking-widest">Average</p>
+                                                    <p className="text-xl font-black font-mono tracking-tighter">{stats.average.toFixed(1)}</p>
                                                 </div>
                                             </div>
                                         );
@@ -534,17 +534,17 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                                     {activeTab === 'market' ? (
                                         <button 
                                             onClick={() => handleBuy(selectedPlayer)}
-                                            className="w-full bg-white text-black py-8 rounded-[32px] font-black italic text-3xl uppercase tracking-tighter hover:bg-teal-500 transition-all flex items-center justify-center gap-6 shadow-2xl active:scale-[0.98]"
+                                            className="w-full bg-white text-black py-5 rounded-[24px] font-black italic text-xl uppercase tracking-tighter hover:bg-teal-500 transition-all flex items-center justify-center gap-4 shadow-2xl active:scale-[0.98]"
                                         >
-                                            <UserPlus className="w-10 h-10" />
+                                            <UserPlus className="w-6 h-6" />
                                             <span>Sign Identity // {((selectedPlayer.battingSkill + selectedPlayer.secondarySkill) / 10).toFixed(2)} CR</span>
                                         </button>
                                     ) : (
                                         <button 
                                             onClick={() => handleSell(selectedPlayer)}
-                                            className="w-full bg-red-500/10 text-red-500 border-2 border-red-500/20 py-8 rounded-[32px] font-black italic text-3xl uppercase tracking-tighter hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-6 active:scale-[0.98]"
+                                            className="w-full bg-red-500/10 text-red-500 border-2 border-red-500/20 py-5 rounded-[24px] font-black italic text-xl uppercase tracking-tighter hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-4 active:scale-[0.98]"
                                         >
-                                            <UserMinus className="w-10 h-10" />
+                                            <UserMinus className="w-6 h-6" />
                                             <span>Release Identity // {(((selectedPlayer.battingSkill + selectedPlayer.secondarySkill) / 10) * 0.8).toFixed(2)} CR</span>
                                         </button>
                                     )}

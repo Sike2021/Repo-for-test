@@ -1,13 +1,14 @@
 
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Match, GameData, MatchResult, Strategy, LiveMatchState, Player, Ground, Message, Format } from '../types';
+import { Match, GameData, MatchResult, Strategy, LiveMatchState, Player, Ground, Message, Format, PlayerRole } from '../types';
 import { useLiveMatch } from '../hooks/useLiveMatch';
 import { Icons } from './Icons';
 import { TV_CHANNELS, INITIAL_SPONSORSHIPS, TOURNAMENT_LOGOS } from '../data';
 import { getPlayerById } from '../utils';
 import { streamAssistantResponse } from '../geminiService';
 import { PlayerAvatar } from './PlayerAvatar';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 interface LiveMatchScreenProps {
     match: Match;
@@ -37,7 +38,7 @@ const StrategyToggle = ({ label, value, onChange }: { label: string, value: Stra
     </div>
 );
 
-const PreMatchPanel = ({ match, gameData, onStart, onSimulate }: { match: Match, gameData: GameData, onStart: () => void, onSimulate: () => void }) => {
+const PreMatchPanel = ({ match, gameData, onStart, onSimulate, onEditLineup }: { match: Match, gameData: GameData, onStart: () => void, onSimulate: () => void, onEditLineup: () => void }) => {
     const sponsorship = gameData.sponsorships?.[gameData.currentFormat] || INITIAL_SPONSORSHIPS[gameData.currentFormat];
     const teamA = gameData.teams.find(t => t.name === match.teamA);
     const teamB = gameData.teams.find(t => t.name === match.teamB);
@@ -129,6 +130,13 @@ const PreMatchPanel = ({ match, gameData, onStart, onSimulate }: { match: Match,
             </div>
 
             <div className="mt-auto pt-1.5 space-y-1.5">
+                <button 
+                    onClick={onEditLineup}
+                    className="w-full bg-white/5 border border-white/10 text-white font-black py-2 px-4 rounded-lg uppercase tracking-[0.2em] text-[7px] hover:bg-white/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group mb-1"
+                >
+                    EDIT LINEUP
+                    <Icons.Settings className="w-2.5 h-2.5 group-hover:rotate-90 transition-transform" />
+                </button>
                 <button 
                     onClick={onStart}
                     className="w-full bg-teal-500 text-black font-black py-2.5 px-4 rounded-lg uppercase tracking-[0.2em] text-[7px] hover:bg-teal-400 transition-all duration-500 shadow-[0_10px_30px_rgba(20,184,166,0.2)] active:scale-[0.98] flex items-center justify-center gap-2 group"
@@ -241,7 +249,7 @@ const MatchChat = ({ gameData, onClose }: { gameData: GameData, onClose: () => v
 };
 
 const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMatchComplete, onExit, savedState, startMode = 'play' }) => {
-    const { state, playBall, playOver, autoSimulate, simulateInning, simulateMatch, setBattingStrategy, setBowlingStrategy, selectOpeners, selectNextBatter, selectNextBowler, startMatch, beginMatch, declareInning, stopAutoPlay } = useLiveMatch(match, gameData, onMatchComplete, savedState);
+    const { state, playBall, playOver, autoSimulate, simulateInning, simulateMatch, setBattingStrategy, setBowlingStrategy, selectOpeners, selectNextBatter, selectNextBowler, startMatch, beginMatch, declareInning, stopAutoPlay, swapPlayers, requestBowlerChange } = useLiveMatch(match, gameData, onMatchComplete, savedState);
     const commentaryRef = useRef<HTMLDivElement>(null);
     const [lastBallSpeed, setLastBallSpeed] = useState<string>("-");
     
@@ -249,6 +257,7 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
     const [showMatchCentre, setShowMatchCentre] = useState(false);
     const [showAnalyst, setShowAnalyst] = useState(false);
     const [activeTab, setActiveTab] = useState<'scorecard' | 'commentary' | 'analysis'>('scorecard');
+    const [scorecardSort, setScorecardSort] = useState<'order' | 'runs'>('order');
     
     const [selectedOpener1, setSelectedOpener1] = useState('');
     const [selectedOpener2, setSelectedOpener2] = useState('');
@@ -256,6 +265,7 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
     const [selectedBowler, setSelectedBowler] = useState('');
     const [tossState, setTossState] = useState<'coin' | 'result'>('coin');
     const [showPreMatch, setShowPreMatch] = useState(() => state?.status === 'ready' && !savedState);
+    const [showLineupEditor, setShowLineupEditor] = useState(false);
 
     // Auto-Simulation effect
     useEffect(() => {
@@ -365,6 +375,19 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
         }
     };
 
+    const handleDragEnd = (result: DropResult) => {
+        if (!result.destination || !state) return;
+        const { source, destination } = result;
+        
+        const teamId = gameData.userTeamId;
+        const team = state.battingTeam.id === teamId ? state.battingTeam : state.bowlingTeam;
+        
+        const player1Id = team.squad[source.index].id;
+        const player2Id = team.squad[destination.index].id;
+        
+        swapPlayers(teamId, player1Id, player2Id);
+    };
+
     useEffect(() => {
         if (activeTab === 'commentary' && commentaryRef.current) {
             commentaryRef.current.scrollTop = commentaryRef.current.scrollHeight;
@@ -462,16 +485,84 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
 
     if (showPreMatch && state.status === 'ready') {
         return (
-            <PreMatchPanel 
-                match={match} 
-                gameData={gameData} 
-                onStart={() => { setShowPreMatch(false); beginMatch(); }} 
-                onSimulate={() => {
-                    setShowPreMatch(false);
-                    beginMatch();
-                    // The useEffect will handle the simulation start once status is 'inprogress'
-                }}
-            />
+            <>
+                <PreMatchPanel 
+                    match={match} 
+                    gameData={gameData} 
+                    onStart={() => { setShowPreMatch(false); beginMatch(); }} 
+                    onSimulate={() => {
+                        setShowPreMatch(false);
+                        beginMatch();
+                        // The useEffect will handle the simulation start once status is 'inprogress'
+                    }}
+                    onEditLineup={() => setShowLineupEditor(true)}
+                />
+                
+                <AnimatePresence>
+                    {showLineupEditor && (
+                        <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20 }}
+                            className="absolute inset-0 z-[130] bg-[#050808] flex flex-col p-4"
+                        >
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-sm font-black italic uppercase tracking-tighter text-white">EDIT_LINEUP</h2>
+                                <button onClick={() => setShowLineupEditor(false)} className="p-1.5 bg-white/5 rounded-lg border border-white/10">
+                                    <Icons.X className="h-4 w-4 text-white/40" />
+                                </button>
+                            </div>
+                            
+                            <p className="text-[7px] text-white/40 uppercase font-black tracking-widest mb-4">Drag to reorder your playing XI</p>
+                            
+                            <DragDropContext onDragEnd={handleDragEnd}>
+                                <Droppable droppableId="lineup">
+                                    {(provided) => (
+                                        <div 
+                                            {...provided.droppableProps} 
+                                            ref={provided.innerRef}
+                                            className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-hide"
+                                        >
+                                            {(state.battingTeam.id === gameData.userTeamId ? state.battingTeam : state.bowlingTeam).squad.map((player, index) => (
+                                                <Draggable key={player.id} draggableId={player.id} index={index}>
+                                                    {(provided, snapshot) => (
+                                                        <div
+                                                            ref={provided.innerRef}
+                                                            {...provided.draggableProps}
+                                                            {...provided.dragHandleProps}
+                                                            className={`p-3 rounded-xl border transition-all flex items-center justify-between ${snapshot.isDragging ? 'bg-teal-500 border-teal-400 shadow-2xl scale-105 z-50' : 'bg-white/[0.03] border-white/5'}`}
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <span className="text-[10px] font-mono font-black text-white/20 w-4">{index + 1}</span>
+                                                                <div className="w-8 h-8 rounded-full bg-black/40 border border-white/10 overflow-hidden">
+                                                                    <PlayerAvatar player={player} size="sm" />
+                                                                </div>
+                                                                <div>
+                                                                    <p className={`text-[10px] font-black uppercase italic tracking-tighter ${snapshot.isDragging ? 'text-black' : 'text-white'}`}>{player.name}</p>
+                                                                    <p className={`text-[6px] font-black uppercase tracking-widest ${snapshot.isDragging ? 'text-black/60' : 'text-white/40'}`}>{player.role}</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className={`text-[10px] font-black italic ${snapshot.isDragging ? 'text-black/40' : 'text-white/10'}`}>:::</div>
+                                                        </div>
+                                                    )}
+                                                </Draggable>
+                                            ))}
+                                            {provided.placeholder}
+                                        </div>
+                                    )}
+                                </Droppable>
+                            </DragDropContext>
+                            
+                            <button 
+                                onClick={() => setShowLineupEditor(false)}
+                                className="mt-4 w-full bg-teal-500 text-black font-black py-3 rounded-xl uppercase tracking-[0.2em] text-[8px] shadow-lg"
+                            >
+                                SAVE_LINEUP
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </>
         );
     }
 
@@ -620,16 +711,37 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
         if (autoArrivalSeconds !== null) return null;
 
         if (state.autoPlayType === 'inning' || state.autoPlayType === 'match') return <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center text-white font-black animate-pulse text-[10px] uppercase tracking-widest">Simulating...</div>;
+        
+        // Sorting logic: if it's a bowler selection, sort by secondarySkill (bowling skill)
+        const isBowlerSelection = title.toLowerCase().includes('bowler');
+        const sortedOptions = [...options].sort((a, b) => {
+            const pA = getPlayerById(a.playerId, gameData.allPlayers);
+            const pB = getPlayerById(b.playerId, gameData.allPlayers);
+            if (isBowlerSelection) {
+                return pB.secondarySkill - pA.secondarySkill;
+            }
+            // For batters, sort by battingSkill
+            return pB.battingSkill - pA.battingSkill;
+        });
+
         return (
             <div className="absolute inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center p-3 backdrop-blur-md">
                 <h3 className="text-sm font-black italic uppercase tracking-tighter mb-2 text-white text-center leading-none">{title}</h3>
                 <div className="w-full max-w-[240px] space-y-2.5 bg-slate-800/80 p-3 rounded-xl shadow-2xl border border-white/10 backdrop-blur-xl">
                     {extraSelect}
                     <div className="space-y-1">
-                        <label className="text-[6px] font-black text-white/40 uppercase tracking-widest ml-1">SELECT_PLAYER</label>
+                        <label className="text-[6px] font-black text-white/40 uppercase tracking-widest ml-1">SELECT_PLAYER (SORTED BY SKILL)</label>
                         <select className="w-full p-1.5 bg-slate-900 text-white rounded-lg border border-white/10 text-[9px] font-black focus:ring-1 focus:ring-teal-500 outline-none" value={selectedValue} onChange={e => setValue(e.target.value)}>
                             <option value="">Select Player</option>
-                            {options.map(p => <option key={p.playerId} value={p.playerId}>{p.playerName} {p.overs ? `(${p.overs})` : ''}</option>)}
+                            {sortedOptions.map(p => {
+                                const pDetails = getPlayerById(p.playerId, gameData.allPlayers);
+                                const skill = isBowlerSelection ? pDetails.secondarySkill : pDetails.battingSkill;
+                                return (
+                                    <option key={p.playerId} value={p.playerId}>
+                                        {p.playerName} {p.overs ? `(${p.overs})` : ''} - Skill: {skill}
+                                    </option>
+                                );
+                            })}
                         </select>
                     </div>
                     <button 
@@ -675,7 +787,15 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                         <div className="bg-white/[0.02] rounded-xl p-2.5 border border-white/5">
                             <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-1.5">
                                 <h3 className="text-[9px] font-black italic uppercase tracking-tighter text-teal-500">Batting - {battingTeam.name}</h3>
-                                <div className="text-[8px] text-white/40 font-mono font-black">{currentInning.score}/{currentInning.wickets} ({currentInning.overs})</div>
+                                <div className="flex items-center gap-2">
+                                    <button 
+                                        onClick={() => setScorecardSort(prev => prev === 'order' ? 'runs' : 'order')}
+                                        className="text-[6px] font-black text-teal-500 uppercase tracking-widest hover:text-white transition-colors bg-white/5 px-1.5 py-0.5 rounded border border-white/5"
+                                    >
+                                        SORT: {scorecardSort === 'order' ? 'BATTING_ORDER' : 'MOST_RUNS'}
+                                    </button>
+                                    <div className="text-[8px] text-white/40 font-mono font-black">{currentInning.score}/{currentInning.wickets} ({currentInning.overs})</div>
+                                </div>
                             </div>
                             <table className="w-full text-[9px]">
                                 <thead>
@@ -689,35 +809,40 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {currentInning.batting.map((b, idx) => {
-                                        const isBatting = b.playerId === currentBatters.strikerId || b.playerId === currentBatters.nonStrikerId;
-                                        const hasBatted = b.isOut || isBatting || b.runs > 0 || b.balls > 0;
-                                        
-                                        if (!hasBatted) return null;
+                                    {[...currentInning.batting]
+                                        .sort((a, b) => {
+                                            if (scorecardSort === 'runs') return b.runs - a.runs;
+                                            return 0; // Keep original order
+                                        })
+                                        .map((b, idx) => {
+                                            const isBatting = b.playerId === currentBatters.strikerId || b.playerId === currentBatters.nonStrikerId;
+                                            const hasBatted = b.isOut || isBatting || b.runs > 0 || b.balls > 0;
+                                            
+                                            if (!hasBatted) return null;
 
-                                        return (
-                                            <tr key={b.playerId} className={`border-b border-white/[0.02] ${b.isOut ? 'text-white/30' : 'text-white'}`}>
-                                                <td className="py-1.5">
-                                                    <div className="flex items-center gap-1.5">
-                                                        <span className="text-[7px] text-white/10 font-mono w-2">{idx + 1}</span>
-                                                        <div className="flex flex-col">
-                                                            <span className="font-black italic uppercase tracking-tighter">
-                                                                {b.playerName} {b.playerId === currentBatters.strikerId ? '*' : ''}
-                                                            </span>
-                                                            <span className="text-[6px] text-teal-500/60 font-black uppercase tracking-widest">
-                                                                {b.isOut ? b.dismissalText : isBatting ? 'BATTING' : ''}
-                                                            </span>
+                                            return (
+                                                <tr key={b.playerId} className={`border-b border-white/[0.02] ${b.isOut ? 'text-white/30' : 'text-white'}`}>
+                                                    <td className="py-1.5">
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className="text-[7px] text-white/10 font-mono w-2">{currentInning.batting.findIndex(pb => pb.playerId === b.playerId) + 1}</span>
+                                                            <div className="flex flex-col">
+                                                                <span className="font-black italic uppercase tracking-tighter">
+                                                                    {b.playerName} {b.playerId === currentBatters.strikerId ? '*' : ''}
+                                                                </span>
+                                                                <span className="text-[6px] text-teal-500/60 font-black uppercase tracking-widest">
+                                                                    {b.isOut ? b.dismissalText : isBatting ? 'BATTING' : ''}
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </td>
-                                                <td className="text-right font-black text-[10px]">{b.runs}</td>
-                                                <td className="text-right opacity-40">{b.balls}</td>
-                                                <td className="text-right opacity-40">{b.fours}</td>
-                                                <td className="text-right opacity-40">{b.sixes}</td>
-                                                <td className="text-right font-mono text-[8px] text-teal-500/60">{b.balls > 0 ? Math.round((b.runs/b.balls)*100) : 0}</td>
-                                            </tr>
-                                        );
-                                    })}
+                                                    </td>
+                                                    <td className="text-right font-black text-[10px]">{b.runs}</td>
+                                                    <td className="text-right opacity-40">{b.balls}</td>
+                                                    <td className="text-right opacity-40">{b.fours}</td>
+                                                    <td className="text-right opacity-40">{b.sixes}</td>
+                                                    <td className="text-right font-mono text-[8px] text-teal-500/60">{b.balls > 0 ? Math.round((b.runs/b.balls)*100) : 0}</td>
+                                                </tr>
+                                            );
+                                        })}
                                 </tbody>
                             </table>
                             
@@ -1110,7 +1235,16 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                         <div className="flex items-center gap-1.5">
                             {bowler && <PlayerAvatar player={getPlayerById(bowler.playerId, gameData.allPlayers)!} size="xs" />}
                             <div>
-                                <div className="font-black text-white truncate text-xs italic">{bowler?.playerName}</div>
+                                <button 
+                                    onClick={() => {
+                                        if (isUserBowling && state.status === 'inprogress' && !state.waitingFor) {
+                                            requestBowlerChange();
+                                        }
+                                    }}
+                                    className="font-black text-white truncate text-xs italic hover:text-teal-500 transition-colors text-left block"
+                                >
+                                    {bowler?.playerName}
+                                </button>
                                 <div className="text-white/40 font-black tracking-tighter">
                                     {bowler?.wickets}<span className="text-white/20 mx-0.5">-</span>{bowler?.runsConceded} 
                                     <span className="text-[8px] font-light ml-1 text-white/20">({bowler?.overs})</span>

@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { Player, Format } from '../types';
 import { getRoleColor, getRoleFullName, aggregateStats } from '../utils';
 import { PlayerAvatar } from './PlayerAvatar';
-import { ChevronLeft, Activity, Target, Shield, Zap, Camera } from 'lucide-react';
+import { ChevronLeft, Activity, Target, Shield, Zap, Camera, Palette, User } from 'lucide-react';
 
 interface PlayerProfileProps {
     player: Player | null;
@@ -14,7 +14,7 @@ interface PlayerProfileProps {
 }
 
 const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onBack, initialFormat, onUpdatePlayer }) => {
-    const [selectedFormat, setSelectedFormat] = useState<Format | 'Summary'>(initialFormat);
+    const [selectedFormat, setSelectedFormat] = useState<Format | 'Summary' | 'Customization'>(initialFormat);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,7 +49,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onBack, initialFo
 
     if (!player || !summaryStats) return <div className="h-full flex items-center justify-center bg-[#050808] text-white">Player not found. <button onClick={onBack} className="ml-4 text-teal-500 font-black uppercase tracking-widest">Back</button></div>;
     
-    const stats = selectedFormat === 'Summary' ? summaryStats.overall : player.stats[selectedFormat];
+    const stats = (selectedFormat === 'Summary' || selectedFormat === 'Customization') ? summaryStats.overall : player.stats[selectedFormat as Format];
     
     return (
         <div className="h-full flex flex-col bg-[#050808] text-[#E4E3E0] font-sans overflow-hidden relative">
@@ -72,7 +72,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onBack, initialFo
                     <span className="text-[6px] font-black uppercase tracking-[0.3em] hidden md:block">RETURN_TO_HUB</span>
                 </motion.button>
                 <div className="flex gap-1 bg-white/5 p-0.5 rounded-lg border border-white/10 overflow-x-auto scrollbar-hide max-w-[220px] md:max-w-none">
-                    {['Summary', ...Object.values(Format)].map(format => (
+                    {['Summary', 'Customization', ...Object.values(Format)].map(format => (
                         <button 
                             key={format} 
                             onClick={() => setSelectedFormat(format as any)} 
@@ -164,78 +164,209 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onBack, initialFo
 
                     {/* Right Column: Stats Dashboard */}
                     <div className="lg:col-span-8 space-y-6">
-                        {/* Mini Cards Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {[
-                                { label: 'Matches', val: stats.matches, icon: Activity },
-                                { label: 'Batting Avg', val: stats.average.toFixed(1), icon: Target },
-                                { label: 'Strike Rate', val: stats.strikeRate.toFixed(1), icon: Zap },
-                                { label: 'Wickets', val: stats.wickets, icon: Shield }
-                            ].map((item, idx) => (
-                                <motion.div 
-                                    key={idx}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: idx * 0.05 }}
-                                    className="bg-white/[0.03] border border-white/10 rounded-[20px] p-3.5 flex flex-col justify-between h-24 group hover:border-teal-500/30 transition-colors shadow-xl backdrop-blur-xl"
-                                >
-                                    <item.icon className="w-4 h-4 text-teal-500 group-hover:scale-110 transition-transform" />
-                                    <div>
-                                        <p className="text-[7px] font-black uppercase tracking-[0.3em] text-white/20 mb-0.5">{item.label}</p>
-                                        <p className="text-lg font-black italic font-mono text-white leading-none tracking-tighter">{item.val}</p>
+                        {selectedFormat === 'Customization' ? (
+                            <motion.div 
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="bg-white/[0.03] border border-white/10 rounded-[24px] p-6 shadow-2xl backdrop-blur-xl space-y-6"
+                            >
+                                <div className="flex items-center gap-2 mb-4">
+                                    <Palette className="w-4 h-4 text-teal-500" />
+                                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white">AVATAR_CUSTOMIZATION</h3>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Hair & Skin */}
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[7px] font-black text-white/40 uppercase tracking-widest">Skin Tone</label>
+                                            <div className="flex gap-2">
+                                                {[0, 1, 2, 3, 4, 5].map(tone => (
+                                                    <button 
+                                                        key={tone}
+                                                        onClick={() => onUpdatePlayer?.({
+                                                            ...player,
+                                                            customization: { ...(player.customization || {}), skinTone: tone }
+                                                        } as any)}
+                                                        className={`w-6 h-6 rounded-full border-2 ${player.customization?.skinTone === tone ? 'border-teal-500 scale-110' : 'border-white/10'}`}
+                                                        style={{ backgroundColor: ['#FFDBAC', '#F1C27D', '#E0AC69', '#8D5524', '#C68642', '#3D2314'][tone] }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-[7px] font-black text-white/40 uppercase tracking-widest">Hair Style</label>
+                                            <select 
+                                                value={player.customization?.hairStyle || 0}
+                                                onChange={(e) => onUpdatePlayer?.({
+                                                    ...player,
+                                                    customization: { ...(player.customization || {}), hairStyle: parseInt(e.target.value) }
+                                                } as any)}
+                                                className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-[10px] text-white outline-none focus:border-teal-500"
+                                            >
+                                                {['Bald', 'Short', 'Spiky', 'Afro', 'Long', 'Pompadour', 'Buzz Cut', 'Messy', 'Side Part', 'Shoulder Length'].map((style, idx) => (
+                                                    <option key={idx} value={idx}>{style}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-[7px] font-black text-white/40 uppercase tracking-widest">Hair Color</label>
+                                            <div className="flex flex-wrap gap-2">
+                                                {['#090806', '#2C1608', '#4E2708', '#A56B46', '#B55239', '#D6C4C2', '#FFFFFF', '#4A4A4A'].map(color => (
+                                                    <button 
+                                                        key={color}
+                                                        onClick={() => onUpdatePlayer?.({
+                                                            ...player,
+                                                            customization: { ...(player.customization || {}), hairColor: color }
+                                                        } as any)}
+                                                        className={`w-6 h-6 rounded-full border-2 ${player.customization?.hairColor === color ? 'border-teal-500 scale-110' : 'border-white/10'}`}
+                                                        style={{ backgroundColor: color }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
-                                </motion.div>
-                            ))}
-                        </div>
 
-                        {/* Detailed Stats Tables */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                            {/* Batting Details */}
-                            <motion.div 
-                                initial={{ opacity: 0, x: -15 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="bg-white/[0.03] border border-white/10 rounded-[24px] p-4 shadow-2xl backdrop-blur-xl"
-                            >
-                                <h3 className="text-[7px] font-black uppercase tracking-[0.4em] text-white/20 mb-4">BATTING_METRICS</h3>
-                                <div className="space-y-3">
-                                    {[
-                                        { label: 'Total Runs', val: stats.runs },
-                                        { label: 'High Score', val: stats.highestScore },
-                                        { label: '50s / 100s', val: `${stats.fifties} / ${stats.hundreds}` },
-                                        { label: 'Boundaries (4/6)', val: `${stats.fours} / ${stats.sixes}` },
-                                        { label: 'Fastest 50', val: stats.fastestFifty > 0 ? `${stats.fastestFifty}b` : '-' }
-                                    ].map((stat, idx) => (
-                                        <div key={idx} className="flex justify-between items-center border-b border-white/5 pb-2 last:border-0 last:pb-0">
-                                            <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/60">{stat.label}</span>
-                                            <span className="text-sm font-black italic font-mono text-teal-400 leading-none">{stat.val}</span>
+                                    {/* Facial Hair */}
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[7px] font-black text-white/40 uppercase tracking-widest">Mustache Style</label>
+                                            <select 
+                                                value={player.customization?.mustacheStyle || 0}
+                                                onChange={(e) => onUpdatePlayer?.({
+                                                    ...player,
+                                                    customization: { ...(player.customization || {}), mustacheStyle: parseInt(e.target.value) }
+                                                } as any)}
+                                                className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-[10px] text-white outline-none focus:border-teal-500"
+                                            >
+                                                {['None', 'Thin', 'Thick', 'Pencil', 'Handlebar', 'Chevron', 'Ultra Thin', 'Horseshoe', 'Walrus', 'Toothbrush'].map((style, idx) => (
+                                                    <option key={idx} value={idx}>{style}</option>
+                                                ))}
+                                            </select>
                                         </div>
-                                    ))}
+
+                                        <div className="space-y-2">
+                                            <label className="text-[7px] font-black text-white/40 uppercase tracking-widest">Beard Style</label>
+                                            <select 
+                                                value={player.customization?.beardStyle || 0}
+                                                onChange={(e) => onUpdatePlayer?.({
+                                                    ...player,
+                                                    customization: { ...(player.customization || {}), beardStyle: parseInt(e.target.value) }
+                                                } as any)}
+                                                className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-[10px] text-white outline-none focus:border-teal-500"
+                                            >
+                                                {['None', 'Goatee', 'Full Beard', 'Chin Strap', 'Sideburns', 'Soul Patch', 'Van Dyke', 'Stubble', 'Ducktail', 'Pointed'].map((style, idx) => (
+                                                    <option key={idx} value={idx}>{style}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-[7px] font-black text-white/40 uppercase tracking-widest">Facial Hair Color</label>
+                                            <div className="flex flex-wrap gap-2">
+                                                {['#090806', '#2C1608', '#4E2708', '#A56B46', '#B55239', '#D6C4C2', '#FFFFFF', '#4A4A4A'].map(color => (
+                                                    <button 
+                                                        key={color}
+                                                        onClick={() => onUpdatePlayer?.({
+                                                            ...player,
+                                                            customization: { ...(player.customization || {}), beardColor: color, mustacheColor: color }
+                                                        } as any)}
+                                                        className={`w-6 h-6 rounded-full border-2 ${player.customization?.beardColor === color ? 'border-teal-500 scale-110' : 'border-white/10'}`}
+                                                        style={{ backgroundColor: color }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="pt-4 border-t border-white/5 flex justify-end">
+                                    <button 
+                                        onClick={() => setSelectedFormat('Summary')}
+                                        className="px-6 py-2 bg-teal-500 text-black font-black uppercase tracking-widest text-[8px] rounded-lg hover:bg-teal-400 transition-all"
+                                    >
+                                        SAVE_CHANGES
+                                    </button>
                                 </div>
                             </motion.div>
-
-                            {/* Bowling Details */}
-                            <motion.div 
-                                initial={{ opacity: 0, x: 15 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="bg-white/[0.03] border border-white/10 rounded-[24px] p-4 shadow-2xl backdrop-blur-xl"
-                            >
-                                <h3 className="text-[7px] font-black uppercase tracking-[0.4em] text-white/20 mb-4">BOWLING_METRICS</h3>
-                                <div className="space-y-3">
+                        ) : (
+                            <>
+                                {/* Mini Cards Grid */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                     {[
-                                        { label: 'Economy Rate', val: stats.economy.toFixed(2) },
-                                        { label: 'Bowling Avg', val: stats.bowlingAverage.toFixed(1) },
-                                        { label: 'Best Bowling', val: stats.bestBowling || '-' },
-                                        { label: '3-Wicket Hauls', val: stats.threeWicketHauls },
-                                        { label: '5-Wicket Hauls', val: stats.fiveWicketHauls }
-                                    ].map((stat, idx) => (
-                                        <div key={idx} className="flex justify-between items-center border-b border-white/5 pb-2 last:border-0 last:pb-0">
-                                            <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/60">{stat.label}</span>
-                                            <span className="text-sm font-black italic font-mono text-teal-400 leading-none">{stat.val}</span>
-                                        </div>
+                                        { label: 'Matches', val: stats.matches, icon: Activity },
+                                        { label: 'Batting Avg', val: stats.average.toFixed(1), icon: Target },
+                                        { label: 'Strike Rate', val: stats.strikeRate.toFixed(1), icon: Zap },
+                                        { label: 'Wickets', val: stats.wickets, icon: Shield }
+                                    ].map((item, idx) => (
+                                        <motion.div 
+                                            key={idx}
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            transition={{ delay: idx * 0.05 }}
+                                            className="bg-white/[0.03] border border-white/10 rounded-[20px] p-3.5 flex flex-col justify-between h-24 group hover:border-teal-500/30 transition-colors shadow-xl backdrop-blur-xl"
+                                        >
+                                            <item.icon className="w-4 h-4 text-teal-500 group-hover:scale-110 transition-transform" />
+                                            <div>
+                                                <p className="text-[7px] font-black uppercase tracking-[0.3em] text-white/20 mb-0.5">{item.label}</p>
+                                                <p className="text-lg font-black italic font-mono text-white leading-none tracking-tighter">{item.val}</p>
+                                            </div>
+                                        </motion.div>
                                     ))}
                                 </div>
-                            </motion.div>
-                        </div>
+
+                                {/* Detailed Stats Tables */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                                    {/* Batting Details */}
+                                    <motion.div 
+                                        initial={{ opacity: 0, x: -15 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        className="bg-white/[0.03] border border-white/10 rounded-[24px] p-4 shadow-2xl backdrop-blur-xl"
+                                    >
+                                        <h3 className="text-[7px] font-black uppercase tracking-[0.4em] text-white/20 mb-4">BATTING_METRICS</h3>
+                                        <div className="space-y-3">
+                                            {[
+                                                { label: 'Total Runs', val: stats.runs },
+                                                { label: 'High Score', val: stats.highestScore },
+                                                { label: '50s / 100s', val: `${stats.fifties} / ${stats.hundreds}` },
+                                                { label: 'Boundaries (4/6)', val: `${stats.fours} / ${stats.sixes}` },
+                                                { label: 'Fastest 50', val: stats.fastestFifty > 0 ? `${stats.fastestFifty}b` : '-' }
+                                            ].map((stat, idx) => (
+                                                <div key={idx} className="flex justify-between items-center border-b border-white/5 pb-2 last:border-0 last:pb-0">
+                                                    <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/60">{stat.label}</span>
+                                                    <span className="text-sm font-black italic font-mono text-teal-400 leading-none">{stat.val}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+
+                                    {/* Bowling Details */}
+                                    <motion.div 
+                                        initial={{ opacity: 0, x: 15 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        className="bg-white/[0.03] border border-white/10 rounded-[24px] p-4 shadow-2xl backdrop-blur-xl"
+                                    >
+                                        <h3 className="text-[7px] font-black uppercase tracking-[0.4em] text-white/20 mb-4">BOWLING_METRICS</h3>
+                                        <div className="space-y-3">
+                                            {[
+                                                { label: 'Economy Rate', val: stats.economy.toFixed(2) },
+                                                { label: 'Bowling Avg', val: stats.bowlingAverage.toFixed(1) },
+                                                { label: 'Best Bowling', val: stats.bestBowling || '-' },
+                                                { label: '3-Wicket Hauls', val: stats.threeWicketHauls },
+                                                { label: '5-Wicket Hauls', val: stats.fiveWicketHauls }
+                                            ].map((stat, idx) => (
+                                                <div key={idx} className="flex justify-between items-center border-b border-white/5 pb-2 last:border-0 last:pb-0">
+                                                    <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/60">{stat.label}</span>
+                                                    <span className="text-sm font-black italic font-mono text-teal-400 leading-none">{stat.val}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

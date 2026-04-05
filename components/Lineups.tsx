@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { GameData, Team, Format, Player, PlayerRole } from '../types';
 import { Icons } from './Icons';
 import { getRoleColor, generateAutoXI, calculateTeamRatings, getTeamHighlights } from '../utils';
@@ -150,86 +151,156 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
         return null;
     };
 
+    const onDragEnd = (result: DropResult) => {
+        if (!result.destination || !selectedTeam) return;
+
+        const { source, destination } = result;
+
+        // Reordering within Playing XI
+        if (source.droppableId === 'playingXI' && destination.droppableId === 'playingXI') {
+            const newXI = Array.from(playingXI);
+            const [reorderedItem] = newXI.splice(source.index, 1);
+            newXI.splice(destination.index, 0, reorderedItem);
+            handleUpdatePlayingXI(selectedTeam.id, selectedFormat, newXI.map(p => p.id));
+            return;
+        }
+
+        // Swapping from Bench to Playing XI
+        if (source.droppableId === 'bench' && destination.droppableId === 'playingXI') {
+            const playerFromBench = bench[source.index];
+            if (isDomesticOnlyFormat && playerFromBench.isForeign) {
+                showFeedback("Foreign players are not allowed in this format.", "error");
+                return;
+            }
+            const targetPlayerInXI = playingXI[destination.index];
+            if (targetPlayerInXI.id === captainId) {
+                showFeedback("Cannot swap the captain. Please assign a new captain first.", "error");
+                return;
+            }
+            const newXI = Array.from(playingXI);
+            newXI[destination.index] = playerFromBench;
+            handleUpdatePlayingXI(selectedTeam.id, selectedFormat, newXI.map(p => p.id));
+            showFeedback("Player added to Playing XI!", "success");
+            return;
+        }
+
+        // Swapping from Playing XI to Bench
+        if (source.droppableId === 'playingXI' && destination.droppableId === 'bench') {
+            const playerFromXI = playingXI[source.index];
+            if (playerFromXI.id === captainId) {
+                showFeedback("Cannot remove the captain. Please assign a new captain first.", "error");
+                return;
+            }
+            // In this UI, we usually swap. If we just "remove", we need an auto-replacement or leave it empty?
+            // The user wants to "choose xi", so swapping is better. 
+            // But if they drag to bench, maybe they want to swap with a specific bench player?
+            // For now, let's just allow reordering and swapping between lists.
+            // If dragging from XI to Bench, we need to know which bench player to swap with.
+            // DnD usually works by dropping into a list. 
+            // Let's implement a simple swap if dropped on a bench player.
+            const playerFromBench = bench[destination.index];
+            if (isDomesticOnlyFormat && playerFromBench.isForeign) {
+                showFeedback("Foreign players are not allowed in this format.", "error");
+                return;
+            }
+            const newXI = Array.from(playingXI);
+            newXI[source.index] = playerFromBench;
+            handleUpdatePlayingXI(selectedTeam.id, selectedFormat, newXI.map(p => p.id));
+            showFeedback("Players swapped successfully!", "success");
+        }
+    };
+
     const renderPlayerCard = (player: Player, isXI: boolean, index: number) => {
         const isSelected = playerToSwap?.id === player.id;
         const isCaptain = player.id === captainId;
         const dropStatus = getDropStatus(player);
 
         return (
-            <motion.div
-                key={player.id}
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                whileHover={{ y: -3, scale: 1.01 }}
-                onClick={() => isXI ? selectPlayerForSwap(player) : completeSwap(player)}
-                className={`relative group cursor-pointer p-2 md:p-4 rounded-[12px] md:rounded-[24px] border transition-all duration-500 overflow-hidden ${
-                    isSelected 
-                    ? 'bg-teal-500 border-teal-400 shadow-[0_15px_30px_rgba(20,184,166,0.3)]' 
-                    : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.06] hover:border-teal-500/40 shadow-xl'
-                } ${dropStatus ? 'border-l-4 border-l-red-500' : ''}`}
-            >
-                <div className={`absolute -right-2 -bottom-2 text-3xl md:text-6xl font-black italic opacity-[0.03] pointer-events-none transition-colors ${isSelected ? 'text-black' : 'text-white'}`}>
-                    {index + 1}
-                </div>
-
-                <div className="flex items-center gap-2 md:gap-4 relative z-10">
-                    <div className="relative">
-                        <div className={`absolute inset-0 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${isSelected ? 'bg-white/40' : 'bg-teal-500/20'}`} />
-                        <PlayerAvatar player={player} size="sm" className={`w-8 h-8 md:w-12 md:h-12 border-2 md:border-3 relative z-10 transition-colors ${isSelected ? 'border-white/40' : 'border-white/5 group-hover:border-teal-500/30'}`} />
-                        {isCaptain && (
-                            <div className="absolute -top-1 -right-1 bg-yellow-500 text-black w-3.5 h-3.5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-[5px] md:text-[8px] font-black shadow-lg border-2 border-[#050808] z-20">
-                                C
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1 md:gap-2 mb-0.5 md:mb-1">
-                            <h4 className={`text-xs md:text-lg font-black italic uppercase tracking-tighter truncate transition-colors ${isSelected ? 'text-black' : 'text-white group-hover:text-teal-500'}`}>
-                                {player.name}
-                            </h4>
-                            {player.isForeign && <Icons.Globe className={isSelected ? 'text-black/40 w-1.5 h-1.5 md:w-2 md:h-2' : 'text-white/20 w-1.5 h-1.5 md:w-2 md:h-2'} />}
-                        </div>
-                        
-                        <div className="flex items-center gap-1 md:gap-2">
-                            <span className={`text-[5px] md:text-[8px] font-black uppercase tracking-widest px-1 md:px-2 py-0.5 rounded-full border transition-colors ${
-                                isSelected 
-                                ? 'bg-black/10 border-black/10 text-black' 
-                                : `bg-white/5 border-white/10 ${getRoleColor(player.role)}`
-                            }`}>
-                                {player.role}
-                            </span>
-                            {dropStatus && (
-                                <span className="text-[5px] md:text-[7px] font-black text-red-500 uppercase tracking-widest bg-red-500/10 px-1 py-0.5 rounded-full border border-red-500/20">
-                                    AT_RISK
-                                </span>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="text-right">
-                        <p className={`text-sm md:text-xl font-black italic leading-none mb-0.5 transition-colors ${isSelected ? 'text-black' : 'text-teal-500'}`}>
-                            {Math.max(player.battingSkill, player.secondarySkill)}
-                        </p>
-                        <p className={`text-[5px] md:text-[7px] font-black uppercase tracking-widest transition-colors ${isSelected ? 'text-black/40' : 'text-white/20'}`}>
-                            RATING
-                        </p>
-                    </div>
-                </div>
-
-                {/* Actions Overlay for Captaincy */}
-                {isXI && !isCaptain && !isSelected && (
-                    <motion.button 
-                        initial={{ opacity: 0 }}
-                        whileHover={{ opacity: 1 }}
-                        onClick={(e) => { e.stopPropagation(); setCaptain(player.id); }}
-                        className="absolute inset-0 bg-yellow-500/90 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity z-30"
+            <Draggable key={player.id} draggableId={player.id} index={index}>
+                {(provided, snapshot) => (
+                    <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
                     >
-                        <span className="text-black text-[6px] md:text-[10px] font-black uppercase tracking-[0.4em]">ASSIGN_CAPTAINCY</span>
-                    </motion.button>
-                )}
-            </motion.div>
+                        <motion.div
+                            layout
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            whileHover={{ y: -3, scale: 1.01 }}
+                            onClick={() => isXI ? selectPlayerForSwap(player) : completeSwap(player)}
+                            className={`relative group cursor-grab active:cursor-grabbing p-2 md:p-4 rounded-[12px] md:rounded-[24px] border transition-all duration-500 overflow-hidden ${
+                                snapshot.isDragging ? 'z-50 scale-105 shadow-2xl ring-2 ring-teal-500' : ''
+                            } ${
+                                isSelected 
+                                ? 'bg-teal-500 border-teal-400 shadow-[0_15px_30px_rgba(20,184,166,0.3)]' 
+                                : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.06] hover:border-teal-500/40 shadow-xl'
+                            } ${dropStatus ? 'border-l-4 border-l-red-500' : ''}`}
+                        >
+                        <div className={`absolute -right-2 -bottom-2 text-3xl md:text-6xl font-black italic opacity-[0.03] pointer-events-none transition-colors ${isSelected ? 'text-black' : 'text-white'}`}>
+                            {index + 1}
+                        </div>
+
+                        <div className="flex items-center gap-2 md:gap-4 relative z-10">
+                            <div className="relative">
+                                <div className={`absolute inset-0 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${isSelected ? 'bg-white/40' : 'bg-teal-500/20'}`} />
+                                <PlayerAvatar player={player} size="sm" className={`w-8 h-8 md:w-12 md:h-12 border-2 md:border-3 relative z-10 transition-colors ${isSelected ? 'border-white/40' : 'border-white/5 group-hover:border-teal-500/30'}`} />
+                                {isCaptain && (
+                                    <div className="absolute -top-1 -right-1 bg-yellow-500 text-black w-3.5 h-3.5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-[5px] md:text-[8px] font-black shadow-lg border-2 border-[#050808] z-20">
+                                        C
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1 md:gap-2 mb-0.5 md:mb-1">
+                                    <h4 className={`text-xs md:text-lg font-black italic uppercase tracking-tighter truncate transition-colors ${isSelected ? 'text-black' : 'text-white group-hover:text-teal-500'}`}>
+                                        {player.name}
+                                    </h4>
+                                    {player.isForeign && <Icons.Globe className={isSelected ? 'text-black/40 w-1.5 h-1.5 md:w-2 md:h-2' : 'text-white/20 w-1.5 h-1.5 md:w-2 md:h-2'} />}
+                                </div>
+                                
+                                <div className="flex items-center gap-1 md:gap-2">
+                                    <span className={`text-[5px] md:text-[8px] font-black uppercase tracking-widest px-1 md:px-2 py-0.5 rounded-full border transition-colors ${
+                                        isSelected 
+                                        ? 'bg-black/10 border-black/10 text-black' 
+                                        : `bg-white/5 border-white/10 ${getRoleColor(player.role)}`
+                                    }`}>
+                                        {player.role}
+                                    </span>
+                                    {dropStatus && (
+                                        <span className="text-[5px] md:text-[7px] font-black text-red-500 uppercase tracking-widest bg-red-500/10 px-1 py-0.5 rounded-full border border-red-500/20">
+                                            AT_RISK
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="text-right">
+                                <p className={`text-sm md:text-xl font-black italic leading-none mb-0.5 transition-colors ${isSelected ? 'text-black' : 'text-teal-500'}`}>
+                                    {Math.max(player.battingSkill, player.secondarySkill)}
+                                </p>
+                                <p className={`text-[5px] md:text-[7px] font-black uppercase tracking-widest transition-colors ${isSelected ? 'text-black/40' : 'text-white/20'}`}>
+                                    RATING
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Actions Overlay for Captaincy */}
+                        {isXI && !isCaptain && !isSelected && (
+                            <motion.button 
+                                initial={{ opacity: 0 }}
+                                whileHover={{ opacity: 1 }}
+                                onClick={(e) => { e.stopPropagation(); setCaptain(player.id); }}
+                                className="absolute inset-0 bg-yellow-500/90 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity z-30"
+                            >
+                                <span className="text-black text-[6px] md:text-[10px] font-black uppercase tracking-[0.4em]">ASSIGN_CAPTAINCY</span>
+                            </motion.button>
+                        )}
+                    </motion.div>
+                </div>
+            )}
+        </Draggable>
         );
     };
 
@@ -328,58 +399,74 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
             </header>
 
             <div className="flex-1 overflow-y-auto p-3 md:p-10 scrollbar-hide relative z-10">
-                {isDomesticOnlyFormat && (
-                    <div className="mb-3 md:mb-12 p-2 md:p-6 bg-yellow-500/10 border border-yellow-500/20 rounded-lg md:rounded-[32px] flex items-center gap-2 md:gap-6">
-                        <Icons.AlertTriangle className="text-yellow-500 w-3 h-3 md:w-8 md:h-8" />
-                        <div>
-                            <p className="text-[6px] md:text-[11px] font-black text-yellow-500 uppercase tracking-widest mb-0.5 md:mb-1">DOMESTIC_PROTOCOL_ACTIVE</p>
-                            <p className="text-[5px] md:text-[10px] font-black text-white/40 uppercase tracking-widest">ONLY_LOCAL_ASSETS_PERMITTED_IN_THIS_FORMAT</p>
-                        </div>
-                    </div>
-                )}
-
-                <div className="space-y-4 md:space-y-16">
-                    {/* Playing XI Section */}
-                    <section className="space-y-2 md:space-y-8">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 md:gap-6">
-                                <h3 className="text-[6px] md:text-[11px] font-black uppercase tracking-[0.5em] text-white/20">PLAYING_XI</h3>
-                                <div className="h-[1px] bg-white/5 w-6 md:w-32"></div>
-                                <span className="text-[6px] md:text-[11px] font-black text-teal-500 italic tracking-tighter">{playingXI.length}/11</span>
+                <DragDropContext onDragEnd={onDragEnd}>
+                    {isDomesticOnlyFormat && (
+                        <div className="mb-3 md:mb-12 p-2 md:p-6 bg-yellow-500/10 border border-yellow-500/20 rounded-lg md:rounded-[32px] flex items-center gap-2 md:gap-6">
+                            <Icons.AlertTriangle className="text-yellow-500 w-3 h-3 md:w-8 md:h-8" />
+                            <div>
+                                <p className="text-[6px] md:text-[11px] font-black text-yellow-500 uppercase tracking-widest mb-0.5 md:mb-1">DOMESTIC_PROTOCOL_ACTIVE</p>
+                                <p className="text-[5px] md:text-[10px] font-black text-white/40 uppercase tracking-widest">ONLY_LOCAL_ASSETS_PERMITTED_IN_THIS_FORMAT</p>
                             </div>
-                            <motion.button 
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => {
-                                    const newXI = generateAutoXI(selectedTeam.squad, selectedFormat);
-                                    handleUpdatePlayingXI(selectedTeam.id, selectedFormat, newXI.map(p => p.id));
-                                    showFeedback("Auto-generated a balanced XI!", "success");
-                                }}
-                                className="bg-white/5 border border-white/10 px-2 md:px-6 py-1 md:py-3 rounded-lg md:rounded-2xl text-[5px] md:text-[10px] font-black uppercase tracking-widest text-white/60 hover:bg-teal-500 hover:text-black hover:border-teal-500 transition-all duration-500 w-full sm:w-auto"
-                            >
-                                AUTO_SELECT_OPTIMAL
-                            </motion.button>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-6">
-                            <AnimatePresence mode="popLayout">
-                                {playingXI.map((player, idx) => renderPlayerCard(player, true, idx))}
-                            </AnimatePresence>
-                        </div>
-                    </section>
+                    )}
 
-                    {/* Bench Section */}
-                    <section className="space-y-2 md:space-y-8">
-                        <div className="flex items-center gap-2 md:gap-6">
-                            <h3 className="text-[6px] md:text-[11px] font-black uppercase tracking-[0.5em] text-white/20">RESERVE_BENCH</h3>
-                            <div className="h-[1px] bg-white/5 flex-1"></div>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-6">
-                            <AnimatePresence mode="popLayout">
-                                {bench.map((player, idx) => renderPlayerCard(player, false, idx))}
-                            </AnimatePresence>
-                        </div>
-                    </section>
-                </div>
+                    <div className="space-y-4 md:space-y-16">
+                        {/* Playing XI Section */}
+                        <section className="space-y-2 md:space-y-8">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div className="flex items-center gap-2 md:gap-6">
+                                    <h3 className="text-[6px] md:text-[11px] font-black uppercase tracking-[0.5em] text-white/20">PLAYING_XI</h3>
+                                    <div className="h-[1px] bg-white/5 w-6 md:w-32"></div>
+                                    <span className="text-[6px] md:text-[11px] font-black text-teal-500 italic tracking-tighter">{playingXI.length}/11</span>
+                                </div>
+                                <motion.button 
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => {
+                                        const newXI = generateAutoXI(selectedTeam.squad, selectedFormat);
+                                        handleUpdatePlayingXI(selectedTeam.id, selectedFormat, newXI.map(p => p.id));
+                                        showFeedback("Auto-generated a balanced XI!", "success");
+                                    }}
+                                    className="bg-white/5 border border-white/10 px-2 md:px-6 py-1 md:py-3 rounded-lg md:rounded-2xl text-[5px] md:text-[10px] font-black uppercase tracking-widest text-white/60 hover:bg-teal-500 hover:text-black hover:border-teal-500 transition-all duration-500 w-full sm:w-auto"
+                                >
+                                    AUTO_SELECT_OPTIMAL
+                                </motion.button>
+                            </div>
+                            <Droppable droppableId="playingXI">
+                                {(provided) => (
+                                    <div 
+                                        {...provided.droppableProps}
+                                        ref={provided.innerRef}
+                                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-6"
+                                    >
+                                        {playingXI.map((player, idx) => renderPlayerCard(player, true, idx))}
+                                        {provided.placeholder}
+                                    </div>
+                                )}
+                            </Droppable>
+                        </section>
+
+                        {/* Bench Section */}
+                        <section className="space-y-2 md:space-y-8">
+                            <div className="flex items-center gap-2 md:gap-6">
+                                <h3 className="text-[6px] md:text-[11px] font-black uppercase tracking-[0.5em] text-white/20">RESERVE_BENCH</h3>
+                                <div className="h-[1px] bg-white/5 flex-1"></div>
+                            </div>
+                            <Droppable droppableId="bench">
+                                {(provided) => (
+                                    <div 
+                                        {...provided.droppableProps}
+                                        ref={provided.innerRef}
+                                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-6"
+                                    >
+                                        {bench.map((player, idx) => renderPlayerCard(player, false, idx))}
+                                        {provided.placeholder}
+                                    </div>
+                                )}
+                            </Droppable>
+                        </section>
+                    </div>
+                </DragDropContext>
             </div>
 
             {/* Bottom Info Bar */}
