@@ -253,6 +253,23 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
         });
     };
 
+    const handleUpdateBowlingPlan = (teamId: string, format: Format, newPlan: Record<number, string>) => {
+        setGameData(prevData => {
+            if (!prevData) return null;
+            const teamPlans = prevData.bowlingPlans[teamId] || {};
+            return {
+                ...prevData,
+                bowlingPlans: {
+                    ...prevData.bowlingPlans,
+                    [teamId]: {
+                        ...teamPlans,
+                        [format]: newPlan
+                    }
+                }
+            };
+        });
+    };
+
     const simulateBackgroundMatches = (currentData: GameData): GameData => {
         if (!currentData || !currentData.schedule || !currentData.currentMatchIndex) return currentData;
         let updatedData = JSON.parse(JSON.stringify(currentData)) as GameData;
@@ -653,7 +670,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
             case 'DASHBOARD': return <Dashboard {...commonProps} handlePlayMatch={handlePlayMatch} handleForwardDay={handleForwardDay} handleQuickSimulate={handleQuickSimulate} handleSimulateWithPlay={handleSimulateWithPlay} />;
             case 'LEAGUES': return <Standings gameData={gameData} />; 
             case 'SCHEDULE': return <Schedule gameData={gameData} userTeam={userTeam} viewMatchResult={result => { setSelectedMatchResult(result); setScreen('MATCH_RESULT'); }} />;
-            case 'LINEUPS': return <Lineups {...commonProps} handleUpdatePlayingXI={handleUpdatePlayingXI} handleUpdateCaptain={handleUpdateCaptain} />;
+            case 'LINEUPS': return <Lineups {...commonProps} handleUpdatePlayingXI={handleUpdatePlayingXI} handleUpdateCaptain={handleUpdateCaptain} handleUpdateBowlingPlan={handleUpdateBowlingPlan} />;
             case 'EDITOR': return <Editor {...commonProps} handleUpdatePlayer={handleUpdatePlayer} handleCreatePlayer={handleCreatePlayer} handleUpdateGround={handleUpdateGround} handleUpdateScoreLimits={handleUpdateScoreLimits} />;
             case 'PLAYER_DATABASE': return <PlayerDatabase gameData={gameData} onAddPlayer={() => setScreen('EDITOR')} onViewPlayer={(p) => { setSelectedPlayer(p); setScreen('PLAYER_PROFILE'); }} />;
             case 'NEWS': return <News news={gameData.news} />;

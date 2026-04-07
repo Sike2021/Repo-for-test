@@ -323,6 +323,7 @@ export const App = () => {
     // Ensure other fields exist
     if (!data.awardsHistory) data.awardsHistory = [];
     if (!data.playingXIs) data.playingXIs = {};
+    if (!data.bowlingPlans) data.bowlingPlans = {};
     if (!data.sponsorships) data.sponsorships = INITIAL_SPONSORSHIPS;
     if (!data.news) data.news = INITIAL_NEWS;
     if (!data.records) data.records = { batterVsBowler: [], teamVsTeam: [], playerVsTeam: [] };
@@ -419,6 +420,7 @@ export const App = () => {
         standings: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: [] }), {} as Record<Format, Standing[]>),
         matchResults: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: [] }), {} as Record<Format, MatchResult[]>),
         playingXIs: {},
+        bowlingPlans: {},
         currentSeason: 1,
         currentFormat: Format.T20,
         awardsHistory: [],
@@ -494,6 +496,7 @@ export const App = () => {
         return acc;
       }, {} as Record<Format, MatchResult[]>),
       playingXIs: {},
+      bowlingPlans: {},
       currentSeason: 1,
       currentFormat: Format.T20, 
       awardsHistory: [],

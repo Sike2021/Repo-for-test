@@ -140,8 +140,13 @@ export const generateAutoXI = (squad: Player[], format: Format) => {
         return true;
     };
 
-    // Sort squad by overall quality for the format
+    // Sort squad by overall quality for the format, prioritizing non-emerging (National) players
     const sortedSquad = [...squad].sort((a, b) => {
+        // Priority 1: Non-emerging (National) players
+        if (!a.isEmerging && b.isEmerging) return -1;
+        if (a.isEmerging && !b.isEmerging) return 1;
+        
+        // Priority 2: Overall skill
         const scoreA = Math.max(a.battingSkill, a.secondarySkill);
         const scoreB = Math.max(b.battingSkill, b.secondarySkill);
         return scoreB - scoreA;
@@ -241,7 +246,41 @@ export const generateAutoXI = (squad: Player[], format: Format) => {
         
         // Then by batting skill
         return b.battingSkill - a.battingSkill;
-    }).slice(0, 11);
+    });
+
+    const xiIds = new Set(xi.map(p => p.id));
+    const bench = sortedSquad.filter(p => !xiIds.has(p.id));
+    
+    return [...xi, ...bench];
+};
+
+export const generateAutoBowlingPlan = (playingXI: Player[], format: Format): Record<number, string> => {
+    const plan: Record<number, string> = {};
+    const bowlers = playingXI.filter(p => [PlayerRole.FAST_BOWLER, PlayerRole.SPIN_BOWLER, PlayerRole.ALL_ROUNDER].includes(p.role))
+        .sort((a, b) => b.secondarySkill - a.secondarySkill);
+    
+    if (bowlers.length === 0) return plan;
+
+    const maxOvers = format === Format.T20 ? 20 : (format === Format.ODI ? 50 : 90);
+    const maxOversPerBowler = format === Format.T20 ? 4 : (format === Format.ODI ? 10 : 25);
+
+    const bowlerOvers: Record<string, number> = {};
+    bowlers.forEach(b => bowlerOvers[b.id] = 0);
+
+    for (let over = 1; over <= maxOvers; over++) {
+        // Simple rotation for now
+        const availableBowlers = bowlers.filter(b => bowlerOvers[b.id] < maxOversPerBowler);
+        if (availableBowlers.length === 0) break;
+
+        // Pick the best available bowler who didn't bowl the previous over
+        const prevBowlerId = plan[over - 1];
+        const candidate = availableBowlers.find(b => b.id !== prevBowlerId) || availableBowlers[0];
+        
+        plan[over] = candidate.id;
+        bowlerOvers[candidate.id]++;
+    }
+
+    return plan;
 };
 
 export const calculateTeamRatings = (squad: Player[]) => {

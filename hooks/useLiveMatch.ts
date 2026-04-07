@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { GameData, Match, Player, Format, Team, Inning, MatchResult, PlayerRole, BattingPerformance, BowlingPerformance, Strategy, LiveMatchState } from '../types';
-import { PITCH_MODIFIERS, formatOvers, getPlayerById, generateAutoXI, getBatterTier, BATTING_PROFILES, getCommentary } from '../utils';
+import { PITCH_MODIFIERS, formatOvers, getPlayerById, generateAutoXI, getBatterTier, BATTING_PROFILES, getCommentary, generateAutoBowlingPlan } from '../utils';
 
 export const useLiveMatch = (
     match: Match,
@@ -199,6 +199,8 @@ export const useLiveMatch = (
                 }
             }
 
+            const initialBowlingPlan = generateAutoBowlingPlan(bowlingTeam.squad, gameData.currentFormat);
+
             return {
                 ...prev,
                 status: 'ready',
@@ -212,6 +214,7 @@ export const useLiveMatch = (
                 currentBowlerId: bowlerId,
                 waitingFor: waitingFor,
                 autoPlayType: null, 
+                bowlingPlan: initialBowlingPlan,
                 commentary: [
                     `Match Started!`,
                     `${winnerId === teamA.id ? teamA.name : teamB.name} won the toss and elected to ${decision}.`,
@@ -491,14 +494,24 @@ export const useLiveMatch = (
                          }
                      } else {
                          // Auto Select Bowler
+                         const nextOverNum = (totalBalls / 6) + 1;
+                         const plannedBowlerId = newState.bowlingPlan?.[nextOverNum];
                          const overLimit = (gameData.currentFormat.includes('T20') ? 4 : 10);
-                         const validBowlers = currentInning.bowling.filter(b => b.playerId !== currentBowlerId && b.ballsBowled < overLimit * 6);
                          
-                         let nextBowler = validBowlers.sort((a,b) => {
-                             const pa = getPlayerById(a.playerId, allPlayers);
-                             const pb = getPlayerById(b.playerId, allPlayers);
-                             return pb.secondarySkill - pa.secondarySkill;
-                         })[0];
+                         let nextBowler = null;
+                         if (plannedBowlerId) {
+                             nextBowler = currentInning.bowling.find(b => b.playerId === plannedBowlerId && b.playerId !== currentBowlerId && b.ballsBowled < overLimit * 6);
+                         }
+
+                         if (!nextBowler) {
+                             const validBowlers = currentInning.bowling.filter(b => b.playerId !== currentBowlerId && b.ballsBowled < overLimit * 6);
+                             
+                             nextBowler = validBowlers.sort((a,b) => {
+                                 const pa = getPlayerById(a.playerId, allPlayers);
+                                 const pb = getPlayerById(b.playerId, allPlayers);
+                                 return pb.secondarySkill - pa.secondarySkill;
+                             })[0];
+                         }
 
                          if (!nextBowler) {
                              nextBowler = currentInning.bowling.find(b => b.playerId !== currentBowlerId) || currentInning.bowling[0];
@@ -823,7 +836,7 @@ export const useLiveMatch = (
             if (idx1 !== -1 && idx2 !== -1) {
                 const temp = team.squad[idx1];
                 team.squad[idx1] = team.squad[idx2];
-                team.squad[idx2] = team.squad[idx1];
+                team.squad[idx2] = temp;
             }
             
             // Also need to update the innings lineups if they were already initialized
@@ -852,6 +865,20 @@ export const useLiveMatch = (
         });
     };
 
+    const updateBowlingPlan = (plan: Record<number, string>) => {
+        setState(prev => prev ? { ...prev, bowlingPlan: plan } : null);
+    };
+
+    const autoAssignOvers = () => {
+        setState(prev => {
+            if (!prev) return null;
+            const currentInning = prev.innings[prev.currentInningIndex];
+            const bowlers = currentInning.bowling.map(b => getPlayerById(b.playerId, allPlayers));
+            const plan = generateAutoBowlingPlan(bowlers, gameData.currentFormat);
+            return { ...prev, bowlingPlan: plan };
+        });
+    };
+
     const requestBowlerChange = () => {
         setState(prev => {
             if (!prev || prev.status !== 'inprogress' || prev.waitingFor) return prev;
@@ -876,6 +903,8 @@ export const useLiveMatch = (
         startMatch,
         beginMatch,
         swapPlayers,
-        requestBowlerChange
+        requestBowlerChange,
+        updateBowlingPlan,
+        autoAssignOvers
     };
 };

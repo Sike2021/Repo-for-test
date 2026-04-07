@@ -5,7 +5,7 @@ import { Match, GameData, MatchResult, Strategy, LiveMatchState, Player, Ground,
 import { useLiveMatch } from '../hooks/useLiveMatch';
 import { Icons } from './Icons';
 import { TV_CHANNELS, INITIAL_SPONSORSHIPS, TOURNAMENT_LOGOS } from '../data';
-import { getPlayerById } from '../utils';
+import { getPlayerById, generateAutoBowlingPlan } from '../utils';
 import { streamAssistantResponse } from '../geminiService';
 import { PlayerAvatar } from './PlayerAvatar';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
@@ -38,7 +38,7 @@ const StrategyToggle = ({ label, value, onChange }: { label: string, value: Stra
     </div>
 );
 
-const PreMatchPanel = ({ match, gameData, onStart, onSimulate, onEditLineup }: { match: Match, gameData: GameData, onStart: () => void, onSimulate: () => void, onEditLineup: () => void }) => {
+const PreMatchPanel = ({ match, gameData, onStart, onSimulate, onEditLineup, onEditBowlingPlan }: { match: Match, gameData: GameData, onStart: () => void, onSimulate: () => void, onEditLineup: () => void, onEditBowlingPlan: () => void }) => {
     const sponsorship = gameData.sponsorships?.[gameData.currentFormat] || INITIAL_SPONSORSHIPS[gameData.currentFormat];
     const teamA = gameData.teams.find(t => t.name === match.teamA);
     const teamB = gameData.teams.find(t => t.name === match.teamB);
@@ -130,13 +130,22 @@ const PreMatchPanel = ({ match, gameData, onStart, onSimulate, onEditLineup }: {
             </div>
 
             <div className="mt-auto pt-1.5 space-y-1.5">
-                <button 
-                    onClick={onEditLineup}
-                    className="w-full bg-white/5 border border-white/10 text-white font-black py-2 px-4 rounded-lg uppercase tracking-[0.2em] text-[7px] hover:bg-white/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group mb-1"
-                >
-                    EDIT LINEUP
-                    <Icons.Settings className="w-2.5 h-2.5 group-hover:rotate-90 transition-transform" />
-                </button>
+                <div className="grid grid-cols-2 gap-2 mb-1">
+                    <button 
+                        onClick={onEditLineup}
+                        className="bg-white/5 border border-white/10 text-white font-black py-2 px-4 rounded-lg uppercase tracking-[0.2em] text-[7px] hover:bg-white/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group"
+                    >
+                        EDIT LINEUP
+                        <Icons.Settings className="w-2.5 h-2.5 group-hover:rotate-90 transition-transform" />
+                    </button>
+                    <button 
+                        onClick={onEditBowlingPlan}
+                        className="bg-white/5 border border-white/10 text-white font-black py-2 px-4 rounded-lg uppercase tracking-[0.2em] text-[7px] hover:bg-white/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group"
+                    >
+                        BOWLING PLAN
+                        <Icons.FastForward className="w-2.5 h-2.5 group-hover:rotate-90 transition-transform" />
+                    </button>
+                </div>
                 <button 
                     onClick={onStart}
                     className="w-full bg-teal-500 text-black font-black py-2.5 px-4 rounded-lg uppercase tracking-[0.2em] text-[7px] hover:bg-teal-400 transition-all duration-500 shadow-[0_10px_30px_rgba(20,184,166,0.2)] active:scale-[0.98] flex items-center justify-center gap-2 group"
@@ -249,7 +258,7 @@ const MatchChat = ({ gameData, onClose }: { gameData: GameData, onClose: () => v
 };
 
 const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMatchComplete, onExit, savedState, startMode = 'play' }) => {
-    const { state, playBall, playOver, autoSimulate, simulateInning, simulateMatch, setBattingStrategy, setBowlingStrategy, selectOpeners, selectNextBatter, selectNextBowler, startMatch, beginMatch, declareInning, stopAutoPlay, swapPlayers, requestBowlerChange } = useLiveMatch(match, gameData, onMatchComplete, savedState);
+    const { state, playBall, playOver, autoSimulate, simulateInning, simulateMatch, setBattingStrategy, setBowlingStrategy, selectOpeners, selectNextBatter, selectNextBowler, startMatch, beginMatch, declareInning, stopAutoPlay, swapPlayers, requestBowlerChange, updateBowlingPlan } = useLiveMatch(match, gameData, onMatchComplete, savedState);
     const commentaryRef = useRef<HTMLDivElement>(null);
     const [lastBallSpeed, setLastBallSpeed] = useState<string>("-");
     
@@ -378,6 +387,7 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
     const handleDragEnd = (result: DropResult) => {
         if (!result.destination || !state) return;
         const { source, destination } = result;
+        if (source.index === destination.index) return;
         
         const teamId = gameData.userTeamId;
         const team = state.battingTeam.id === teamId ? state.battingTeam : state.bowlingTeam;
@@ -387,6 +397,88 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
         
         swapPlayers(teamId, player1Id, player2Id);
     };
+
+    const BowlingPlanEditor = ({ onClose }: { onClose: () => void }) => {
+        if (!state) return null;
+        const teamId = gameData.userTeamId;
+        const bowlingTeam = state.bowlingTeam.id === teamId ? state.bowlingTeam : state.battingTeam;
+        const format = gameData.currentFormat;
+        const maxOvers = format === Format.T20 ? 20 : (format === Format.ODI ? 50 : 90);
+        const overLimit = format === Format.T20 ? 4 : (format === Format.ODI ? 10 : 25);
+        
+        const bowlers = bowlingTeam.squad.filter(p => [PlayerRole.FAST_BOWLER, PlayerRole.SPIN_BOWLER, PlayerRole.ALL_ROUNDER].includes(p.role));
+        
+        const [localPlan, setLocalPlan] = useState<Record<number, string>>(state.bowlingPlan || {});
+
+        const handleSelectBowler = (over: number, bowlerId: string) => {
+            setLocalPlan(prev => ({ ...prev, [over]: bowlerId }));
+        };
+
+        const handleAuto = () => {
+            const plan = generateAutoBowlingPlan(bowlingTeam.squad, format);
+            setLocalPlan(plan);
+        };
+
+        const handleSave = () => {
+            updateBowlingPlan(localPlan);
+            onClose();
+        };
+
+        return (
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="absolute inset-0 z-[140] bg-[#050808] flex flex-col p-4"
+            >
+                <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center gap-2">
+                        <div className="w-1 h-4 bg-red-500 rounded-full" />
+                        <h2 className="text-sm font-black italic uppercase tracking-tighter text-white">BOWLING_STRATEGY</h2>
+                    </div>
+                    <div className="flex gap-2">
+                        <button onClick={handleAuto} className="px-3 py-1 bg-teal-500 text-black text-[7px] font-black uppercase rounded-lg shadow-lg">AUTO_DISTRIBUTE</button>
+                        <button onClick={onClose} className="p-1.5 bg-white/5 rounded-lg border border-white/10">
+                            <Icons.X className="h-4 w-4 text-white/40" />
+                        </button>
+                    </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-hide">
+                    {Array.from({ length: maxOvers }, (_, i) => i + 1).map(over => (
+                        <div key={over} className="flex items-center gap-3 bg-white/[0.03] border border-white/5 p-2 rounded-xl">
+                            <div className="w-8 h-8 rounded-lg bg-black/40 flex items-center justify-center border border-white/10">
+                                <span className="text-[10px] font-mono font-black text-teal-500">{over}</span>
+                            </div>
+                            <div className="flex-grow">
+                                <select 
+                                    value={localPlan[over] || ''} 
+                                    onChange={(e) => handleSelectBowler(over, e.target.value)}
+                                    className="w-full bg-transparent border-none text-[9px] font-black text-white focus:ring-0 outline-none uppercase tracking-widest"
+                                >
+                                    <option value="" className="bg-slate-900">Select Bowler</option>
+                                    {bowlers.map(b => (
+                                        <option key={b.id} value={b.id} className="bg-slate-900">
+                                            {b.name} ({b.role})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <button 
+                    onClick={handleSave}
+                    className="mt-4 w-full bg-red-500 text-white font-black py-3 rounded-xl uppercase tracking-[0.2em] text-[8px] shadow-lg shadow-red-500/20"
+                >
+                    APPLY_BOWLING_PLAN
+                </button>
+            </motion.div>
+        );
+    };
+
+    const [showBowlingEditor, setShowBowlingEditor] = useState(false);
 
     useEffect(() => {
         if (activeTab === 'commentary' && commentaryRef.current) {
@@ -496,8 +588,15 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                         // The useEffect will handle the simulation start once status is 'inprogress'
                     }}
                     onEditLineup={() => setShowLineupEditor(true)}
+                    onEditBowlingPlan={() => setShowBowlingEditor(true)}
                 />
                 
+                <AnimatePresence>
+                    {showBowlingEditor && (
+                        <BowlingPlanEditor onClose={() => setShowBowlingEditor(false)} />
+                    )}
+                </AnimatePresence>
+
                 <AnimatePresence>
                     {showLineupEditor && (
                         <motion.div 
@@ -523,29 +622,50 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                                             ref={provided.innerRef}
                                             className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-hide"
                                         >
+                                            <div className="sticky top-0 z-10 bg-[#050808] pb-2">
+                                                <div className="flex items-center gap-2 px-2 py-1 bg-teal-500/10 border border-teal-500/20 rounded-lg">
+                                                    <span className="text-[7px] font-black text-teal-500 uppercase tracking-widest">PLAYING_XI</span>
+                                                </div>
+                                            </div>
+
                                             {(state.battingTeam.id === gameData.userTeamId ? state.battingTeam : state.bowlingTeam).squad.map((player, index) => (
-                                                <Draggable key={player.id} draggableId={player.id} index={index}>
-                                                    {(provided, snapshot) => (
-                                                        <div
-                                                            ref={provided.innerRef}
-                                                            {...provided.draggableProps}
-                                                            {...provided.dragHandleProps}
-                                                            className={`p-3 rounded-xl border transition-all flex items-center justify-between ${snapshot.isDragging ? 'bg-teal-500 border-teal-400 shadow-2xl scale-105 z-50' : 'bg-white/[0.03] border-white/5'}`}
-                                                        >
-                                                            <div className="flex items-center gap-3">
-                                                                <span className="text-[10px] font-mono font-black text-white/20 w-4">{index + 1}</span>
-                                                                <div className="w-8 h-8 rounded-full bg-black/40 border border-white/10 overflow-hidden">
-                                                                    <PlayerAvatar player={player} size="sm" />
-                                                                </div>
-                                                                <div>
-                                                                    <p className={`text-[10px] font-black uppercase italic tracking-tighter ${snapshot.isDragging ? 'text-black' : 'text-white'}`}>{player.name}</p>
-                                                                    <p className={`text-[6px] font-black uppercase tracking-widest ${snapshot.isDragging ? 'text-black/60' : 'text-white/40'}`}>{player.role}</p>
-                                                                </div>
+                                                <React.Fragment key={player.id}>
+                                                    {index === 11 && (
+                                                        <div className="sticky top-0 z-10 bg-[#050808] py-2">
+                                                            <div className="flex items-center gap-2 px-2 py-1 bg-white/5 border border-white/10 rounded-lg">
+                                                                <span className="text-[7px] font-black text-white/40 uppercase tracking-widest">BENCH</span>
                                                             </div>
-                                                            <div className={`text-[10px] font-black italic ${snapshot.isDragging ? 'text-black/40' : 'text-white/10'}`}>:::</div>
                                                         </div>
                                                     )}
-                                                </Draggable>
+                                                    <Draggable draggableId={player.id} index={index}>
+                                                        {(provided, snapshot) => (
+                                                            <div
+                                                                ref={provided.innerRef}
+                                                                {...provided.draggableProps}
+                                                                {...provided.dragHandleProps}
+                                                                className={`p-3 rounded-xl border transition-all flex items-center justify-between ${
+                                                                    snapshot.isDragging 
+                                                                    ? 'bg-teal-500 border-teal-400 shadow-2xl scale-105 z-50' 
+                                                                    : index < 11 
+                                                                        ? 'bg-white/[0.03] border-white/5'
+                                                                        : 'bg-white/[0.01] border-white/5 opacity-60'
+                                                                }`}
+                                                            >
+                                                                <div className="flex items-center gap-3">
+                                                                    <span className="text-[10px] font-mono font-black text-white/20 w-4">{index + 1}</span>
+                                                                    <div className="w-8 h-8 rounded-full bg-black/40 border border-white/10 overflow-hidden">
+                                                                        <PlayerAvatar player={player} size="sm" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className={`text-[10px] font-black uppercase italic tracking-tighter ${snapshot.isDragging ? 'text-black' : 'text-white'}`}>{player.name}</p>
+                                                                        <p className={`text-[6px] font-black uppercase tracking-widest ${snapshot.isDragging ? 'text-black/60' : 'text-white/40'}`}>{player.role}</p>
+                                                                    </div>
+                                                                </div>
+                                                                <div className={`text-[10px] font-black italic ${snapshot.isDragging ? 'text-black/40' : 'text-white/10'}`}>:::</div>
+                                                            </div>
+                                                        )}
+                                                    </Draggable>
+                                                </React.Fragment>
                                             ))}
                                             {provided.placeholder}
                                         </div>
@@ -1304,7 +1424,16 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                         <StrategyToggle label="Batting Tactics" value={strategies.batting} onChange={setBattingStrategy} />
                     )}
                     {isUserBowling && (
-                        <StrategyToggle label="Bowling Tactics" value={strategies.bowling} onChange={setBowlingStrategy} />
+                        <>
+                            <StrategyToggle label="Bowling Tactics" value={strategies.bowling} onChange={setBowlingStrategy} />
+                            <button 
+                                onClick={() => setShowBowlingEditor(true)}
+                                className="flex-1 bg-white/[0.03] border border-white/5 rounded-xl p-2 flex flex-col items-center justify-center gap-1 hover:bg-white/[0.05] transition-all group"
+                            >
+                                <Icons.FastForward className="w-3 h-3 text-white/20 group-hover:text-teal-500 transition-colors" />
+                                <span className="text-[6px] font-black text-white/40 uppercase tracking-[0.2em] group-hover:text-white transition-colors">Bowling Plan</span>
+                            </button>
+                        </>
                     )}
                  </div>
 

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { GameData, Team, Format, Player, PlayerRole } from '../types';
 import { Icons } from './Icons';
-import { getRoleColor, generateAutoXI, calculateTeamRatings, getTeamHighlights } from '../utils';
+import { getRoleColor, generateAutoXI, calculateTeamRatings, getTeamHighlights, generateAutoBowlingPlan } from '../utils';
 import { PlayerAvatar } from './PlayerAvatar';
 
 interface LineupsProps {
@@ -11,16 +11,18 @@ interface LineupsProps {
     userTeam: Team | null;
     handleUpdatePlayingXI: (teamId: string, format: Format, newXI: string[]) => void;
     handleUpdateCaptain: (teamId: string, format: Format, playerId: string) => void;
+    handleUpdateBowlingPlan: (teamId: string, format: Format, newPlan: Record<number, string>) => void;
     showFeedback: (message: string, type?: 'success' | 'error') => void;
 }
 
-const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayingXI, handleUpdateCaptain, showFeedback }) => {
+const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayingXI, handleUpdateCaptain, handleUpdateBowlingPlan, showFeedback }) => {
     const [selectedTeamId, setSelectedTeamId] = useState(userTeam?.id || '');
     const selectedTeam = useMemo(() => gameData.teams.find(t => t.id === selectedTeamId), [gameData.teams, selectedTeamId]);
     
     const [category, setCategory] = useState<'T20' | 'List A' | 'First Class'>('T20');
     const [selectedFormat, setSelectedFormat] = useState<Format>(gameData.currentFormat);
     const [playerToSwap, setPlayerToSwap] = useState<Player | null>(null);
+    const [viewMode, setViewMode] = useState<'BATTING' | 'BOWLING'>('BATTING');
 
     const teamRatings = useMemo(() => selectedTeam ? calculateTeamRatings(selectedTeam.squad) : null, [selectedTeam]);
     const teamHighlights = useMemo(() => selectedTeam ? getTeamHighlights(selectedTeam.squad) : null, [selectedTeam]);
@@ -66,6 +68,44 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
         const benchPlayers = teamData.squad.filter(p => !xiIdSet.has(p.id));
         return { playingXI: xiPlayers, bench: benchPlayers };
     }, [selectedTeam, selectedFormat, gameData.playingXIs, gameData.teams]);
+
+    const bowlingPlan = useMemo(() => {
+        if (!selectedTeam) return {};
+        return gameData.bowlingPlans[selectedTeam.id]?.[selectedFormat] || {};
+    }, [selectedTeam, selectedFormat, gameData.bowlingPlans]);
+
+    const bowlersInXI = useMemo(() => {
+        return playingXI.filter(p => [PlayerRole.FAST_BOWLER, PlayerRole.SPIN_BOWLER, PlayerRole.ALL_ROUNDER].includes(p.role));
+    }, [playingXI]);
+
+    const maxOvers = useMemo(() => {
+        switch(selectedFormat) {
+            case Format.T20: return 20;
+            case Format.ODI: return 50;
+            case Format.SHIELD: return 90;
+            default: return 20;
+        }
+    }, [selectedFormat]);
+
+    const maxOversPerBowler = useMemo(() => {
+        switch(selectedFormat) {
+            case Format.T20: return 4;
+            case Format.ODI: return 10;
+            case Format.SHIELD: return 25;
+            default: return 4;
+        }
+    }, [selectedFormat]);
+
+    const handleUpdateOverBowler = (over: number, bowlerId: string) => {
+        if (!selectedTeam) return;
+        const currentBowlerOvers = Object.values(bowlingPlan).filter(id => id === bowlerId).length;
+        if (currentBowlerOvers >= maxOversPerBowler && bowlingPlan[over] !== bowlerId) {
+            showFeedback(`Bowler has already reached the maximum limit of ${maxOversPerBowler} overs.`, "error");
+            return;
+        }
+        const newPlan = { ...bowlingPlan, [over]: bowlerId };
+        handleUpdateBowlingPlan(selectedTeam.id, selectedFormat, newPlan);
+    };
 
     useEffect(() => {
         if (!selectedTeam) return;
@@ -339,6 +379,22 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
                             <span className="text-[6px] md:text-[9px] font-mono font-black text-white/40 uppercase tracking-[0.4em]">ROSTER_MGMT</span>
                         </div>
                     </div>
+
+                    <div className="flex bg-white/[0.03] p-0.5 md:p-1 rounded-lg md:rounded-[16px] border border-white/10 backdrop-blur-xl">
+                        {['BATTING', 'BOWLING'].map((mode) => (
+                            <button 
+                                key={mode} 
+                                onClick={() => setViewMode(mode as any)} 
+                                className={`px-3 md:px-6 py-1 md:py-2 rounded-md md:rounded-[14px] text-[6px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${
+                                    viewMode === mode 
+                                    ? 'bg-teal-500 text-black shadow-xl' 
+                                    : 'text-white/30 hover:text-white hover:bg-white/5'
+                                }`}
+                            >
+                                {mode}
+                            </button>
+                        ))}
+                    </div>
                     
                     <div className="flex flex-col items-start md:items-end gap-2 md:gap-3 w-full md:w-auto">
                         <motion.div 
@@ -399,74 +455,140 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
             </header>
 
             <div className="flex-1 overflow-y-auto p-3 md:p-10 scrollbar-hide relative z-10">
-                <DragDropContext onDragEnd={onDragEnd}>
-                    {isDomesticOnlyFormat && (
-                        <div className="mb-3 md:mb-12 p-2 md:p-6 bg-yellow-500/10 border border-yellow-500/20 rounded-lg md:rounded-[32px] flex items-center gap-2 md:gap-6">
-                            <Icons.AlertTriangle className="text-yellow-500 w-3 h-3 md:w-8 md:h-8" />
-                            <div>
-                                <p className="text-[6px] md:text-[11px] font-black text-yellow-500 uppercase tracking-widest mb-0.5 md:mb-1">DOMESTIC_PROTOCOL_ACTIVE</p>
-                                <p className="text-[5px] md:text-[10px] font-black text-white/40 uppercase tracking-widest">ONLY_LOCAL_ASSETS_PERMITTED_IN_THIS_FORMAT</p>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="space-y-4 md:space-y-16">
-                        {/* Playing XI Section */}
-                        <section className="space-y-2 md:space-y-8">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                <div className="flex items-center gap-2 md:gap-6">
-                                    <h3 className="text-[6px] md:text-[11px] font-black uppercase tracking-[0.5em] text-white/20">PLAYING_XI</h3>
-                                    <div className="h-[1px] bg-white/5 w-6 md:w-32"></div>
-                                    <span className="text-[6px] md:text-[11px] font-black text-teal-500 italic tracking-tighter">{playingXI.length}/11</span>
+                {viewMode === 'BATTING' ? (
+                    <DragDropContext onDragEnd={onDragEnd}>
+                        {isDomesticOnlyFormat && (
+                            <div className="mb-3 md:mb-12 p-2 md:p-6 bg-yellow-500/10 border border-yellow-500/20 rounded-lg md:rounded-[32px] flex items-center gap-2 md:gap-6">
+                                <Icons.AlertTriangle className="text-yellow-500 w-3 h-3 md:w-8 md:h-8" />
+                                <div>
+                                    <p className="text-[6px] md:text-[11px] font-black text-yellow-500 uppercase tracking-widest mb-0.5 md:mb-1">DOMESTIC_PROTOCOL_ACTIVE</p>
+                                    <p className="text-[5px] md:text-[10px] font-black text-white/40 uppercase tracking-widest">ONLY_LOCAL_ASSETS_PERMITTED_IN_THIS_FORMAT</p>
                                 </div>
-                                <motion.button 
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() => {
-                                        const newXI = generateAutoXI(selectedTeam.squad, selectedFormat);
-                                        handleUpdatePlayingXI(selectedTeam.id, selectedFormat, newXI.map(p => p.id));
-                                        showFeedback("Auto-generated a balanced XI!", "success");
-                                    }}
-                                    className="bg-white/5 border border-white/10 px-2 md:px-6 py-1 md:py-3 rounded-lg md:rounded-2xl text-[5px] md:text-[10px] font-black uppercase tracking-widest text-white/60 hover:bg-teal-500 hover:text-black hover:border-teal-500 transition-all duration-500 w-full sm:w-auto"
-                                >
-                                    AUTO_SELECT_OPTIMAL
-                                </motion.button>
                             </div>
-                            <Droppable droppableId="playingXI">
-                                {(provided) => (
-                                    <div 
-                                        {...provided.droppableProps}
-                                        ref={provided.innerRef}
-                                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-6"
-                                    >
-                                        {playingXI.map((player, idx) => renderPlayerCard(player, true, idx))}
-                                        {provided.placeholder}
-                                    </div>
-                                )}
-                            </Droppable>
-                        </section>
+                        )}
 
-                        {/* Bench Section */}
-                        <section className="space-y-2 md:space-y-8">
-                            <div className="flex items-center gap-2 md:gap-6">
-                                <h3 className="text-[6px] md:text-[11px] font-black uppercase tracking-[0.5em] text-white/20">RESERVE_BENCH</h3>
-                                <div className="h-[1px] bg-white/5 flex-1"></div>
-                            </div>
-                            <Droppable droppableId="bench">
-                                {(provided) => (
-                                    <div 
-                                        {...provided.droppableProps}
-                                        ref={provided.innerRef}
-                                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-6"
-                                    >
-                                        {bench.map((player, idx) => renderPlayerCard(player, false, idx))}
-                                        {provided.placeholder}
+                        <div className="space-y-4 md:space-y-16">
+                            {/* Playing XI Section */}
+                            <section className="space-y-2 md:space-y-8">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2 md:gap-6">
+                                        <h3 className="text-[6px] md:text-[11px] font-black uppercase tracking-[0.5em] text-white/20">PLAYING_XI</h3>
+                                        <div className="h-[1px] bg-white/5 w-6 md:w-32"></div>
+                                        <span className="text-[6px] md:text-[11px] font-black text-teal-500 italic tracking-tighter">{playingXI.length}/11</span>
                                     </div>
-                                )}
-                            </Droppable>
-                        </section>
+                                    <motion.button 
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => {
+                                            const newXI = generateAutoXI(selectedTeam.squad, selectedFormat);
+                                            handleUpdatePlayingXI(selectedTeam.id, selectedFormat, newXI.map(p => p.id));
+                                            showFeedback("Auto-generated a balanced XI!", "success");
+                                        }}
+                                        className="bg-white/5 border border-white/10 px-2 md:px-6 py-1 md:py-3 rounded-lg md:rounded-2xl text-[5px] md:text-[10px] font-black uppercase tracking-widest text-white/60 hover:bg-teal-500 hover:text-black hover:border-teal-500 transition-all duration-500 w-full sm:w-auto"
+                                    >
+                                        AUTO_SELECT_OPTIMAL
+                                    </motion.button>
+                                </div>
+                                <Droppable droppableId="playingXI">
+                                    {(provided) => (
+                                        <div 
+                                            {...provided.droppableProps}
+                                            ref={provided.innerRef}
+                                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-6"
+                                        >
+                                            {playingXI.map((player, idx) => renderPlayerCard(player, true, idx))}
+                                            {provided.placeholder}
+                                        </div>
+                                    )}
+                                </Droppable>
+                            </section>
+
+                            {/* Bench Section */}
+                            <section className="space-y-2 md:space-y-8">
+                                <div className="flex items-center gap-2 md:gap-6">
+                                    <h3 className="text-[6px] md:text-[11px] font-black uppercase tracking-[0.5em] text-white/20">RESERVE_BENCH</h3>
+                                    <div className="h-[1px] bg-white/5 flex-1"></div>
+                                </div>
+                                <Droppable droppableId="bench">
+                                    {(provided) => (
+                                        <div 
+                                            {...provided.droppableProps}
+                                            ref={provided.innerRef}
+                                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-6"
+                                        >
+                                            {bench.map((player, idx) => renderPlayerCard(player, false, idx))}
+                                            {provided.placeholder}
+                                        </div>
+                                    )}
+                                </Droppable>
+                            </section>
+                        </div>
+                    </DragDropContext>
+                ) : (
+                    <div className="space-y-8">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex items-center gap-6">
+                                <h3 className="text-[11px] font-black uppercase tracking-[0.5em] text-white/20">BOWLING_PLAN</h3>
+                                <div className="h-[1px] bg-white/5 w-32"></div>
+                                <span className="text-[11px] font-black text-teal-500 italic tracking-tighter">{selectedFormat}</span>
+                            </div>
+                            <motion.button 
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => {
+                                    const newPlan = generateAutoBowlingPlan(playingXI, selectedFormat);
+                                    handleUpdateBowlingPlan(selectedTeam.id, selectedFormat, newPlan);
+                                    showFeedback("Bowling plan auto-generated!", "success");
+                                }}
+                                className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white/60 hover:bg-teal-500 hover:text-black hover:border-teal-500 transition-all duration-500"
+                            >
+                                AUTO_DISTRIBUTE_OVERS
+                            </motion.button>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">
+                            {Array.from({ length: maxOvers }).map((_, i) => {
+                                const overNum = i + 1;
+                                const assignedBowlerId = bowlingPlan[overNum];
+                                const assignedBowler = playingXI.find(p => p.id === assignedBowlerId);
+
+                                return (
+                                    <div key={overNum} className="bg-white/[0.02] border border-white/10 rounded-2xl p-4 flex flex-col gap-3 group hover:border-teal-500/40 transition-all">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">OVER {overNum}</span>
+                                            {assignedBowler && (
+                                                <div className="w-2 h-2 rounded-full bg-teal-500 shadow-[0_0_10px_rgba(20,184,166,0.5)]" />
+                                            )}
+                                        </div>
+
+                                        <select
+                                            value={assignedBowlerId || ''}
+                                            onChange={(e) => handleUpdateOverBowler(overNum, e.target.value)}
+                                            className="bg-white/[0.05] border border-white/10 rounded-xl px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white outline-none cursor-pointer hover:bg-white/[0.1] transition-all"
+                                        >
+                                            <option value="" className="bg-[#050808]">SELECT_BOWLER</option>
+                                            {bowlersInXI.map(bowler => (
+                                                <option key={bowler.id} value={bowler.id} className="bg-[#050808]">
+                                                    {bowler.name.toUpperCase()} ({Object.values(bowlingPlan).filter(id => id === bowler.id).length}/{maxOversPerBowler})
+                                                </option>
+                                            ))}
+                                        </select>
+
+                                        {assignedBowler && (
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <PlayerAvatar player={assignedBowler} size="xs" className="w-6 h-6 border border-white/10" />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-[8px] font-black text-white uppercase truncate">{assignedBowler.name}</p>
+                                                    <p className={`text-[6px] font-black uppercase tracking-widest ${getRoleColor(assignedBowler.role)}`}>{assignedBowler.role}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
-                </DragDropContext>
+                )}
             </div>
 
             {/* Bottom Info Bar */}

@@ -140,6 +140,7 @@ export interface TVChannel { id: string; name: string; logo: string; color: stri
 
 export interface GameData {
     userTeamId: string; teams: Team[]; grounds: Ground[]; allTeamsData: TeamData[]; allPlayers: Player[]; schedule: Record<Format, Match[]>; currentMatchIndex: Record<Format, number>; standings: Record<Format, Standing[]>; matchResults: Record<Format, MatchResult[]>; playingXIs: Record<string, Partial<Record<Format, string[]>>>; currentSeason: number; currentFormat: Format; awardsHistory: Award[]; records: { batterVsBowler: BatterVsBowlerRecord[]; teamVsTeam: TeamVsTeamRecord[]; playerVsTeam: PlayerVsTeamRecord[]; }; promotionHistory: PromotionRecord[]; popularity: number; sponsorships: Record<Format, Sponsorship>; news: NewsArticle[]; activeMatch: LiveMatchState | null; scoreLimits?: Record<string, Partial<Record<Format, InningLimits>>>; availableBrands?: Brand[]; availableTVChannels?: TVChannel[];
+    bowlingPlans: Record<string, Partial<Record<Format, Record<number, string>>>>;
     settings: {
         isDoubleRoundRobin: boolean;
     };
@@ -147,6 +148,7 @@ export interface GameData {
 
 export interface LiveMatchState {
     status: 'toss' | 'ready' | 'inprogress' | 'inning_break' | 'completed'; match: Match; currentInningIndex: number; innings: Inning[]; target: number | null; currentBatters: { strikerId: string; nonStrikerId: string }; currentBowlerId: string; recentBalls: string[]; commentary: string[]; battingTeam: Team; bowlingTeam: Team; requiredRunRate: number; currentPartnership: { runs: number, balls: number }; fallOfWickets: { score: number, wicket: number, over: string, player: string }[]; waitingFor: 'openers' | 'batter' | 'bowler' | 'batter_arrival' | 'bowler_change' | null; strategies: { batting: Strategy; bowling: Strategy; }; autoPlayType: 'regular' | 'inning' | 'match' | null; tossWinnerId: string | null; tossDecision: 'bat' | 'bowl' | null; followOn?: boolean;
+    bowlingPlan?: Record<number, string>;
 }
 
 export interface Message { id: string; text: string; sender: 'user' | 'model' | 'bot'; timestamp?: Date; }
