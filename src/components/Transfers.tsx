@@ -108,7 +108,7 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                             ))}
                         </select>
                     </div>
-                    <div className="p-2 space-y-1">
+                    <div className="flex-1 overflow-y-auto p-2 space-y-1">
                         {leftTeam?.squad.map(player => (
                             <div key={player.id} className="flex items-center justify-between p-2 bg-white/[0.02] hover:bg-white/[0.05] rounded-lg border border-white/5 transition-colors group">
                                 <div className="flex items-center gap-2">
@@ -162,7 +162,7 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                             </div>
                         )}
                     </div>
-                    <div className="p-2 space-y-1">
+                    <div className="flex-1 overflow-y-auto p-2 space-y-1">
                         {rightList.map(player => (
                             <div key={player.id} className="flex items-center justify-between p-2 bg-white/[0.02] hover:bg-white/[0.05] rounded-lg border border-white/5 transition-colors group">
                                 <div className="flex items-center gap-2">

@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { GameData, Message } from '../types';
-import { streamAssistantResponse } from '../geminiService';
+import { streamAssistantResponse } from '../services/geminiService';
 import { Icons } from './Icons';
 
 interface AssistantProps {

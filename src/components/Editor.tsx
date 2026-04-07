@@ -34,12 +34,21 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
         const file = e.target.files?.[0];
         if (!file || !selectedPlayer) return;
 
+        // Local preview
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            if (event.target?.result) {
+                setSelectedPlayer(prev => prev ? { ...prev, imageUrl: event.target?.result as string } : null);
+            }
+        };
+        reader.readAsDataURL(file);
+
         setIsUploading(true);
         try {
             const storageRef = ref(storage, `avatars/${selectedPlayer.id}_${Date.now()}`);
             await uploadBytes(storageRef, file);
             const url = await getDownloadURL(storageRef);
-            setSelectedPlayer(prev => prev ? { ...prev, avatarUrl: url } : null);
+            setSelectedPlayer(prev => prev ? { ...prev, imageUrl: url } : null);
         } catch (error) {
             console.error("Error uploading photo:", error);
         } finally {
@@ -201,6 +210,7 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
                             <AvatarSelector 
                                 selectedSeed={selectedPlayer.avatarSeed}
                                 selectedUrl={selectedPlayer.avatarUrl}
+                                selectedImageUrl={selectedPlayer.imageUrl}
                                 onSelect={(seed, isGallery, isUrl, gp) => {
                                     setSelectedPlayer(prev => {
                                         if (!prev) return null;
@@ -209,7 +219,8 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
                                             name: gp ? gp.name : prev.name,
                                             nationality: gp ? gp.nationality : prev.nationality,
                                             avatarSeed: isUrl ? undefined : seed,
-                                            avatarUrl: isUrl ? seed : undefined
+                                            avatarUrl: isUrl ? seed : undefined,
+                                            imageUrl: isUrl ? seed : prev.imageUrl
                                         };
                                     });
                                 }}

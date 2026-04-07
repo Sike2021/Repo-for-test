@@ -154,14 +154,14 @@ export const PlayerAvatar: React.FC<PlayerAvatarProps> = ({ player, size = 'md',
 
   if (!player) return null;
 
-  const isDiceBear = player.avatarSeed && !player.avatarUrl;
+  const isDiceBear = player.avatarSeed && !player.avatarUrl && !player.imageUrl;
   const diceBearUrl = player.avatarSeed ? GET_AVATAR_URL(player.avatarSeed!) : null;
   const localAvatarUrl = player.avatarSeed ? `/avatars/${player.avatarSeed}.png` : null;
-  const avatarUrl = player.avatarUrl || localAvatarUrl || diceBearUrl;
+  const avatarUrl = player.imageUrl || player.avatarUrl || localAvatarUrl || diceBearUrl;
 
   return (
     <div className={`relative rounded-full overflow-hidden border-2 flex-shrink-0 ${nationalityBorder} ${sizeClasses[size]} ${className}`}>
-      {avatarUrl && (avatarUrl.startsWith('http') || avatarUrl.startsWith('data:image/') || avatarUrl.startsWith('/')) ? (
+      {avatarUrl && (typeof avatarUrl === 'string') && (avatarUrl.startsWith('http') || avatarUrl.startsWith('data:image/') || avatarUrl.startsWith('/')) ? (
         <img 
           src={avatarUrl} 
           alt={player.name} 

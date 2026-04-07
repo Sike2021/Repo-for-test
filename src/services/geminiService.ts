@@ -1,23 +1,15 @@
 
-import { GoogleGenAI } from "@google/genai";
-import { MatchResult, GameData, Message, PlayerRole } from './types';
-import { INITIAL_SPONSORSHIPS } from './data';
+import { GoogleGenAI, Type } from "@google/genai";
+import { Player, Team, LiveMatchState, MatchResult, GameData, Message } from "../types";
+
+// Initialize the Google GenAI client using the API key from environment variables.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || process.env.GEMINI_API_KEY });
 
 const GEMINI_MODEL = 'gemini-3-flash-preview';
-
-let ai: GoogleGenAI;
-
-function getAi() {
-    if (!ai) {
-        ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
-    }
-    return ai;
-}
 
 const getSystemInstruction = (gameData: GameData) => {
     const userTeam = gameData.teams.find(t => t.id === gameData.userTeamId);
     const currentFormat = gameData.currentFormat;
-    const teamList = gameData.teams.map(t => t.name).join(', ');
 
     return `
     You are "Signify", an expert AI cricket manager assistant for '${userTeam?.name}'.
@@ -40,12 +32,14 @@ const getSystemInstruction = (gameData: GameData) => {
     `;
 };
 
+/**
+ * Streams assistant responses for the chat interface.
+ */
 export async function* streamAssistantResponse(
     prompt: string,
     history: Message[],
     gameData: GameData
 ): AsyncGenerator<string> {
-    const ai = getAi();
     const systemInstruction = getSystemInstruction(gameData);
     const contents = history.map(msg => ({
         role: msg.sender === 'user' ? 'user' : 'model',
@@ -67,8 +61,10 @@ export async function* streamAssistantResponse(
     }
 }
 
+/**
+ * Generates a post-match analysis.
+ */
 export const generateMatchAnalysis = async (matchResult: MatchResult): Promise<string> => {
-    const ai = getAi();
     const prompt = `Analyze this cricket match scorecard. Highlight turning points and MOTM impact.
     Summary: ${matchResult.summary}
     Man of Match: ${matchResult.manOfTheMatch.playerName}`;
@@ -82,4 +78,53 @@ export const generateMatchAnalysis = async (matchResult: MatchResult): Promise<s
     } catch (e) {
         return "Could not generate analysis at this time.";
     }
+};
+
+/**
+ * Gets tactical advice for the cricket team using Gemini.
+ */
+export const getAITacticalAdvice = async (team: Team) => {
+  try {
+    const squadInfo = team.squad.map(p => `${p.name} (${p.role}, Rating: ${p.battingSkill}/${p.secondarySkill})`).join(", ");
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: `Analyze this cricket team and provide tactical advice: ${team.name}. Squad: ${squadInfo}. Provide scouting recommendations, a tactical tip, and a player of the month.`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            scoutingReport: { type: Type.STRING },
+            tacticalTip: { type: Type.STRING },
+            playerOfTheMonthSuggestion: { type: Type.STRING }
+          },
+          required: ["scoutingReport", "tacticalTip", "playerOfTheMonthSuggestion"]
+        }
+      }
+    });
+    return JSON.parse(response.text || '{}');
+  } catch (error) {
+    console.error("AI Advice Error:", error);
+    return {
+      scoutingReport: "Focus on strengthening the middle-order batting.",
+      tacticalTip: "Try utilizing your spinners during the middle overs to choke the run rate.",
+      playerOfTheMonthSuggestion: team.squad[0]?.name || "Your Captain"
+    };
+  }
+};
+
+/**
+ * Narrates a match event using Gemini as a commentator.
+ */
+export const getMatchNarration = async (matchState: LiveMatchState, event: string) => {
+  try {
+    const currentInning = matchState.innings[matchState.currentInningIndex];
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: `You are a cricket commentator. Narrate a specific match event: "${event}". Current Score: ${currentInning.score}/${currentInning.wickets} in ${currentInning.overs} overs. Keep it exciting and under 50 words.`
+    });
+    return response.text;
+  } catch (error) {
+    return "What a fantastic delivery! The crowd is going wild!";
+  }
 };

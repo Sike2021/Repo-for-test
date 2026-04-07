@@ -233,10 +233,7 @@ const playersRaw: any[] = [
   { id: 'dom-bl-4', name: 'Asif Hanif', nationality: 'Local', role: PlayerRole.FAST_BOWLER, battingSkill: 42, secondarySkill: 64, style: 'N', isOpener: false, isForeign: false, avatarSeed: 'Ahmed' },
 ];
 
-// --- GALLERY PLAYERS (FROM UPLOADED IMAGES) ---
-export const GALLERY_PLAYERS: any[] = [];
-
-export const PLAYERS: Player[] = [...playersRaw, ...GALLERY_PLAYERS].map(p => ({
+export const PLAYERS: Player[] = playersRaw.map(p => ({
     ...p,
     stats: generateInitialStats()
 }));

@@ -11,7 +11,7 @@ export const useLiveMatch = (
 ) => {
     const [state, setState] = useState<LiveMatchState | null>(initialState || null);
     const matchIdRef = useRef<string | number | null>(initialState ? initialState.match.matchNumber : null);
-    const autoPlayRef = useRef<any>(null); 
+    const autoPlayRef = useRef<NodeJS.Timeout | null>(null); 
     const [allPlayers, setAllPlayers] = useState<Player[]>([]);
     const [groundPitch, setGroundPitch] = useState("Balanced Sporting Pitch");
     const [groundCode, setGroundCode] = useState("KCG");
@@ -124,7 +124,7 @@ export const useLiveMatch = (
 
     const startMatch = (winnerId: string, decision: 'bat' | 'bowl') => {
         console.log("startMatch called with:", winnerId, decision);
-        setState(prev => {
+        setState((prev: LiveMatchState | null) => {
             if (!prev) {
                 console.error("startMatch: prev state is null");
                 return null;
@@ -225,7 +225,7 @@ export const useLiveMatch = (
     };
 
     const playBall = useCallback(() => {
-        setState(prevState => {
+        setState((prevState: LiveMatchState | null) => {
             if (!prevState || prevState.status === 'completed') {
                  stopAutoPlay();
                  return prevState;
@@ -695,14 +695,14 @@ export const useLiveMatch = (
             clearInterval(autoPlayRef.current);
             autoPlayRef.current = null;
         }
-        setState(prev => prev ? { ...prev, autoPlayType: null } : null);
+        setState((prev: LiveMatchState | null) => prev ? { ...prev, autoPlayType: null } : null);
     };
 
     const playOver = () => {
         let balls = 0;
         stopAutoPlay();
         
-        setState(prev => prev ? { ...prev, autoPlayType: 'regular' } : null);
+        setState((prev: LiveMatchState | null) => prev ? { ...prev, autoPlayType: 'regular' } : null);
 
         autoPlayRef.current = setInterval(() => {
             playBall();
@@ -710,14 +710,14 @@ export const useLiveMatch = (
             if (balls >= 6) {
                 if (autoPlayRef.current) clearInterval(autoPlayRef.current);
                 autoPlayRef.current = null;
-                setState(prev => prev ? { ...prev, autoPlayType: null } : null);
+                setState((prev: LiveMatchState | null) => prev ? { ...prev, autoPlayType: null } : null);
             }
         }, 100);
     };
 
     const autoSimulate = () => {
         if (autoPlayRef.current) return;
-        setState(prev => prev ? { ...prev, autoPlayType: 'regular' } : null);
+        setState((prev: LiveMatchState | null) => prev ? { ...prev, autoPlayType: 'regular' } : null);
         autoPlayRef.current = setInterval(() => {
             playBall();
         }, 50);
@@ -725,7 +725,7 @@ export const useLiveMatch = (
     
     const simulateInning = () => {
          stopAutoPlay();
-         setState(prev => prev ? { ...prev, autoPlayType: 'inning' } : null);
+         setState((prev: LiveMatchState | null) => prev ? { ...prev, autoPlayType: 'inning' } : null);
          autoPlayRef.current = setInterval(() => {
             playBall();
         }, 10); 
@@ -733,7 +733,7 @@ export const useLiveMatch = (
 
     const simulateMatch = () => {
         stopAutoPlay();
-        setState(prev => prev ? { ...prev, autoPlayType: 'match' } : null);
+        setState((prev: LiveMatchState | null) => prev ? { ...prev, autoPlayType: 'match' } : null);
         autoPlayRef.current = setInterval(() => {
            playBall();
        }, 5); 
@@ -745,11 +745,11 @@ export const useLiveMatch = (
         };
     }, []);
 
-    const setBattingStrategy = (s: Strategy) => setState(prev => prev ? { ...prev, strategies: { ...prev.strategies, batting: s } } : null);
-    const setBowlingStrategy = (s: Strategy) => setState(prev => prev ? { ...prev, strategies: { ...prev.strategies, bowling: s } } : null);
+    const setBattingStrategy = (s: Strategy) => setState((prev: LiveMatchState | null) => prev ? { ...prev, strategies: { ...prev.strategies, batting: s } } : null);
+    const setBowlingStrategy = (s: Strategy) => setState((prev: LiveMatchState | null) => prev ? { ...prev, strategies: { ...prev.strategies, bowling: s } } : null);
 
     const selectOpeners = (strikerId: string, nonStrikerId: string) => {
-        setState(prev => {
+        setState((prev: LiveMatchState | null) => {
             if (!prev) return null;
             
             return {
@@ -762,7 +762,7 @@ export const useLiveMatch = (
     };
 
     const selectNextBatter = (batterId: string) => {
-        setState(prev => {
+        setState((prev: LiveMatchState | null) => {
             if (!prev) return null;
             const currentInning = prev.innings[prev.currentInningIndex];
             const strikerOut = currentInning.batting.find(b => b.playerId === prev.currentBatters.strikerId)?.isOut;
@@ -804,7 +804,7 @@ export const useLiveMatch = (
     };
 
     const selectNextBowler = (bowlerId: string) => {
-        setState(prev => {
+        setState((prev: LiveMatchState | null) => {
             if (!prev) return null;
             return {
                 ...prev,
@@ -816,7 +816,7 @@ export const useLiveMatch = (
     };
 
     const declareInning = () => {
-        setState(prev => {
+        setState((prev: LiveMatchState | null) => {
             if (!prev || prev.status !== 'inprogress' || gameData.currentFormat !== Format.SHIELD) return prev;
             const newState = { ...prev };
             newState.innings[newState.currentInningIndex].declared = true;
@@ -826,11 +826,11 @@ export const useLiveMatch = (
     };
 
     const beginMatch = () => {
-        setState(prev => prev ? { ...prev, status: 'inprogress' } : null);
+        setState((prev: LiveMatchState | null) => prev ? { ...prev, status: 'inprogress' } : null);
     };
 
     const swapPlayers = (teamId: string, player1Id: string, player2Id: string) => {
-        setState(prev => {
+        setState((prev: LiveMatchState | null) => {
             if (!prev) return null;
             const newState = JSON.parse(JSON.stringify(prev)) as LiveMatchState;
             const team = newState.battingTeam.id === teamId ? newState.battingTeam : newState.bowlingTeam;
@@ -871,7 +871,7 @@ export const useLiveMatch = (
     };
 
     const updateBattingOrder = (playerIds: string[]) => {
-        setState(prev => {
+        setState((prev: LiveMatchState | null) => {
             if (!prev) return null;
             const newState = { ...prev };
             newState.innings = newState.innings.map(inning => {
@@ -929,11 +929,11 @@ export const useLiveMatch = (
     };
 
     const updateBowlingPlan = (plan: Record<number, string>) => {
-        setState(prev => prev ? { ...prev, bowlingPlan: plan } : null);
+        setState((prev: LiveMatchState | null) => prev ? { ...prev, bowlingPlan: plan } : null);
     };
 
     const autoAssignOvers = () => {
-        setState(prev => {
+        setState((prev: LiveMatchState | null) => {
             if (!prev) return null;
             const currentInning = prev.innings[prev.currentInningIndex];
             const bowlers = currentInning.bowling.map(b => getPlayerById(b.playerId, allPlayers));
@@ -943,7 +943,7 @@ export const useLiveMatch = (
     };
 
     const requestBowlerChange = () => {
-        setState(prev => {
+        setState((prev: LiveMatchState | null) => {
             if (!prev || prev.status !== 'inprogress' || prev.waitingFor) return prev;
             return { ...prev, waitingFor: 'bowler' };
         });

@@ -6,7 +6,7 @@ import { useLiveMatch } from '../hooks/useLiveMatch';
 import { Icons } from './Icons';
 import { TV_CHANNELS, INITIAL_SPONSORSHIPS, TOURNAMENT_LOGOS } from '../data';
 import { getPlayerById, generateAutoBowlingPlan } from '../utils';
-import { streamAssistantResponse } from '../geminiService';
+import { streamAssistantResponse } from '../services/geminiService';
 import { PlayerAvatar } from './PlayerAvatar';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 

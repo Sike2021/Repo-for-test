@@ -1,27 +1,28 @@
 
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { GALLERY_PLAYERS } from '../data';
 import { AVATAR_SEEDS } from '../constants';
 import { PlayerAvatar } from './PlayerAvatar';
 import { Player } from '../types';
-import { Check, Image as ImageIcon, User, Palette, Globe } from 'lucide-react';
+import { Check, User, Globe } from 'lucide-react';
 
 interface AvatarSelectorProps {
     selectedSeed?: string;
     selectedUrl?: string;
+    selectedImageUrl?: string;
     onSelect: (seed: string, isGallery: boolean, isUrl: boolean, galleryPlayer?: Player) => void;
 }
 
-const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedSeed, selectedUrl, onSelect }) => {
-    const [tab, setTab] = useState<'gallery' | 'dicebear' | 'url'>('gallery');
+const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedSeed, selectedUrl, selectedImageUrl, onSelect }) => {
+    const [tab, setTab] = useState<'dicebear' | 'url'>('dicebear');
     const [urlInput, setUrlInput] = useState('');
+
+    const activeUrl = selectedImageUrl || selectedUrl;
 
     return (
         <div className="space-y-6">
             <div className="flex bg-slate-900/50 p-1 rounded-xl border border-white/5">
                 {[
-                    { id: 'gallery', label: 'Gallery', icon: ImageIcon },
                     { id: 'dicebear', label: 'System', icon: User },
                     { id: 'url', label: 'URL', icon: Globe }
                 ].map((t) => (
@@ -37,30 +38,6 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedSeed, selectedU
             </div>
 
             <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                {tab === 'gallery' && (
-                    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {GALLERY_PLAYERS.map((gp) => (
-                            <button
-                                key={gp.id}
-                                onClick={() => onSelect(gp.avatarSeed || gp.name, true, false, gp)}
-                                className={`relative aspect-square rounded-2xl overflow-hidden border-2 transition-all group ${selectedSeed === (gp.avatarSeed || gp.name) ? 'border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'border-slate-800 hover:border-slate-600'}`}
-                            >
-                                <PlayerAvatar player={gp} size="xl" className="border-none shadow-none" />
-                                {selectedSeed === (gp.avatarSeed || gp.name) && (
-                                    <div className="absolute inset-0 bg-emerald-500/20 flex items-center justify-center">
-                                        <div className="bg-emerald-500 text-black p-1 rounded-full">
-                                            <Check size={12} strokeWidth={4} />
-                                        </div>
-                                    </div>
-                                )}
-                                <div className="absolute bottom-0 inset-x-0 bg-black/60 py-1 text-[8px] font-black uppercase text-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {gp.name}
-                                </div>
-                            </button>
-                        ))}
-                    </div>
-                )}
-
                 {tab === 'dicebear' && (
                     <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4">
                         {AVATAR_SEEDS.map((seed) => (
@@ -138,11 +115,11 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedSeed, selectedU
                             />
                         </div>
 
-                        {selectedUrl && (
+                        {activeUrl && (
                             <div className="flex flex-col items-center gap-2 pt-2 border-t border-white/5">
                                 <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest italic">Current Custom Avatar</p>
                                 <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
-                                    <img src={selectedUrl} alt="Custom URL" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                    <img src={activeUrl} alt="Custom URL" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                                 </div>
                             </div>
                         )}

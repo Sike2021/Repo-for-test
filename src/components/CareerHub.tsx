@@ -51,7 +51,7 @@ const BottomNavBar = ({ activeScreen, setScreen }: { activeScreen: CareerScreen,
         { name: 'Home', screen: 'DASHBOARD' as CareerScreen, icon: Home },
         { name: 'Table', screen: 'LEAGUES' as CareerScreen, icon: Trophy },
         { name: 'Stats', screen: 'STATS' as CareerScreen, icon: BarChart3 },
-        { name: 'Ratings', screen: 'RATING_BOARD' as CareerScreen, icon: Star },
+        { name: 'Captains', screen: 'CAPTAINS_CORNER' as CareerScreen, icon: Users },
         { name: 'Settings', screen: 'SETTINGS' as CareerScreen, icon: SettingsIcon },
     ];
     return (

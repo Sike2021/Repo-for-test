@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { GameData, Player, PlayerCustomization, PlayerRole } from '../types';
 import { AVATAR_SEEDS } from '../constants';
-import { GALLERY_PLAYERS, generateInitialStats } from '../data';
+import { generateInitialStats } from '../data';
 import { PlayerAvatar } from './PlayerAvatar';
 import AvatarSelector from './AvatarSelector';
 import { motion, AnimatePresence } from 'motion/react';
@@ -143,6 +143,16 @@ const CustomizationHub: React.FC<CustomizationHubProps> = ({ gameData, setGameDa
         });
     };
 
+    const handleUpdateTeamColor = (color: string) => {
+        setGameData(prev => {
+            if (!prev) return null;
+            return {
+                ...prev,
+                teams: prev.teams.map(t => t.id === prev.userTeamId ? { ...t, color } : t)
+            };
+        });
+    };
+
     const handleCreatePlayer = () => {
         const newId = `custom-${Date.now()}`;
         const newPlayer: Player = {
@@ -200,7 +210,7 @@ const CustomizationHub: React.FC<CustomizationHubProps> = ({ gameData, setGameDa
                         onClick={() => setActiveTab('avatar')}
                         className={`px-3 md:px-4 py-2 rounded-lg flex items-center gap-2 text-[10px] md:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'avatar' ? 'bg-emerald-500 text-black' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
                     >
-                        <User size={14} /> Gallery
+                        <User size={14} /> Avatar
                     </button>
                     <button 
                         onClick={() => setActiveTab('manual')}
@@ -308,11 +318,11 @@ const CustomizationHub: React.FC<CustomizationHubProps> = ({ gameData, setGameDa
                                         </div>
                                     </div>
 
-                                    {/* Gallery Grid */}
+                                    {/* Avatar Grid */}
                                     <div className="flex-1">
                                         <div className="flex items-center justify-between mb-6">
-                                            <h3 className="text-xl font-black uppercase tracking-tight">Avatar Gallery</h3>
-                                            <span className="text-xs font-bold text-slate-500 uppercase">{AVATAR_SEEDS.length + GALLERY_PLAYERS.length} Styles Available</span>
+                                            <h3 className="text-xl font-black uppercase tracking-tight">Avatar Selection</h3>
+                                            <span className="text-xs font-bold text-slate-500 uppercase">{AVATAR_SEEDS.length} Styles Available</span>
                                         </div>
                                         
                                         <div className="space-y-8">
@@ -531,8 +541,22 @@ const CustomizationHub: React.FC<CustomizationHubProps> = ({ gameData, setGameDa
                                         </div>
                                     </div>
 
+                                    <div className="p-8 bg-slate-900 rounded-3xl border border-slate-800 text-left">
+                                        <label className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-4 block">Primary Team Color</label>
+                                        <div className="flex flex-wrap gap-3">
+                                            {['#10b981', '#3b82f6', '#ef4444', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'].map((color) => (
+                                                <button
+                                                    key={color}
+                                                    onClick={() => handleUpdateTeamColor(color)}
+                                                    className={`w-12 h-12 rounded-2xl border-2 transition-all ${userTeam.color === color ? 'border-white scale-110 shadow-[0_0_20px_rgba(255,255,255,0.2)]' : 'border-transparent hover:scale-105'}`}
+                                                    style={{ backgroundColor: color }}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+
                                     <div className="p-8 bg-slate-900/50 rounded-3xl border border-dashed border-slate-800 opacity-50">
-                                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Logo & Colors Customization Coming Soon</p>
+                                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Logo Customization Coming Soon</p>
                                     </div>
                                     
                                     <div className="p-6 bg-slate-900 rounded-2xl border border-slate-800">

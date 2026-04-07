@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { GameData, Format, PlayerRole, MatchResult, Inning, BattingPerformance, BowlingPerformance, Team, Match, Player } from '../types';
+import { GameData, Format, PlayerRole, MatchResult, Inning, BattingPerformance, BowlingPerformance, Team, Match, Player, Standing } from '../types';
 import { PITCH_MODIFIERS, formatOvers, getPlayerById, generateAutoXI, getBatterTier, BATTING_PROFILES, calculatePopularityPoints } from '../utils';
 import { generateSingleFormatInitialStats } from '../data';
 
@@ -25,7 +25,7 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
         }
         const maxWicketsForInning = (limits?.maxWickets && limits.maxWickets > 0 && limits.maxWickets <= 10) ? limits.maxWickets : 10;
 
-        const battingLineup: BattingPerformance[] = battingTeam.squad.map((p, i) => { 
+        const battingLineup: BattingPerformance[] = battingTeam.squad.map((p: Player, i: number) => { 
             const d = getPlayerById(p.id, allPlayers); 
             return { 
                 playerId: d.id, 
@@ -36,7 +36,7 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
                 sixes: 0, 
                 isOut: false, 
                 dismissalText: 'not out', 
-                dismissal: { type: 'not out', bowlerId: '' }, 
+                dismissal: { type: 'not out' as const, bowlerId: '' }, 
                 ballsToFifty: 0, 
                 ballsToHundred: 0,
                 battingOrder: i + 1
@@ -44,8 +44,8 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
         });
         
         const bowlingLineup = bowlingTeam.squad
-            .filter(p => [PlayerRole.FAST_BOWLER, PlayerRole.SPIN_BOWLER, PlayerRole.ALL_ROUNDER].includes(getPlayerById(p.id, allPlayers).role))
-            .map(p => { 
+            .filter((p: Player) => [PlayerRole.FAST_BOWLER, PlayerRole.SPIN_BOWLER, PlayerRole.ALL_ROUNDER].includes(getPlayerById(p.id, allPlayers).role))
+            .map((p: Player) => { 
                 const d = getPlayerById(p.id, allPlayers); 
                 return { 
                     playerId: d.id, 
@@ -575,7 +575,7 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
             motmPlayer.stats[format].manOfTheMatchAwards++; 
         }
 
-        newGameData.standings[format].forEach(s => {
+        newGameData.standings[format].forEach((s: Standing) => {
             if (s.teamId === result.firstInning.teamId) {
                 s.played++;
                 if (result.winnerId === s.teamId) {

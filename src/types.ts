@@ -72,12 +72,14 @@ export interface Player {
     customization?: PlayerCustomization;
     avatarUrl?: string;
     avatarSeed?: string;
+    imageUrl?: string;
 }
 
 export interface Team {
     id: string; name: string; squad: Player[]; captains: { [key in Format]?: string };
     purse: number; // In PKR Crore (stored as number, e.g., 50.0)
     nextYearBudgetReduction?: number; // Penalty for swapping great players
+    color?: string;
 }
 
 export interface TeamData {
