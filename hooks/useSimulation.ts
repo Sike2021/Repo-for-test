@@ -4,7 +4,7 @@ import { PITCH_MODIFIERS, formatOvers, getPlayerById, generateAutoXI, getBatterT
 import { generateSingleFormatInitialStats } from '../data';
 
 export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<React.SetStateAction<GameData | null>>) => {
-    const simulateInning = useCallback((battingTeam: Team, bowlingTeam: Team, format: Format, target: number | null, pitch: string, groundCode: string, inningNumber: number, allPlayers: Player[], playerForms: Record<string, number>): Inning => {
+    const simulateInning = useCallback((battingTeam: Team, bowlingTeam: Team, format: Format, target: number | null, pitch: string, groundCode: string, inningNumber: number, allPlayers: Player[], playerForms: Record<string, number>, bowlingPlan?: Record<number, string>): Inning => {
         const pitchMods = PITCH_MODIFIERS[pitch as keyof typeof PITCH_MODIFIERS] || PITCH_MODIFIERS["Balanced Sporting Pitch"];
         const formatMods = pitchMods[format];
         let score = 0, wickets = 0, balls = 0;
@@ -262,50 +262,66 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
                 const lastBowlerIndex = bowlerIndex;
                 const currentOverNumber = Math.floor(balls / 6) + 1;
                 
-                // Smarter bowling rotation
-                let bestNextBowlerIndex = -1;
-                let bestScore = -Infinity;
-                
-                // Identify crucial overs
-                const isPowerplay = isT20 && currentOverNumber <= 6;
-                const isDeathOvers = isT20 && currentOverNumber >= 16;
-                const isCrucial = isPowerplay || isDeathOvers;
-
-                for (let i = 0; i < bowlingLineup.length; i++) {
-                    if (i === lastBowlerIndex) continue; // Cannot bowl consecutive overs
-                    if (bowlingLineup[i].ballsBowled >= maxOversPerBowler * 6) continue; // Max overs reached
+                // Check if there's a bowling plan for this over
+                let plannedBowlerIndex = -1;
+                if (bowlingPlan && bowlingPlan[currentOverNumber]) {
+                    const plannedBowlerId = bowlingPlan[currentOverNumber];
+                    plannedBowlerIndex = bowlingLineup.findIndex(b => b.playerId === plannedBowlerId);
                     
-                    const b = bowlingLineup[i];
-                    let bScore = b.skill;
-                    
-                    // Crucial Overs Logic: Best bowlers handle PP and Death
-                    if (isCrucial) {
-                        bScore += b.skill * 0.5; // Heavy weight on skill for crucial overs
-                    }
-
-                    // Prefer strike bowlers if wickets are needed
-                    if (wickets < 5) {
-                        if (b.role === PlayerRole.FAST_BOWLER) bScore += 10;
-                    } else {
-                        if (b.role === PlayerRole.SPIN_BOWLER) bScore += 5;
-                    }
-                    
-                    // Fatigue penalty
-                    bScore -= (b.ballsBowled / 6) * 2;
-                    
-                    // Randomness
-                    bScore += Math.random() * 10;
-                    
-                    if (bScore > bestScore) {
-                        bestScore = bScore;
-                        bestNextBowlerIndex = i;
+                    // Validate: Planned bowler must not have bowled the previous over
+                    if (plannedBowlerIndex === lastBowlerIndex) {
+                        plannedBowlerIndex = -1; // Invalid plan (consecutive overs)
                     }
                 }
-                
-                if (bestNextBowlerIndex !== -1) {
-                    bowlerIndex = bestNextBowlerIndex;
+
+                if (plannedBowlerIndex !== -1) {
+                    bowlerIndex = plannedBowlerIndex;
                 } else {
-                    bowlerIndex = (lastBowlerIndex + 1) % bowlingLineup.length;
+                    // Smarter bowling rotation (Fallback or Default)
+                    let bestNextBowlerIndex = -1;
+                    let bestScore = -Infinity;
+                    
+                    // Identify crucial overs
+                    const isPowerplay = isT20 && currentOverNumber <= 6;
+                    const isDeathOvers = isT20 && currentOverNumber >= 16;
+                    const isCrucial = isPowerplay || isDeathOvers;
+
+                    for (let i = 0; i < bowlingLineup.length; i++) {
+                        if (i === lastBowlerIndex) continue; // Cannot bowl consecutive overs
+                        if (bowlingLineup[i].ballsBowled >= maxOversPerBowler * 6) continue; // Max overs reached
+                        
+                        const b = bowlingLineup[i];
+                        let bScore = b.skill;
+                        
+                        // Crucial Overs Logic: Best bowlers handle PP and Death
+                        if (isCrucial) {
+                            bScore += b.skill * 0.5; // Heavy weight on skill for crucial overs
+                        }
+
+                        // Prefer strike bowlers if wickets are needed
+                        if (wickets < 5) {
+                            if (b.role === PlayerRole.FAST_BOWLER) bScore += 10;
+                        } else {
+                            if (b.role === PlayerRole.SPIN_BOWLER) bScore += 5;
+                        }
+                        
+                        // Fatigue penalty
+                        bScore -= (b.ballsBowled / 6) * 2;
+                        
+                        // Randomness
+                        bScore += Math.random() * 10;
+                        
+                        if (bScore > bestScore) {
+                            bestScore = bScore;
+                            bestNextBowlerIndex = i;
+                        }
+                    }
+                    
+                    if (bestNextBowlerIndex !== -1) {
+                        bowlerIndex = bestNextBowlerIndex;
+                    } else {
+                        bowlerIndex = (lastBowlerIndex + 1) % bowlingLineup.length;
+                    }
                 }
             }
         }
@@ -341,8 +357,11 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
             playerForms[p.id] = 0.9 + (Math.random() * 0.2);
         });
 
-        const firstInning = simulateInning(teamA, teamB, gameData.currentFormat, null, pitch, groundCode, 1, allPlayersInMatch, playerForms);
-        const secondInning = simulateInning(teamB, teamA, gameData.currentFormat, firstInning.score, pitch, groundCode, 2, allPlayersInMatch, playerForms);
+        const firstInningPlan = gameData.bowlingPlans[teamB.id]?.[gameData.currentFormat];
+        const secondInningPlan = gameData.bowlingPlans[teamA.id]?.[gameData.currentFormat];
+
+        const firstInning = simulateInning(teamA, teamB, gameData.currentFormat, null, pitch, groundCode, 1, allPlayersInMatch, playerForms, firstInningPlan);
+        const secondInning = simulateInning(teamB, teamA, gameData.currentFormat, firstInning.score, pitch, groundCode, 2, allPlayersInMatch, playerForms, secondInningPlan);
 
         let winnerId: string | null, loserId: string | null, summary: string;
 
@@ -393,10 +412,13 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
         });
 
         // First-Class Simulation: Multi-innings
-        const firstInning = simulateInning(teamA, teamB, gameData.currentFormat, null, pitch, groundCode, 1, allPlayersInMatch, playerForms);
-        const secondInning = simulateInning(teamB, teamA, gameData.currentFormat, null, pitch, groundCode, 2, allPlayersInMatch, playerForms);
-        const thirdInning = simulateInning(teamA, teamB, gameData.currentFormat, null, pitch, groundCode, 3, allPlayersInMatch, playerForms);
-        const fourthInning = simulateInning(teamB, teamA, gameData.currentFormat, (firstInning.score + thirdInning.score - secondInning.score), pitch, groundCode, 4, allPlayersInMatch, playerForms);
+        const teamAPlan = gameData.bowlingPlans[teamA.id]?.[gameData.currentFormat];
+        const teamBPlan = gameData.bowlingPlans[teamB.id]?.[gameData.currentFormat];
+
+        const firstInning = simulateInning(teamA, teamB, gameData.currentFormat, null, pitch, groundCode, 1, allPlayersInMatch, playerForms, teamBPlan);
+        const secondInning = simulateInning(teamB, teamA, gameData.currentFormat, null, pitch, groundCode, 2, allPlayersInMatch, playerForms, teamAPlan);
+        const thirdInning = simulateInning(teamA, teamB, gameData.currentFormat, null, pitch, groundCode, 3, allPlayersInMatch, playerForms, teamBPlan);
+        const fourthInning = simulateInning(teamB, teamA, gameData.currentFormat, (firstInning.score + thirdInning.score - secondInning.score), pitch, groundCode, 4, allPlayersInMatch, playerForms, teamAPlan);
 
         let winnerId: string | null, loserId: string | null, isDraw = false, summary: string;
         const target = firstInning.score + thirdInning.score - secondInning.score + 1;
