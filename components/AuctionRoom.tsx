@@ -34,6 +34,24 @@ const shuffle = <T,>(array: T[]): T[] => {
     return newArr;
 };
 
+const getBasePrice = (player: Player) => {
+    if (player.basePrice !== undefined) {
+        return player.basePrice / 100;
+    }
+    const attr = Math.max(player.battingSkill, player.secondarySkill);
+    if (attr > 70) return 2.0;
+    if (attr >= 61) return 1.0; 
+    if (attr >= 51) return 0.6;
+    return 0.25;
+};
+
+const getBidIncrement = (price: number) => {
+    if (price >= 10.0) return 1.0;
+    if (price >= 5.0) return 0.5;
+    if (price >= 2.0) return 0.2;
+    return 0.1;
+};
+
 const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }) => {
     const mainTeamIds = useMemo(() => 
         gameData.allTeamsData.filter(td => !td.isYouthTeam).map(td => td.id), 
@@ -65,27 +83,37 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
     const [isAuctioning, setIsAuctioning] = useState(false);
     const [biddingLog, setBiddingLog] = useState<{teamName: string, bid: number, time: string}[]>([]);
     const [auctionFinished, setAuctionFinished] = useState(false);
+    const [directSigningPhase, setDirectSigningPhase] = useState(true);
+    const [directSignedPlayers, setDirectSignedPlayers] = useState<{foreign?: Player, national?: Player, emerging?: Player}>({});
 
     const currentPlayer = sortedPool[currentPlayerIdx] || null;
     const userTeam = teams.find(t => t.id === gameData.userTeamId);
 
-    const getBasePrice = (player: Player) => {
-        if (player.basePrice !== undefined) {
-            return player.basePrice / 100;
-        }
-        const attr = Math.max(player.battingSkill, player.secondarySkill);
-        if (attr > 70) return 2.0;
-        if (attr >= 61) return 1.0; 
-        if (attr >= 51) return 0.6;
-        return 0.25;
+    const handleDirectSign = (player: Player, category: 'foreign' | 'national' | 'emerging') => {
+        if (!userTeam) return;
+        const cost = getBasePrice(player) * 2;
+        if (userTeam.purse < cost) return;
+
+        setTeams(prev => prev.map(t => {
+            if (t.id === userTeam.id) {
+                return {
+                    ...t,
+                    squad: [...t.squad, { ...player, auctionPrice: cost }],
+                    purse: t.purse - cost
+                };
+            }
+            return t;
+        }));
+
+        setDirectSignedPlayers(prev => ({ ...prev, [category]: player }));
     };
 
-    const getBidIncrement = (price: number) => {
-        if (price >= 10.0) return 1.0;
-        if (price >= 5.0) return 0.5;
-        if (price >= 2.0) return 0.2;
-        return 0.1;
+    const startAuction = () => {
+        setDirectSigningPhase(false);
     };
+
+    // --- Direct Signing Logic ---
+
 
     const startNextPlayer = useCallback(() => {
         if (auctionFinished) return;
@@ -219,6 +247,12 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                     if (currentPlayer.isForeign) {
                         const foreignCount = squad.filter(p => p.isForeign).length;
                         if (foreignCount >= MAX_FOREIGN_LIMIT - 1) needFactor *= 0.2;
+                    } else if (currentPlayer.isEmerging) {
+                        // Emerging players lower priority initially
+                        needFactor *= 0.8;
+                    } else {
+                        // National players (Local/Pakistan) priority
+                        needFactor *= 1.5;
                     }
 
                     const personalityJitter = 0.7 + (Math.random() * 0.6);
@@ -366,6 +400,138 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
 
     return (
         <div className="h-full flex flex-col bg-[#050808] relative overflow-hidden font-sans text-[#E4E3E0]">
+            {directSigningPhase && (
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="absolute inset-0 z-[200] bg-[#050808] flex flex-col p-8 overflow-y-auto"
+                >
+                    <div className="max-w-6xl mx-auto w-full">
+                        <div className="flex justify-between items-center mb-12">
+                            <div>
+                                <h2 className="text-6xl font-black italic text-white uppercase tracking-tighter">Direct Signing</h2>
+                                <p className="text-teal-500 font-bold tracking-widest text-sm uppercase mt-2">Pre-Auction Exclusive // 2X Value</p>
+                            </div>
+                            <button 
+                                onClick={startAuction}
+                                className="bg-teal-500 text-black px-12 py-6 rounded-3xl font-black italic uppercase tracking-tighter text-3xl hover:scale-105 transition-all shadow-[0_0_50px_rgba(20,184,166,0.4)]"
+                            >
+                                Start Auction
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                            {/* Foreign */}
+                            <div className="space-y-6">
+                                <h3 className="text-2xl font-black text-white/40 uppercase tracking-widest border-b border-white/10 pb-3">Foreign Star</h3>
+                                {directSignedPlayers.foreign ? (
+                                    <div className="bg-teal-500/10 border border-teal-500/50 p-6 rounded-3xl flex items-center gap-6">
+                                        <PlayerAvatar player={directSignedPlayers.foreign} size="lg" />
+                                        <div>
+                                            <p className="text-white font-black uppercase italic text-xl">{directSignedPlayers.foreign.name}</p>
+                                            <p className="text-teal-500 text-xs font-bold">SIGNED @ {(getBasePrice(directSignedPlayers.foreign) * 2).toFixed(2)} Cr</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {sortedPool.filter(p => p.isForeign).slice(0, 10).map(p => (
+                                            <button 
+                                                key={p.id}
+                                                onClick={() => handleDirectSign(p, 'foreign')}
+                                                className="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-2xl flex items-center justify-between group transition-all"
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <PlayerAvatar player={p} size="sm" />
+                                                    <div className="text-left">
+                                                        <p className="text-white font-bold text-sm uppercase">{p.name}</p>
+                                                        <p className="text-white/40 text-[10px] font-bold uppercase">{p.role}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-teal-500 font-black text-sm">{(getBasePrice(p) * 2).toFixed(2)}</p>
+                                                    <p className="text-[8px] text-white/20 font-bold uppercase">SIGN_NOW</p>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* National */}
+                            <div className="space-y-6">
+                                <h3 className="text-2xl font-black text-white/40 uppercase tracking-widest border-b border-white/10 pb-3">National Hero</h3>
+                                {directSignedPlayers.national ? (
+                                    <div className="bg-teal-500/10 border border-teal-500/50 p-6 rounded-3xl flex items-center gap-6">
+                                        <PlayerAvatar player={directSignedPlayers.national} size="lg" />
+                                        <div>
+                                            <p className="text-white font-black uppercase italic text-xl">{directSignedPlayers.national.name}</p>
+                                            <p className="text-teal-500 text-xs font-bold">SIGNED @ {(getBasePrice(directSignedPlayers.national) * 2).toFixed(2)} Cr</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {sortedPool.filter(p => !p.isForeign && !p.isEmerging && p.nationality === 'Pakistan').slice(0, 10).map(p => (
+                                            <button 
+                                                key={p.id}
+                                                onClick={() => handleDirectSign(p, 'national')}
+                                                className="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-2xl flex items-center justify-between group transition-all"
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <PlayerAvatar player={p} size="sm" />
+                                                    <div className="text-left">
+                                                        <p className="text-white font-bold text-sm uppercase">{p.name}</p>
+                                                        <p className="text-white/40 text-[10px] font-bold uppercase">{p.role}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-teal-500 font-black text-sm">{(getBasePrice(p) * 2).toFixed(2)}</p>
+                                                    <p className="text-[8px] text-white/20 font-bold uppercase">SIGN_NOW</p>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Emerging */}
+                            <div className="space-y-6">
+                                <h3 className="text-2xl font-black text-white/40 uppercase tracking-widest border-b border-white/10 pb-3">Emerging Talent</h3>
+                                {directSignedPlayers.emerging ? (
+                                    <div className="bg-teal-500/10 border border-teal-500/50 p-6 rounded-3xl flex items-center gap-6">
+                                        <PlayerAvatar player={directSignedPlayers.emerging} size="lg" />
+                                        <div>
+                                            <p className="text-white font-black uppercase italic text-xl">{directSignedPlayers.emerging.name}</p>
+                                            <p className="text-teal-500 text-xs font-bold">SIGNED @ {(getBasePrice(directSignedPlayers.emerging) * 2).toFixed(2)} Cr</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {sortedPool.filter(p => p.isEmerging).slice(0, 10).map(p => (
+                                            <button 
+                                                key={p.id}
+                                                onClick={() => handleDirectSign(p, 'emerging')}
+                                                className="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-2xl flex items-center justify-between group transition-all"
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <PlayerAvatar player={p} size="sm" />
+                                                    <div className="text-left">
+                                                        <p className="text-white font-bold text-sm uppercase">{p.name}</p>
+                                                        <p className="text-white/40 text-[10px] font-bold uppercase">{p.role}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-teal-500 font-black text-sm">{(getBasePrice(p) * 2).toFixed(2)}</p>
+                                                    <p className="text-[8px] text-white/20 font-bold uppercase">SIGN_NOW</p>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+            )}
             {/* Background Accents */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-teal-500/5 blur-[160px] rounded-full" />

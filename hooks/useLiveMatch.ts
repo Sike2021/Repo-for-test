@@ -865,6 +865,64 @@ export const useLiveMatch = (
         });
     };
 
+    const updateBattingOrder = (playerIds: string[]) => {
+        setState(prev => {
+            if (!prev) return null;
+            const newState = { ...prev };
+            newState.innings = newState.innings.map(inning => {
+                if (inning.teamId === gameData.userTeamId) {
+                    // Create a new batting lineup based on the provided player IDs
+                    const newBatting = playerIds.map((id, index) => {
+                        const existing = inning.batting.find(b => b.playerId === id);
+                        if (existing) {
+                            return { ...existing, battingOrder: index + 1 };
+                        }
+                        const p = getPlayerById(id, allPlayers);
+                        return { 
+                            playerId: p.id, 
+                            playerName: p.name, 
+                            runs: 0, 
+                            balls: 0, 
+                            fours: 0, 
+                            sixes: 0, 
+                            isOut: false, 
+                            dismissalText: 'not out', 
+                            dismissal: { type: 'not out' as const, bowlerId: '' }, 
+                            battingOrder: index + 1 
+                        };
+                    });
+                    
+                    // If there are players in the squad not in the playerIds list, add them at the end
+                    const squadPlayerIds = prev.battingTeam.id === gameData.userTeamId 
+                        ? prev.battingTeam.squad.map(p => p.id)
+                        : prev.bowlingTeam.squad.map(p => p.id);
+                    
+                    const remainingIds = squadPlayerIds.filter(id => !playerIds.includes(id));
+                    remainingIds.forEach((id, idx) => {
+                        const existing = inning.batting.find(b => b.playerId === id);
+                        const p = getPlayerById(id, allPlayers);
+                        newBatting.push(existing ? { ...existing, battingOrder: playerIds.length + idx + 1 } : {
+                            playerId: p.id, 
+                            playerName: p.name, 
+                            runs: 0, 
+                            balls: 0, 
+                            fours: 0, 
+                            sixes: 0, 
+                            isOut: false, 
+                            dismissalText: 'not out', 
+                            dismissal: { type: 'not out', bowlerId: '' }, 
+                            battingOrder: playerIds.length + idx + 1 
+                        });
+                    });
+
+                    return { ...inning, batting: newBatting };
+                }
+                return inning;
+            });
+            return newState;
+        });
+    };
+
     const updateBowlingPlan = (plan: Record<number, string>) => {
         setState(prev => prev ? { ...prev, bowlingPlan: plan } : null);
     };
@@ -905,6 +963,7 @@ export const useLiveMatch = (
         swapPlayers,
         requestBowlerChange,
         updateBowlingPlan,
+        updateBattingOrder,
         autoAssignOvers
     };
 };

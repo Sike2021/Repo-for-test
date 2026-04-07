@@ -59,33 +59,33 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
                 <div className="absolute -bottom-24 -left-24 w-[600px] h-[600px] bg-blue-500/5 blur-[160px] rounded-full" />
             </div>
 
-            <header className="px-3 py-2 md:px-4 md:py-3 border-b border-white/5 relative z-10">
-                <div className="flex flex-col gap-0.5">
-                    <h2 className="text-[5px] md:text-[6px] font-black uppercase tracking-[0.4em] text-teal-500/60">
+            <header className="px-4 py-3 md:px-6 md:py-5 border-b border-white/5 relative z-10">
+                <div className="flex flex-col gap-1">
+                    <h2 className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] text-teal-500/60">
                         {sponsorship?.sponsorName || "SIKE'S"} {sponsorship?.tournamentName || "T20 CHAMPIONSHIP"} // SEASON {gameData.currentSeason}
                     </h2>
-                    <h1 className="text-base md:text-lg font-black italic uppercase tracking-tighter text-white leading-none">THE CAREER HUB</h1>
+                    <h1 className="text-xl md:text-2xl font-black italic uppercase tracking-tighter text-white leading-none">THE CAREER HUB</h1>
                 </div>
             </header>
 
-            <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-2.5 md:space-y-3 scrollbar-hide pb-6 relative z-10">
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-5 scrollbar-hide pb-8 relative z-10">
                 {/* Team Profile Card */}
                 <motion.div 
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white/[0.03] border border-white/10 rounded-xl md:rounded-2xl p-2.5 md:p-3 flex items-center gap-2.5 md:gap-3 backdrop-blur-xl"
+                    className="bg-white/[0.03] border border-white/10 rounded-2xl md:rounded-3xl p-4 md:p-5 flex items-center gap-4 md:gap-5 backdrop-blur-xl"
                 >
                     <div 
-                        className="w-7 h-7 md:w-10 md:h-10 bg-white/5 rounded-lg md:rounded-xl border border-white/10 flex items-center justify-center p-1 md:p-1.5 shadow-xl"
+                        className="w-12 h-12 md:w-16 md:h-16 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 flex items-center justify-center p-2 md:p-3 shadow-xl"
                         dangerouslySetInnerHTML={{ __html: userTeamData?.logo || `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 opacity-20"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>` }}
                     />
                     <div className="flex-1">
-                        <h3 className="text-sm md:text-base font-black italic uppercase tracking-tighter text-white leading-none mb-0.5">{userTeam?.name || 'N/A'}</h3>
-                        <p className="text-[5px] md:text-[7px] font-black text-white/30 uppercase tracking-[0.2em]">MANAGER: <span className="text-teal-500">SIKE G.</span></p>
+                        <h3 className="text-lg md:text-xl font-black italic uppercase tracking-tighter text-white leading-none mb-1">{userTeam?.name || 'N/A'}</h3>
+                        <p className="text-[8px] md:text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">MANAGER: <span className="text-teal-500">SIKE G.</span></p>
                     </div>
                     <div className="text-right">
-                        <p className="text-[5px] md:text-[7px] font-black text-white/20 uppercase tracking-[0.2em] mb-0.5">PURSE</p>
-                        <p className="text-xs md:text-sm font-black italic text-teal-500 tracking-tighter leading-none">${userTeam?.purse.toFixed(2)}Cr</p>
+                        <p className="text-[8px] md:text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-1">PURSE</p>
+                        <p className="text-lg md:text-xl font-black italic text-teal-500 tracking-tighter leading-none">${userTeam?.purse.toFixed(2)}Cr</p>
                     </div>
                 </motion.div>
 
@@ -94,9 +94,9 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="bg-white/[0.03] border border-white/10 rounded-[20px] md:rounded-[24px] p-3 md:p-4 relative overflow-hidden group shadow-2xl backdrop-blur-2xl"
+                    className="bg-white/[0.03] border border-white/10 rounded-[30px] md:rounded-[40px] p-5 md:p-6 relative overflow-hidden group shadow-2xl backdrop-blur-2xl"
                 >
-                    <div className="absolute top-0 right-0 bg-teal-500 text-black px-2 md:px-3 py-0.5 text-[5px] md:text-[7px] font-black uppercase tracking-[0.3em] rounded-bl-lg md:rounded-bl-xl shadow-xl z-10">
+                    <div className="absolute top-0 right-0 bg-teal-500 text-black px-4 md:px-5 py-1 text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] rounded-bl-2xl md:rounded-bl-3xl shadow-xl z-10">
                         NEXT MATCH
                     </div>
                     

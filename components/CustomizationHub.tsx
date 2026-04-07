@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { GameData, Player, PlayerCustomization } from '../types';
+import { GameData, Player, PlayerCustomization, PlayerRole } from '../types';
 import { AVATAR_SEEDS } from '../src/constants';
-import { GALLERY_PLAYERS } from '../data';
+import { GALLERY_PLAYERS, generateInitialStats } from '../data';
 import { PlayerAvatar } from './PlayerAvatar';
 import AvatarSelector from './AvatarSelector';
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, User, Shield, Settings2, Palette, Scissors, UserCircle, Image as ImageIcon, ArrowLeft, Globe, ChevronLeft, ChevronRight, RotateCcw, Save, Search, Filter } from 'lucide-react';
+import { Check, User, Shield, Settings2, Palette, Scissors, UserCircle, Image as ImageIcon, ArrowLeft, Globe, ChevronLeft, ChevronRight, RotateCcw, Save, Search, Filter, Plus } from 'lucide-react';
 
 interface CustomizationHubProps {
     gameData: GameData;
@@ -143,6 +143,35 @@ const CustomizationHub: React.FC<CustomizationHubProps> = ({ gameData, setGameDa
         });
     };
 
+    const handleCreatePlayer = () => {
+        const newId = `custom-${Date.now()}`;
+        const newPlayer: Player = {
+            id: newId,
+            name: 'New Player',
+            nationality: 'Pakistan',
+            role: PlayerRole.BATSMAN,
+            battingSkill: 50,
+            secondarySkill: 50,
+            style: 'A',
+            isOpener: false,
+            isForeign: false,
+            isEmerging: false,
+            avatarSeed: AVATAR_SEEDS[0],
+            stats: generateInitialStats(),
+            recentPerformances: []
+        };
+
+        setGameData(prev => {
+            if (!prev) return null;
+            return {
+                ...prev,
+                allPlayers: [...prev.allPlayers, newPlayer]
+            };
+        });
+        setSelectedPlayerId(newId);
+        setActiveTab('manual');
+    };
+
     if (!userTeam) return null;
 
     const skinTones = ['#FFDBAC', '#F1C27D', '#E0AC69', '#8D5524', '#C68642', '#3D2314'];
@@ -194,12 +223,21 @@ const CustomizationHub: React.FC<CustomizationHubProps> = ({ gameData, setGameDa
                     <div className="p-4 space-y-4 border-b border-slate-800">
                         <div className="flex items-center justify-between">
                             <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Player Selection</h3>
-                            <button 
-                                onClick={() => setShowAllPlayers(!showAllPlayers)}
-                                className={`text-[8px] font-black uppercase px-2 py-1 rounded transition-all ${showAllPlayers ? 'bg-emerald-500 text-black' : 'bg-slate-800 text-slate-400'}`}
-                            >
-                                {showAllPlayers ? 'All Players' : 'My Squad'}
-                            </button>
+                            <div className="flex gap-1">
+                                <button 
+                                    onClick={handleCreatePlayer}
+                                    className="bg-emerald-500 hover:bg-emerald-400 text-black p-1.5 rounded transition-all"
+                                    title="Add New Player"
+                                >
+                                    <Plus className="w-3 h-3" />
+                                </button>
+                                <button 
+                                    onClick={() => setShowAllPlayers(!showAllPlayers)}
+                                    className={`text-[8px] font-black uppercase px-2 py-1 rounded transition-all ${showAllPlayers ? 'bg-emerald-500 text-black' : 'bg-slate-800 text-slate-400'}`}
+                                >
+                                    {showAllPlayers ? 'All' : 'Squad'}
+                                </button>
+                            </div>
                         </div>
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={12} />
