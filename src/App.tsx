@@ -13,7 +13,7 @@ import CareerHub from './components/CareerHub';
 import AuctionRoom from './components/AuctionRoom';
 import Lineups from './components/Lineups';
 import Editor from './components/Editor';
-import Gallery from './components/Gallery';
+import { CaptainsCorner } from './components/CaptainsCorner';
 
 export const MAX_SQUAD_SIZE = 16;
 export const MIN_SQUAD_SIZE = 16;
@@ -51,8 +51,8 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
         transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
         className="relative mb-8 md:mb-10 z-10"
       >
-        <div className="w-24 h-24 md:w-48 md:h-48 bg-[#050808] rounded-[24px] md:rounded-[40px] flex items-center justify-center shadow-[0_0_60px_rgba(20,184,166,0.4)] border-[6px] md:border-[12px] border-white/10 relative overflow-hidden group">
-            <img src="/favicon.svg" alt="Cricket Manager 26 Logo" className="w-14 h-14 md:w-32 md:h-32 relative z-10 drop-shadow-[0_0_20px_rgba(20,184,166,0.5)]" />
+        <div className="w-32 h-32 md:w-64 md:h-64 bg-[#050808] rounded-[32px] md:rounded-[56px] flex items-center justify-center shadow-[0_0_80px_rgba(20,184,166,0.4)] border-[8px] md:border-[16px] border-white/10 relative overflow-hidden group">
+            <img src="/favicon.svg" alt="Cricket Manager 26 Logo" className="w-20 h-20 md:w-44 md:h-44 relative z-10 drop-shadow-[0_0_30px_rgba(20,184,166,0.5)]" />
             <motion.div 
               animate={{ x: ["-100%", "200%"] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
@@ -83,7 +83,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.8, duration: 0.8 }}
-            className="text-4xl md:text-8xl font-black italic uppercase tracking-tighter text-white mb-1.5 md:mb-2 font-display leading-[0.85]"
+            className="text-5xl md:text-9xl font-black italic uppercase tracking-tighter text-white mb-2 md:mb-4 font-display leading-[0.85]"
         >
             CRICKET<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-teal-500 to-teal-700">MANAGER</span>
         </motion.h1>
@@ -182,15 +182,15 @@ const GameCover = ({ onStart, isInstallable, onInstall }: { onStart: () => void;
                         NEXT_GEN_STRATEGY
                     </div>
                     
-                    <h1 className="text-4xl md:text-8xl font-black italic uppercase tracking-tighter text-white mb-1.5 md:mb-4 font-display leading-[0.8] drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
+                    <h1 className="text-5xl md:text-9xl font-black italic uppercase tracking-tighter text-white mb-2 md:mb-6 font-display leading-[0.8] drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
                         CRICKET<br/>
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-teal-500 to-teal-700">MANAGER</span>
                     </h1>
                     
-                    <div className="flex items-center justify-center gap-3 md:gap-4 mt-1.5 md:mt-2">
-                        <div className="h-[1px] w-10 md:w-12 bg-gradient-to-r from-transparent to-white/20" />
-                        <span className="text-2xl md:text-5xl font-black italic text-teal-500 font-display tracking-widest drop-shadow-[0_0_20px_rgba(20,184,166,0.5)]">26</span>
-                        <div className="h-[1px] w-10 md:w-12 bg-gradient-to-l from-transparent to-white/20" />
+                    <div className="flex items-center justify-center gap-4 md:gap-6 mt-2 md:mt-4">
+                        <div className="h-[1.5px] w-12 md:w-16 bg-gradient-to-r from-transparent to-white/20" />
+                        <span className="text-3xl md:text-7xl font-black italic text-teal-500 font-display tracking-widest drop-shadow-[0_0_20px_rgba(20,184,166,0.5)]">26</span>
+                        <div className="h-[1.5px] w-12 md:w-16 bg-gradient-to-l from-transparent to-white/20" />
                     </div>
                 </motion.div>
             </div>
@@ -239,7 +239,7 @@ const GameCover = ({ onStart, isInstallable, onInstall }: { onStart: () => void;
     );
 };
 
-export type AppState = 'MAIN_MENU' | 'TEAM_SELECTION' | 'AUCTION' | 'CAREER_HUB' | 'EDITOR' | 'GALLERY';
+export type AppState = 'MAIN_MENU' | 'TEAM_SELECTION' | 'AUCTION' | 'CAREER_HUB' | 'EDITOR' | 'CAPTAINS_CORNER';
 
 export const App = () => {
   const [appState, setAppState] = useState<AppState>('MAIN_MENU');
@@ -583,7 +583,7 @@ export const App = () => {
         );
     }
     switch(appState) {
-        case 'MAIN_MENU': return <MainMenu onStartNewGame={handleStartNewGame} onResumeGame={resumeGame} onOpenEditor={handleOpenEditor} onOpenGallery={() => setAppState('GALLERY')} hasSaveData={hasSaveData} />;
+        case 'MAIN_MENU': return <MainMenu onStartNewGame={handleStartNewGame} onResumeGame={resumeGame} onOpenEditor={handleOpenEditor} onOpenCaptainsCorner={() => setAppState('CAPTAINS_CORNER')} hasSaveData={hasSaveData} />;
         case 'TEAM_SELECTION': return <TeamSelection onTeamSelected={initializeNewGame} theme={theme} />;
         case 'AUCTION': return gameData ? <AuctionRoom gameData={gameData} onAuctionComplete={handleAuctionComplete} /> : null;
         case 'CAREER_HUB': return gameData ? <CareerHub gameData={gameData} setGameData={setGameData} onResetGame={resetGame} theme={theme} setTheme={setTheme} saveGame={saveGame} loadGame={loadGame} showFeedback={showFeedback} /> : null;
@@ -618,18 +618,17 @@ export const App = () => {
                 </div>
             </div>
         ) : null;
-        case 'GALLERY': return (
+        case 'CAPTAINS_CORNER': return (
             <div className="h-full flex flex-col">
                 <div className="bg-[#050808] p-4 border-b-2 border-white/10 flex justify-between items-center">
                     <button onClick={() => setAppState('MAIN_MENU')} className="text-teal-500 font-black uppercase italic text-xs hover:text-white transition-colors flex items-center gap-2">
                         <span>← BACK_TO_MENU</span>
                     </button>
-                    <span className="text-[10px] font-mono font-bold opacity-30 uppercase tracking-widest">ELITE_GALLERY_VIEW</span>
+                    <span className="text-[10px] font-mono font-bold opacity-30 uppercase tracking-widest">ELITE_CAPTAINS_VIEW</span>
                 </div>
                 <div className="flex-grow overflow-hidden">
-                    <Gallery 
-                        gameData={gameData || undefined} 
-                        setGameData={setGameData as any}
+                    <CaptainsCorner 
+                        gameData={gameData!} 
                     />
                 </div>
             </div>
@@ -640,7 +639,7 @@ export const App = () => {
 
   return (
     <div className="bg-slate-100 dark:bg-slate-900 min-h-screen flex items-center justify-center font-sans overflow-hidden">
-      <div className="w-full h-screen md:max-w-md md:max-h-[932px] md:h-[90vh] bg-gray-50 dark:bg-[#050808] md:border-4 md:border-gray-300 md:dark:border-gray-700 md:rounded-[60px] md:shadow-2xl md:shadow-black/50 overflow-hidden relative text-gray-900 dark:text-gray-200 flex flex-col">
+      <div className="w-full h-screen md:max-w-xl md:max-h-[932px] md:h-[90vh] bg-gray-50 dark:bg-[#050808] md:border-4 md:border-gray-300 md:dark:border-gray-700 md:rounded-[60px] md:shadow-2xl md:shadow-black/50 overflow-hidden relative text-gray-900 dark:text-gray-200 flex flex-col">
         <AnimatePresence>
           {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
           {!showSplash && showCover && <GameCover onStart={() => setShowCover(false)} isInstallable={isInstallable} onInstall={handleInstallClick} />}

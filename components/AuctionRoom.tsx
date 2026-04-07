@@ -409,12 +409,12 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                     <div className="max-w-6xl mx-auto w-full">
                         <div className="flex justify-between items-center mb-12">
                             <div>
-                                <h2 className="text-6xl font-black italic text-white uppercase tracking-tighter">Direct Signing</h2>
-                                <p className="text-teal-500 font-bold tracking-widest text-sm uppercase mt-2">Pre-Auction Exclusive // 2X Value</p>
+                                <h2 className="text-7xl font-black italic text-white uppercase tracking-tighter">Direct Signing</h2>
+                                <p className="text-teal-500 font-bold tracking-widest text-lg uppercase mt-4">Pre-Auction Exclusive // 2X Value</p>
                             </div>
                             <button 
                                 onClick={startAuction}
-                                className="bg-teal-500 text-black px-12 py-6 rounded-3xl font-black italic uppercase tracking-tighter text-3xl hover:scale-105 transition-all shadow-[0_0_50px_rgba(20,184,166,0.4)]"
+                                className="bg-teal-500 text-black px-16 py-8 rounded-4xl font-black italic uppercase tracking-tighter text-4xl hover:scale-105 transition-all shadow-[0_0_50px_rgba(20,184,166,0.4)]"
                             >
                                 Start Auction
                             </button>
@@ -470,7 +470,7 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                                     </div>
                                 ) : (
                                     <div className="space-y-3">
-                                        {sortedPool.filter(p => !p.isForeign && !p.isEmerging && p.nationality === 'Pakistan').slice(0, 10).map(p => (
+                                        {sortedPool.filter(p => !p.isForeign && !p.isEmerging && (p.nationality === 'Pakistan' || p.nationality === 'Local')).slice(0, 10).map(p => (
                                             <button 
                                                 key={p.id}
                                                 onClick={() => handleDirectSign(p, 'national')}
@@ -586,45 +586,45 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                             >
                                 <div className="relative bg-white/[0.03] border border-white/10 rounded-[24px] md:rounded-[40px] p-4 md:p-10 lg:p-12 backdrop-blur-3xl overflow-hidden shadow-2xl">
                                     <div className="relative z-10 flex flex-col items-center">
-                                        <div className="relative mb-2 md:mb-6">
-                                            <div className="absolute inset-0 bg-teal-500/20 blur-[20px] md:blur-[40px] rounded-full" />
+                                        <div className="relative mb-4 md:mb-10">
+                                            <div className="absolute inset-0 bg-teal-500/20 blur-[30px] md:blur-[60px] rounded-full" />
                                             <div className="relative">
-                                                <PlayerAvatar player={currentPlayer} size="md" className="w-16 h-16 md:w-40 md:h-40 border-2 md:border-4 border-white/10 shadow-2xl rounded-full" />
-                                                <div className={`absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 md:px-4 py-0.5 md:py-1 rounded-md md:rounded-xl font-black text-[4px] md:text-[9px] uppercase tracking-widest shadow-xl border border-white/10 ${getRoleColor(currentPlayer.role)}`}>
+                                                <PlayerAvatar player={currentPlayer} size="lg" className="w-24 h-24 md:w-56 md:h-56 border-4 md:border-8 border-white/10 shadow-2xl rounded-full" />
+                                                <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 md:px-6 py-1 md:py-2 rounded-lg md:rounded-2xl font-black text-[6px] md:text-xs uppercase tracking-widest shadow-xl border border-white/10 ${getRoleColor(currentPlayer.role)}`}>
                                                     {getRoleFullName(currentPlayer.role)}
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <h2 className="text-base md:text-3xl font-black italic uppercase tracking-tighter text-white text-center mb-0.5 md:mb-2 leading-none">
+                                        <h2 className="text-xl md:text-5xl font-black italic uppercase tracking-tighter text-white text-center mb-1 md:mb-4 leading-none">
                                             {currentPlayer.name}
                                         </h2>
                                         
-                                        <div className="flex items-center gap-1.5 md:gap-4 mb-2 md:mb-8">
+                                        <div className="flex items-center gap-3 md:gap-8 mb-4 md:mb-12">
                                             <div className="flex flex-col items-center">
-                                                <span className="text-[4px] md:text-[8px] font-black text-white/20 uppercase tracking-widest mb-0.5 md:mb-1">Rating</span>
-                                                <span className="text-[7px] md:text-xs font-black text-teal-500">{Math.max(currentPlayer.battingSkill, currentPlayer.secondarySkill)}</span>
+                                                <span className="text-[6px] md:text-[10px] font-black text-white/20 uppercase tracking-widest mb-1 md:mb-2">Rating</span>
+                                                <span className="text-[10px] md:text-xl font-black text-teal-500">{Math.max(currentPlayer.battingSkill, currentPlayer.secondarySkill)}</span>
                                             </div>
-                                            <div className="w-px h-1.5 md:h-4 bg-white/10" />
+                                            <div className="w-px h-3 md:h-8 bg-white/10" />
                                             <div className="flex flex-col items-center">
-                                                <span className="text-[4px] md:text-[8px] font-black text-white/20 uppercase tracking-widest mb-0.5 md:mb-1">Style</span>
-                                                <span className="text-[7px] md:text-xs font-black text-white">{currentPlayer.style}</span>
+                                                <span className="text-[6px] md:text-[10px] font-black text-white/20 uppercase tracking-widest mb-1 md:mb-2">Style</span>
+                                                <span className="text-[10px] md:text-xl font-black text-white">{currentPlayer.style}</span>
                                             </div>
                                         </div>
 
                                         {/* Current Bid Display */}
-                                        <div className="w-full bg-black/40 rounded-[14px] md:rounded-[24px] p-2.5 md:p-6 border border-white/5 text-center relative overflow-hidden">
-                                            <p className="text-[5px] md:text-[9px] font-black uppercase tracking-[0.3em] text-white/30 mb-0.5 md:mb-2">CURRENT_BID</p>
-                                            <div className="flex items-center justify-center gap-1.5 md:gap-4">
-                                                <span className="text-lg md:text-4xl font-black italic text-white tracking-tighter leading-none">${currentBid.toFixed(2)}<span className="text-[8px] md:text-xl ml-0.5 md:ml-1">Cr</span></span>
+                                        <div className="w-full bg-black/40 rounded-[20px] md:rounded-[32px] p-4 md:p-10 border border-white/5 text-center relative overflow-hidden">
+                                            <p className="text-[7px] md:text-xs font-black uppercase tracking-[0.4em] text-white/30 mb-1 md:mb-4">CURRENT_BID</p>
+                                            <div className="flex items-center justify-center gap-2 md:gap-6">
+                                                <span className="text-2xl md:text-6xl font-black italic text-white tracking-tighter leading-none">${currentBid.toFixed(2)}<span className="text-xs md:text-3xl ml-1 md:ml-2">Cr</span></span>
                                                 {highestBidderId === gameData.userTeamId && (
-                                                    <div className="bg-teal-500 text-black px-1 md:px-3 py-0.5 md:py-1 rounded-sm md:rounded-lg text-[4px] md:text-[8px] font-black uppercase tracking-widest">
+                                                    <div className="bg-teal-500 text-black px-2 md:px-5 py-1 md:py-2 rounded-md md:rounded-xl text-[6px] md:text-xs font-black uppercase tracking-widest">
                                                         LEADING
                                                     </div>
                                                 )}
                                             </div>
                                             {highestBidderId && (
-                                                <p className="text-[6px] md:text-[10px] font-black text-teal-500 mt-0.5 md:mt-2 uppercase tracking-widest">
+                                                <p className="text-[8px] md:text-sm font-black text-teal-500 mt-1 md:mt-4 uppercase tracking-widest">
                                                     {teams.find(t => t.id === highestBidderId)?.name}
                                                 </p>
                                             )}

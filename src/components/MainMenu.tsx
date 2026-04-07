@@ -7,11 +7,11 @@ interface MainMenuProps {
     onStartNewGame: () => void;
     onResumeGame: () => void;
     onOpenEditor: () => void;
-    onOpenGallery: () => void;
+    onOpenCaptainsCorner: () => void;
     hasSaveData: boolean;
 }
 
-const MainMenu: React.FC<MainMenuProps> = ({ onStartNewGame, onResumeGame, onOpenEditor, onOpenGallery, hasSaveData }) => {
+const MainMenu: React.FC<MainMenuProps> = ({ onStartNewGame, onResumeGame, onOpenEditor, onOpenCaptainsCorner, hasSaveData }) => {
     return (
         <div className="h-full flex flex-col items-center justify-center p-4 md:p-10 bg-[#050808] relative overflow-hidden font-sans text-[#E4E3E0]">
             {/* Dynamic Background Elements */}
@@ -119,12 +119,12 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStartNewGame, onResumeGame, onOpe
                             transition={{ delay: 0.2 }}
                             whileHover={{ scale: 1.02, y: -4 }}
                             whileTap={{ scale: 0.98 }}
-                            onClick={onOpenGallery}
+                            onClick={onOpenCaptainsCorner}
                             className="group relative overflow-hidden bg-white/[0.03] hover:bg-white/[0.06] text-white py-5 md:py-10 px-6 md:px-12 rounded-[24px] md:rounded-[48px] font-black italic tracking-tighter text-xl md:text-3xl uppercase transition-all border border-white/10 backdrop-blur-2xl hover:border-teal-500/40 shadow-xl"
                         >
                             <div className="flex flex-col items-start gap-2 md:gap-6">
-                                <ImageIcon className="text-teal-500 group-hover:scale-110 transition-transform duration-500 w-6 h-6 md:w-8 md:h-8" />
-                                <span>ELITE_GALLERY</span>
+                                <Trophy className="text-teal-500 group-hover:scale-110 transition-transform duration-500 w-6 h-6 md:w-8 md:h-8" />
+                                <span>CAPTAINS_CORNER</span>
                             </div>
                         </motion.button>
 

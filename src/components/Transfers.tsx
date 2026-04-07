@@ -78,9 +78,9 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
     };
 
     return (
-        <div className="h-full flex flex-col bg-[#0a0f0f] text-gray-100 font-sans overflow-hidden">
+        <div className="min-h-full flex flex-col bg-[#0a0f0f] text-gray-100 font-sans">
             {/* Header */}
-            <div className="p-4 border-b border-white/10 bg-black/40">
+            <div className="p-4 border-b border-white/10 bg-black/40 sticky top-0 z-20 backdrop-blur-md">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-xl font-black tracking-tighter uppercase italic text-teal-500">TRANSFER MARKET</h1>
@@ -90,10 +90,10 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
             </div>
 
             {/* Main Content: Two Columns */}
-            <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+            <div className="flex-1 flex flex-col lg:flex-row">
                 {/* Left Column */}
-                <div className="flex-1 flex flex-col border-r border-white/10">
-                    <div className="p-4 bg-white/5 border-b border-white/5 space-y-3">
+                <div className="flex-1 flex flex-col border-r border-white/10 border-b lg:border-b-0">
+                    <div className="p-4 bg-white/5 border-b border-white/5 space-y-3 sticky top-[65px] z-10 backdrop-blur-md">
                         <div className="flex justify-between items-center">
                             <h2 className="text-[10px] font-black uppercase tracking-widest text-white/40">SOURCE TEAM</h2>
                             <span className="text-[10px] font-bold text-teal-500">{leftTeam?.purse.toFixed(2)} CR</span>
@@ -108,7 +108,7 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                             ))}
                         </select>
                     </div>
-                    <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                    <div className="p-2 space-y-1">
                         {leftTeam?.squad.map(player => (
                             <div key={player.id} className="flex items-center justify-between p-2 bg-white/[0.02] hover:bg-white/[0.05] rounded-lg border border-white/5 transition-colors group">
                                 <div className="flex items-center gap-2">
@@ -135,7 +135,7 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
 
                 {/* Right Column */}
                 <div className="flex-1 flex flex-col bg-black/10">
-                    <div className="p-4 bg-white/5 border-b border-white/5 space-y-3">
+                    <div className="p-4 bg-white/5 border-b border-white/5 space-y-3 sticky top-[65px] lg:top-[65px] z-10 backdrop-blur-md">
                         <div className="flex justify-between items-center">
                             <h2 className="text-[10px] font-black uppercase tracking-widest text-white/40">TARGET / MARKET</h2>
                             {rightTeam && <span className="text-[10px] font-bold text-teal-500">{rightTeam.purse.toFixed(2)} CR</span>}
@@ -162,7 +162,7 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                             </div>
                         )}
                     </div>
-                    <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                    <div className="p-2 space-y-1">
                         {rightList.map(player => (
                             <div key={player.id} className="flex items-center justify-between p-2 bg-white/[0.02] hover:bg-white/[0.05] rounded-lg border border-white/5 transition-colors group">
                                 <div className="flex items-center gap-2">
