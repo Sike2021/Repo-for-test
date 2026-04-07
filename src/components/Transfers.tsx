@@ -90,43 +90,43 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
             </div>
 
             {/* Main Content: Two Columns */}
-            <div className="flex-1 flex flex-col lg:flex-row">
+            <div className="flex-1 flex flex-row overflow-hidden">
                 {/* Left Column */}
-                <div className="flex-1 flex flex-col border-r border-white/10 border-b lg:border-b-0">
-                    <div className="p-4 bg-white/5 border-b border-white/5 space-y-3 sticky top-[65px] z-10 backdrop-blur-md">
+                <div className="flex-1 flex flex-col border-r border-white/10">
+                    <div className="p-4 bg-white/5 border-b border-white/5 space-y-3 sticky top-0 z-10 backdrop-blur-md">
                         <div className="flex justify-between items-center">
-                            <h2 className="text-[10px] font-black uppercase tracking-widest text-white/40">SOURCE TEAM</h2>
-                            <span className="text-[10px] font-bold text-teal-500">{leftTeam?.purse.toFixed(2)} CR</span>
+                            <h2 className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-white/40">SOURCE</h2>
+                            <span className="text-[8px] md:text-[10px] font-bold text-teal-500">{leftTeam?.purse.toFixed(2)} CR</span>
                         </div>
                         <select 
                             value={leftTeamId}
                             onChange={(e) => setLeftTeamId(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm font-bold focus:outline-none focus:border-teal-500 appearance-none"
+                            className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] md:text-sm font-bold focus:outline-none focus:border-teal-500 appearance-none"
                         >
                             {gameData.teams.map(t => (
                                 <option key={t.id} value={t.id} className="bg-[#0a0f0f]">{t.name}</option>
                             ))}
                         </select>
                     </div>
-                    <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                    <div className="flex-1 overflow-y-auto p-1 md:p-2 space-y-1 scrollbar-hide">
                         {leftTeam?.squad.map(player => (
-                            <div key={player.id} className="flex items-center justify-between p-2 bg-white/[0.02] hover:bg-white/[0.05] rounded-lg border border-white/5 transition-colors group">
-                                <div className="flex items-center gap-2">
-                                    <div className={`w-7 h-7 rounded flex items-center justify-center font-black text-xs ${getRoleColor(player.role)} bg-white/5`}>
+                            <div key={player.id} className="flex items-center justify-between p-1.5 md:p-2 bg-white/[0.02] hover:bg-white/[0.05] rounded-lg border border-white/5 transition-colors group">
+                                <div className="flex items-center gap-1.5 md:gap-2 overflow-hidden">
+                                    <div className={`w-6 h-6 md:w-7 md:h-7 rounded flex items-center justify-center font-black text-[8px] md:text-xs ${getRoleColor(player.role)} bg-white/5 shrink-0`}>
                                         {player.name[0]}
                                     </div>
-                                    <div>
-                                        <p className="text-xs font-bold leading-none mb-1">
-                                            {player.name} {player.isForeign && <span className="text-blue-400 text-[9px]">(F)</span>}
+                                    <div className="overflow-hidden">
+                                        <p className="text-[9px] md:text-xs font-bold leading-none mb-0.5 md:mb-1 truncate">
+                                            {player.name}
                                         </p>
-                                        <p className="text-[9px] font-bold opacity-40 uppercase">{player.role}</p>
+                                        <p className="text-[7px] md:text-[9px] font-bold opacity-40 uppercase">{player.role}</p>
                                     </div>
                                 </div>
                                 <button 
                                     onClick={() => handleMove(player, leftTeamId, rightTeamId)}
-                                    className="w-7 h-7 rounded-full bg-teal-500/10 text-teal-500 hover:bg-teal-500 hover:text-black flex items-center justify-center transition-all"
+                                    className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-teal-500/10 text-teal-500 hover:bg-teal-500 hover:text-black flex items-center justify-center transition-all shrink-0"
                                 >
-                                    <UserPlus className="w-3.5 h-3.5" />
+                                    <UserPlus className="w-3 md:w-3.5 h-3 md:h-3.5" />
                                 </button>
                             </div>
                         ))}
@@ -135,15 +135,15 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
 
                 {/* Right Column */}
                 <div className="flex-1 flex flex-col bg-black/10">
-                    <div className="p-4 bg-white/5 border-b border-white/5 space-y-3 sticky top-[65px] lg:top-[65px] z-10 backdrop-blur-md">
+                    <div className="p-4 bg-white/5 border-b border-white/5 space-y-3 sticky top-0 z-10 backdrop-blur-md">
                         <div className="flex justify-between items-center">
-                            <h2 className="text-[10px] font-black uppercase tracking-widest text-white/40">TARGET / MARKET</h2>
-                            {rightTeam && <span className="text-[10px] font-bold text-teal-500">{rightTeam.purse.toFixed(2)} CR</span>}
+                            <h2 className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-white/40">MARKET</h2>
+                            {rightTeam && <span className="text-[8px] md:text-[10px] font-bold text-teal-500">{rightTeam.purse.toFixed(2)} CR</span>}
                         </div>
                         <select 
                             value={rightTeamId}
                             onChange={(e) => setRightTeamId(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm font-bold focus:outline-none focus:border-teal-500 appearance-none"
+                            className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] md:text-sm font-bold focus:outline-none focus:border-teal-500 appearance-none"
                         >
                             <option value="FREE_AGENTS" className="bg-[#0a0f0f]">FREE AGENTS</option>
                             {gameData.teams.map(t => (
@@ -152,35 +152,35 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                         </select>
                         {rightTeamId === 'FREE_AGENTS' && (
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 opacity-20" />
+                                <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-2.5 h-2.5 opacity-20" />
                                 <input 
                                     value={searchQuery}
                                     onChange={e => setSearchQuery(e.target.value)}
-                                    placeholder="Search free agents..."
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg py-1.5 pl-8 pr-3 text-[11px] focus:outline-none focus:border-teal-500 transition-all"
+                                    placeholder="Search..."
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg py-1 pl-6 pr-2 text-[9px] md:text-[11px] focus:outline-none focus:border-teal-500 transition-all"
                                 />
                             </div>
                         )}
                     </div>
-                    <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                    <div className="flex-1 overflow-y-auto p-1 md:p-2 space-y-1 scrollbar-hide">
                         {rightList.map(player => (
-                            <div key={player.id} className="flex items-center justify-between p-2 bg-white/[0.02] hover:bg-white/[0.05] rounded-lg border border-white/5 transition-colors group">
-                                <div className="flex items-center gap-2">
-                                    <div className={`w-7 h-7 rounded flex items-center justify-center font-black text-xs ${getRoleColor(player.role)} bg-white/5`}>
+                            <div key={player.id} className="flex items-center justify-between p-1.5 md:p-2 bg-white/[0.02] hover:bg-white/[0.05] rounded-lg border border-white/5 transition-colors group">
+                                <div className="flex items-center gap-1.5 md:gap-2 overflow-hidden">
+                                    <div className={`w-6 h-6 md:w-7 md:h-7 rounded flex items-center justify-center font-black text-[8px] md:text-xs ${getRoleColor(player.role)} bg-white/5 shrink-0`}>
                                         {player.name[0]}
                                     </div>
-                                    <div>
-                                        <p className="text-xs font-bold leading-none mb-1">
-                                            {player.name} {player.isForeign && <span className="text-blue-400 text-[9px]">(F)</span>}
+                                    <div className="overflow-hidden">
+                                        <p className="text-[9px] md:text-xs font-bold leading-none mb-0.5 md:mb-1 truncate">
+                                            {player.name}
                                         </p>
-                                        <p className="text-[9px] font-bold opacity-40 uppercase">{player.role}</p>
+                                        <p className="text-[7px] md:text-[9px] font-bold opacity-40 uppercase">{player.role}</p>
                                     </div>
                                 </div>
                                 <button 
                                     onClick={() => handleMove(player, rightTeamId, leftTeamId)}
-                                    className="w-7 h-7 rounded-full bg-teal-500/10 text-teal-500 hover:bg-teal-500 hover:text-black flex items-center justify-center transition-all"
+                                    className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-teal-500/10 text-teal-500 hover:bg-teal-500 hover:text-black flex items-center justify-center transition-all shrink-0"
                                 >
-                                    <UserPlus className="w-3.5 h-3.5 rotate-180" />
+                                    <UserPlus className="w-3 md:w-3.5 h-3 md:h-3.5 rotate-180" />
                                 </button>
                             </div>
                         ))}
