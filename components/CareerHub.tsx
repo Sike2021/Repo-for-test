@@ -32,6 +32,8 @@ import AuctionRoom from './AuctionRoom';
 import PlayerDatabase from './PlayerDatabase';
 import SeasonSummary from './SeasonSummary';
 import ModernRatingBoard from './ModernRatingBoard';
+import Gallery from './Gallery';
+import CustomizationHub from './CustomizationHub';
 
 interface CareerHubProps {
     gameData: GameData;
@@ -48,8 +50,8 @@ const BottomNavBar = ({ activeScreen, setScreen }: { activeScreen: CareerScreen,
     const navItems = [
         { name: 'Home', screen: 'DASHBOARD' as CareerScreen, icon: Home },
         { name: 'Table', screen: 'LEAGUES' as CareerScreen, icon: Trophy },
-        { name: 'Ratings', screen: 'RATING_BOARD' as CareerScreen, icon: Star },
         { name: 'Stats', screen: 'STATS' as CareerScreen, icon: BarChart3 },
+        { name: 'Ratings', screen: 'RATING_BOARD' as CareerScreen, icon: Star },
         { name: 'Settings', screen: 'SETTINGS' as CareerScreen, icon: SettingsIcon },
     ];
     return (
@@ -671,6 +673,8 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
             }} />;
             case 'SEASON_SUMMARY': return <SeasonSummary gameData={gameData} onContinue={handleSeasonSummaryComplete} />;
             case 'RATING_BOARD': return <ModernRatingBoard players={gameData.allPlayers} currentFormat={gameData.currentFormat} />;
+            case 'GALLERY': return <Gallery gameData={gameData} setGameData={setGameData} setScreen={setScreen} setSelectedPlayer={setSelectedPlayer} />;
+            case 'CUSTOMIZATION': return <CustomizationHub gameData={gameData} setGameData={setGameData} setScreen={setScreen} />;
             case 'LIVE_MATCH': {
                 const schedule = gameData.schedule[gameData.currentFormat];
                 const currentMatchIndex = gameData.currentMatchIndex[gameData.currentFormat];

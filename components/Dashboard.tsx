@@ -196,9 +196,9 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
                     {[
                         { screen: 'NEWS', icon: <Icons.News className="w-3.5 h-3.5 md:w-4 md:h-4" />, label: 'NEWS', desc: 'MEDIA' },
                         { screen: 'LINEUPS', icon: <Icons.Lineups className="w-3.5 h-3.5 md:w-4 md:h-4" />, label: 'LINEUPS', desc: 'SQUAD' },
-                        { screen: 'PLAYER_DATABASE', icon: <Icons.Database className="w-3.5 h-3.5 md:w-4 md:h-4" />, label: 'DATABASE', desc: 'INTEL' },
+                        { screen: 'GALLERY', icon: <Icons.Layout className="w-3.5 h-3.5 md:w-4 md:h-4" />, label: 'GALLERY', desc: 'ELITE' },
                         { screen: 'TRANSFERS', icon: <Icons.Transfers className="w-3.5 h-3.5 md:w-4 md:h-4" />, label: 'TRANSFERS', desc: 'MARKET' },
-                        { screen: 'EDITOR', icon: <Icons.Settings className="w-3.5 h-3.5 md:w-4 md:h-4" />, label: 'EDITOR', desc: 'SYSTEM' },
+                        { screen: 'CUSTOMIZATION', icon: <Icons.Settings className="w-3.5 h-3.5 md:w-4 md:h-4" />, label: 'CUSTOMIZE', desc: 'SQUAD' },
                         { screen: 'STATS', icon: <Icons.Stats className="w-3.5 h-3.5 md:w-4 md:h-4" />, label: 'ANALYTICS', desc: 'DATA' },
                     ].map((item, idx) => (
                         <motion.button 

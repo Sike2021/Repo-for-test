@@ -1,17 +1,15 @@
 import React, { useMemo } from 'react';
 import { Player, PlayerRole } from '../types';
 import { getRoleBorderClass, hashString } from '../utils';
+import { GET_AVATAR_URL } from '../src/constants';
 
 interface PlayerAvatarProps {
   player: Player;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   className?: string;
 }
 
-// Simple hash function
-
 export const PlayerAvatar: React.FC<PlayerAvatarProps> = ({ player, size = 'md', className = '' }) => {
-  // Use avatarSeed if it exists, otherwise generate one
   const seedStr = player?.avatarSeed || (player?.avatarUrl ? `${player?.id}-${player?.name}-${player?.avatarUrl}` : `${player?.id}-${player?.name}`);
   const seed = hashString(seedStr || '');
   
@@ -20,14 +18,18 @@ export const PlayerAvatar: React.FC<PlayerAvatarProps> = ({ player, size = 'md',
     sm: 'w-8 h-8',
     md: 'w-12 h-12',
     lg: 'w-20 h-20',
-    xl: 'w-32 h-32'
+    xl: 'w-32 h-32',
+    '2xl': 'w-48 h-48'
   };
 
   const borderClass = player ? getRoleBorderClass(player.role) : '';
+  const nationalityBorder = player?.nationality?.toLowerCase() === 'england' || player?.nationality?.toLowerCase() === 'english'
+    ? 'border-white'
+    : 'border-black';
   
   // Generate a deterministic SVG avatar
   const svgContent = useMemo(() => {
-    if (!player) return '';
+    if (!player || player.avatarSeed) return '';
     const bgColors = [
       '#0F172A', '#1E293B', '#334155', '#475569', // Slate
       '#450A0A', '#7F1D1D', '#991B1B', '#B91C1C', // Red
@@ -38,7 +40,20 @@ export const PlayerAvatar: React.FC<PlayerAvatarProps> = ({ player, size = 'md',
     ];
     
     const skinTones = ['#FFDBAC', '#F1C27D', '#E0AC69', '#8D5524', '#C68642', '#3D2314'];
-    const hairColors = ['#090806', '#2C1608', '#4E2708', '#A56B46', '#B55239', '#D6C4C2', '#FFFFFF', '#4A4A4A'];
+    const hairColors = [
+      '#090806', // Black
+      '#2C1608', // Dark Brown
+      '#4E2708', // Medium Brown
+      '#A56B46', // Light Brown
+      '#B55239', // Auburn
+      '#D6C4C2', // Blonde
+      '#FFFFFF', // White
+      '#4A4A4A', // Gray
+      '#3B82F6', // Blue
+      '#EF4444', // Red
+      '#10B981', // Emerald
+      '#F59E0B'  // Amber
+    ];
     
     const custom = player.customization;
     const skinColor = custom?.skinTone !== undefined ? skinTones[custom.skinTone % skinTones.length] : skinTones[(seed >> 2) % skinTones.length];
@@ -139,14 +154,25 @@ export const PlayerAvatar: React.FC<PlayerAvatarProps> = ({ player, size = 'md',
 
   if (!player) return null;
 
+  const isDiceBear = player.avatarSeed && !player.avatarUrl;
+  const diceBearUrl = player.avatarSeed ? GET_AVATAR_URL(player.avatarSeed!) : null;
+  const localAvatarUrl = player.avatarSeed ? `/avatars/${player.avatarSeed}.png` : null;
+  const avatarUrl = player.avatarUrl || localAvatarUrl || diceBearUrl;
+
   return (
-    <div className={`relative rounded-full overflow-hidden border-2 flex-shrink-0 ${borderClass} ${sizeClasses[size]} ${className}`}>
-      {player.avatarUrl && (player.avatarUrl.startsWith('http') || player.avatarUrl.startsWith('data:image/')) ? (
+    <div className={`relative rounded-full overflow-hidden border-2 flex-shrink-0 ${nationalityBorder} ${sizeClasses[size]} ${className}`}>
+      {avatarUrl && (avatarUrl.startsWith('http') || avatarUrl.startsWith('data:image/') || avatarUrl.startsWith('/')) ? (
         <img 
-          src={player.avatarUrl} 
+          src={avatarUrl} 
           alt={player.name} 
           className="w-full h-full object-cover object-top" 
           referrerPolicy="no-referrer"
+          onError={(e) => {
+            // If local image fails, fallback to DiceBear if seed exists
+            if (player.avatarSeed && e.currentTarget.src !== diceBearUrl) {
+              e.currentTarget.src = diceBearUrl!;
+            }
+          }}
         />
       ) : (
         <div 

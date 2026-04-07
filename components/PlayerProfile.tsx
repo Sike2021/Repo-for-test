@@ -4,7 +4,8 @@ import { motion } from 'motion/react';
 import { Player, Format } from '../types';
 import { getRoleColor, getRoleFullName, aggregateStats } from '../utils';
 import { PlayerAvatar } from './PlayerAvatar';
-import { ChevronLeft, Activity, Target, Shield, Zap, Camera, Palette, User } from 'lucide-react';
+import AvatarSelector from './AvatarSelector';
+import { ChevronLeft, Activity, Target, Shield, Zap, Camera, Palette, User, Globe } from 'lucide-react';
 
 interface PlayerProfileProps {
     player: Player | null;
@@ -175,108 +176,78 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onBack, initialFo
                                     <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white">AVATAR_CUSTOMIZATION</h3>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {/* Hair & Skin */}
-                                    <div className="space-y-4">
-                                        <div className="space-y-2">
-                                            <label className="text-[7px] font-black text-white/40 uppercase tracking-widest">Skin Tone</label>
-                                            <div className="flex gap-2">
-                                                {[0, 1, 2, 3, 4, 5].map(tone => (
-                                                    <button 
-                                                        key={tone}
-                                                        onClick={() => onUpdatePlayer?.({
-                                                            ...player,
-                                                            customization: { ...(player.customization || {}), skinTone: tone }
-                                                        } as any)}
-                                                        className={`w-6 h-6 rounded-full border-2 ${player.customization?.skinTone === tone ? 'border-teal-500 scale-110' : 'border-white/10'}`}
-                                                        style={{ backgroundColor: ['#FFDBAC', '#F1C27D', '#E0AC69', '#8D5524', '#C68642', '#3D2314'][tone] }}
-                                                    />
-                                                ))}
+                                <AvatarSelector 
+                                    selectedSeed={player?.avatarSeed}
+                                    selectedUrl={player?.avatarUrl}
+                                    onSelect={(seed, isGallery, isUrl, gp) => {
+                                        if (player && onUpdatePlayer) {
+                                            onUpdatePlayer({
+                                                ...player,
+                                                name: gp ? gp.name : player.name,
+                                                nationality: gp ? gp.nationality : player.nationality,
+                                                avatarSeed: isUrl ? undefined : seed,
+                                                avatarUrl: isUrl ? seed : undefined,
+                                                customization: undefined
+                                            });
+                                        }
+                                    }}
+                                />
+
+                                <div className="pt-6 border-t border-white/5">
+                                    <h4 className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em] mb-4">MANUAL_OVERRIDE</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 opacity-50 hover:opacity-100 transition-opacity">
+                                        {/* Hair & Skin */}
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <label className="text-[7px] font-black text-white/40 uppercase tracking-widest">Skin Tone</label>
+                                                <div className="flex gap-2">
+                                                    {[0, 1, 2, 3, 4, 5].map(tone => (
+                                                        <button 
+                                                            key={tone}
+                                                            onClick={() => onUpdatePlayer?.({
+                                                                ...player,
+                                                                customization: { ...(player?.customization || {}), skinTone: tone }
+                                                            } as any)}
+                                                            className={`w-6 h-6 rounded-full border-2 ${player?.customization?.skinTone === tone ? 'border-teal-500 scale-110' : 'border-white/10'}`}
+                                                            style={{ backgroundColor: ['#FFDBAC', '#F1C27D', '#E0AC69', '#8D5524', '#C68642', '#3D2314'][tone] }}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <label className="text-[7px] font-black text-white/40 uppercase tracking-widest">Hair Style</label>
+                                                <select 
+                                                    value={player?.customization?.hairStyle || 0}
+                                                    onChange={(e) => onUpdatePlayer?.({
+                                                        ...player,
+                                                        customization: { ...(player?.customization || {}), hairStyle: parseInt(e.target.value) }
+                                                    } as any)}
+                                                    className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-[10px] text-white outline-none focus:border-teal-500"
+                                                >
+                                                    {['Bald', 'Short', 'Spiky', 'Afro', 'Long', 'Pompadour', 'Buzz Cut', 'Messy', 'Side Part', 'Shoulder Length'].map((style, idx) => (
+                                                        <option key={idx} value={idx}>{style}</option>
+                                                    ))}
+                                                </select>
                                             </div>
                                         </div>
 
-                                        <div className="space-y-2">
-                                            <label className="text-[7px] font-black text-white/40 uppercase tracking-widest">Hair Style</label>
-                                            <select 
-                                                value={player.customization?.hairStyle || 0}
-                                                onChange={(e) => onUpdatePlayer?.({
-                                                    ...player,
-                                                    customization: { ...(player.customization || {}), hairStyle: parseInt(e.target.value) }
-                                                } as any)}
-                                                className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-[10px] text-white outline-none focus:border-teal-500"
-                                            >
-                                                {['Bald', 'Short', 'Spiky', 'Afro', 'Long', 'Pompadour', 'Buzz Cut', 'Messy', 'Side Part', 'Shoulder Length'].map((style, idx) => (
-                                                    <option key={idx} value={idx}>{style}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <label className="text-[7px] font-black text-white/40 uppercase tracking-widest">Hair Color</label>
-                                            <div className="flex flex-wrap gap-2">
-                                                {['#090806', '#2C1608', '#4E2708', '#A56B46', '#B55239', '#D6C4C2', '#FFFFFF', '#4A4A4A'].map(color => (
-                                                    <button 
-                                                        key={color}
-                                                        onClick={() => onUpdatePlayer?.({
-                                                            ...player,
-                                                            customization: { ...(player.customization || {}), hairColor: color }
-                                                        } as any)}
-                                                        className={`w-6 h-6 rounded-full border-2 ${player.customization?.hairColor === color ? 'border-teal-500 scale-110' : 'border-white/10'}`}
-                                                        style={{ backgroundColor: color }}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Facial Hair */}
-                                    <div className="space-y-4">
-                                        <div className="space-y-2">
-                                            <label className="text-[7px] font-black text-white/40 uppercase tracking-widest">Mustache Style</label>
-                                            <select 
-                                                value={player.customization?.mustacheStyle || 0}
-                                                onChange={(e) => onUpdatePlayer?.({
-                                                    ...player,
-                                                    customization: { ...(player.customization || {}), mustacheStyle: parseInt(e.target.value) }
-                                                } as any)}
-                                                className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-[10px] text-white outline-none focus:border-teal-500"
-                                            >
-                                                {['None', 'Thin', 'Thick', 'Pencil', 'Handlebar', 'Chevron', 'Ultra Thin', 'Horseshoe', 'Walrus', 'Toothbrush'].map((style, idx) => (
-                                                    <option key={idx} value={idx}>{style}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <label className="text-[7px] font-black text-white/40 uppercase tracking-widest">Beard Style</label>
-                                            <select 
-                                                value={player.customization?.beardStyle || 0}
-                                                onChange={(e) => onUpdatePlayer?.({
-                                                    ...player,
-                                                    customization: { ...(player.customization || {}), beardStyle: parseInt(e.target.value) }
-                                                } as any)}
-                                                className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-[10px] text-white outline-none focus:border-teal-500"
-                                            >
-                                                {['None', 'Goatee', 'Full Beard', 'Chin Strap', 'Sideburns', 'Soul Patch', 'Van Dyke', 'Stubble', 'Ducktail', 'Pointed'].map((style, idx) => (
-                                                    <option key={idx} value={idx}>{style}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <label className="text-[7px] font-black text-white/40 uppercase tracking-widest">Facial Hair Color</label>
-                                            <div className="flex flex-wrap gap-2">
-                                                {['#090806', '#2C1608', '#4E2708', '#A56B46', '#B55239', '#D6C4C2', '#FFFFFF', '#4A4A4A'].map(color => (
-                                                    <button 
-                                                        key={color}
-                                                        onClick={() => onUpdatePlayer?.({
-                                                            ...player,
-                                                            customization: { ...(player.customization || {}), beardColor: color, mustacheColor: color }
-                                                        } as any)}
-                                                        className={`w-6 h-6 rounded-full border-2 ${player.customization?.beardColor === color ? 'border-teal-500 scale-110' : 'border-white/10'}`}
-                                                        style={{ backgroundColor: color }}
-                                                    />
-                                                ))}
+                                        {/* Facial Hair */}
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <label className="text-[7px] font-black text-white/40 uppercase tracking-widest">Beard Style</label>
+                                                <select 
+                                                    value={player?.customization?.beardStyle || 0}
+                                                    onChange={(e) => onUpdatePlayer?.({
+                                                        ...player,
+                                                        customization: { ...(player?.customization || {}), beardStyle: parseInt(e.target.value) }
+                                                    } as any)}
+                                                    className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-[10px] text-white outline-none focus:border-teal-500"
+                                                >
+                                                    {['None', 'Goatee', 'Full Beard', 'Chin Strap', 'Sideburns', 'Soul Patch', 'Van Dyke', 'Stubble', 'Ducktail', 'Pointed'].map((style, idx) => (
+                                                        <option key={idx} value={idx}>{style}</option>
+                                                    ))}
+                                                </select>
                                             </div>
                                         </div>
                                     </div>

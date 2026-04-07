@@ -1,16 +1,17 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Database, Play, RotateCcw, Trophy, Users, Settings, BarChart3 } from 'lucide-react';
+import { Database, Play, RotateCcw, Trophy, Users, Settings, BarChart3, Image as ImageIcon } from 'lucide-react';
 
 interface MainMenuProps {
     onStartNewGame: () => void;
     onResumeGame: () => void;
     onOpenEditor: () => void;
+    onOpenGallery: () => void;
     hasSaveData: boolean;
 }
 
-const MainMenu: React.FC<MainMenuProps> = ({ onStartNewGame, onResumeGame, onOpenEditor, hasSaveData }) => {
+const MainMenu: React.FC<MainMenuProps> = ({ onStartNewGame, onResumeGame, onOpenEditor, onOpenGallery, hasSaveData }) => {
     return (
         <div className="h-full flex flex-col items-center justify-center p-4 md:p-10 bg-[#050808] relative overflow-hidden font-sans text-[#E4E3E0]">
             {/* Dynamic Background Elements */}
@@ -118,24 +119,27 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStartNewGame, onResumeGame, onOpe
                             transition={{ delay: 0.2 }}
                             whileHover={{ scale: 1.02, y: -4 }}
                             whileTap={{ scale: 0.98 }}
-                            onClick={onOpenEditor}
+                            onClick={onOpenGallery}
                             className="group relative overflow-hidden bg-white/[0.03] hover:bg-white/[0.06] text-white py-4 md:py-7 px-5 md:px-8 rounded-[20px] md:rounded-[32px] font-black italic tracking-tighter text-base md:text-xl uppercase transition-all border border-white/10 backdrop-blur-2xl hover:border-teal-500/40 shadow-xl"
                         >
                             <div className="flex flex-col items-start gap-1.5 md:gap-4">
-                                <Database className="text-teal-500 group-hover:scale-110 transition-transform duration-500 w-4.5 h-4.5 md:w-5 md:h-5" />
-                                <span>DATA_EDITOR</span>
+                                <ImageIcon className="text-teal-500 group-hover:scale-110 transition-transform duration-500 w-4.5 h-4.5 md:w-5 md:h-5" />
+                                <span>ELITE_GALLERY</span>
                             </div>
                         </motion.button>
 
                         <motion.button
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.3 }}
-                            className="group relative overflow-hidden bg-white/[0.02] text-white/20 py-4 md:py-7 px-5 md:px-8 rounded-[20px] md:rounded-[32px] font-black italic tracking-tighter text-base md:text-xl uppercase transition-all border border-white/5 backdrop-blur-xl cursor-not-allowed"
+                            transition={{ delay: 0.2 }}
+                            whileHover={{ scale: 1.02, y: -4 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={onOpenEditor}
+                            className="group relative overflow-hidden bg-white/[0.03] hover:bg-white/[0.06] text-white py-4 md:py-7 px-5 md:px-8 rounded-[20px] md:rounded-[32px] font-black italic tracking-tighter text-base md:text-xl uppercase transition-all border border-white/10 backdrop-blur-2xl hover:border-teal-500/40 shadow-xl"
                         >
                             <div className="flex flex-col items-start gap-1.5 md:gap-4">
-                                <Settings className="text-white/10 w-4.5 h-4.5 md:w-5 md:h-5" />
-                                <span>SETTINGS</span>
+                                <Database className="text-teal-500 group-hover:scale-110 transition-transform duration-500 w-4.5 h-4.5 md:w-5 md:h-5" />
+                                <span>DATA_EDITOR</span>
                             </div>
                         </motion.button>
                     </div>

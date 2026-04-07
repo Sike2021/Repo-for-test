@@ -13,6 +13,7 @@ import CareerHub from './components/CareerHub';
 import AuctionRoom from './components/AuctionRoom';
 import Lineups from './components/Lineups';
 import Editor from './components/Editor';
+import Gallery from './components/Gallery';
 
 export const MAX_SQUAD_SIZE = 16;
 export const MIN_SQUAD_SIZE = 16;
@@ -238,7 +239,7 @@ const GameCover = ({ onStart, isInstallable, onInstall }: { onStart: () => void;
     );
 };
 
-export type AppState = 'MAIN_MENU' | 'TEAM_SELECTION' | 'AUCTION' | 'CAREER_HUB' | 'EDITOR';
+export type AppState = 'MAIN_MENU' | 'TEAM_SELECTION' | 'AUCTION' | 'CAREER_HUB' | 'EDITOR' | 'GALLERY';
 
 export const App = () => {
   const [appState, setAppState] = useState<AppState>('MAIN_MENU');
@@ -249,6 +250,7 @@ export const App = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [feedbackMessage, setFeedbackMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [hasSaveData, setHasSaveData] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     title: string;
@@ -578,7 +580,7 @@ export const App = () => {
         );
     }
     switch(appState) {
-        case 'MAIN_MENU': return <MainMenu onStartNewGame={handleStartNewGame} onResumeGame={resumeGame} onOpenEditor={handleOpenEditor} hasSaveData={hasSaveData} />;
+        case 'MAIN_MENU': return <MainMenu onStartNewGame={handleStartNewGame} onResumeGame={resumeGame} onOpenEditor={handleOpenEditor} onOpenGallery={() => setAppState('GALLERY')} hasSaveData={hasSaveData} />;
         case 'TEAM_SELECTION': return <TeamSelection onTeamSelected={initializeNewGame} theme={theme} />;
         case 'AUCTION': return gameData ? <AuctionRoom gameData={gameData} onAuctionComplete={handleAuctionComplete} /> : null;
         case 'CAREER_HUB': return gameData ? <CareerHub gameData={gameData} setGameData={setGameData} onResetGame={resetGame} theme={theme} setTheme={setTheme} saveGame={saveGame} loadGame={loadGame} showFeedback={showFeedback} /> : null;
@@ -613,6 +615,22 @@ export const App = () => {
                 </div>
             </div>
         ) : null;
+        case 'GALLERY': return (
+            <div className="h-full flex flex-col">
+                <div className="bg-[#050808] p-4 border-b-2 border-white/10 flex justify-between items-center">
+                    <button onClick={() => setAppState('MAIN_MENU')} className="text-teal-500 font-black uppercase italic text-xs hover:text-white transition-colors flex items-center gap-2">
+                        <span>← BACK_TO_MENU</span>
+                    </button>
+                    <span className="text-[10px] font-mono font-bold opacity-30 uppercase tracking-widest">ELITE_GALLERY_VIEW</span>
+                </div>
+                <div className="flex-grow overflow-hidden">
+                    <Gallery 
+                        gameData={gameData || undefined} 
+                        setGameData={setGameData as any}
+                    />
+                </div>
+            </div>
+        );
         default: return <div>Error</div>;
     }
   }

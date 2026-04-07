@@ -5,6 +5,7 @@ import { GameData, Player, PlayerRole, Format, BattingStyle, ScoreLimits, Ground
 import { getBatterTier, BATTING_PROFILES, getRoleColor, getRoleFullName, getBattingStyleLabel, BATTING_STYLE_OPTIONS } from '../utils';
 import { PITCH_TYPES, generateInitialStats } from '../data';
 import { PlayerAvatar } from './PlayerAvatar';
+import AvatarSelector from './AvatarSelector';
 import { storage } from '../firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Icons } from './Icons';
@@ -170,7 +171,7 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
                         <div className="absolute top-4 right-4 md:top-6 md:right-6 text-[8px] md:text-[10px] font-black text-teal-500/40 uppercase tracking-[0.3em]">{selectedPlayer.role.toUpperCase()} // DOM</div>
 
                         <div className="relative mb-4 md:mb-6 group">
-                            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-teal-500/20 p-1.5 md:p-2 shadow-[0_0_40px_rgba(20,184,166,0.1)] relative">
+                            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-teal-500/20 p-1.5 md:p-2 shadow-[0_0_40px_rgba(20,184,166,0.1)] relative mx-auto">
                                 <div className="w-full h-full rounded-full bg-white/5 border border-white/10 flex items-center justify-center p-3 md:p-4 overflow-hidden relative">
                                     <PlayerAvatar player={selectedPlayer} size="md" className="w-full h-full" />
                                     {isUploading && (
@@ -194,13 +195,25 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
                                     accept="image/*"
                                 />
                             </div>
-                            <button 
-                                onClick={() => setSelectedPlayer({...selectedPlayer, avatarSeed: `seed-${Math.random()}`})}
-                                className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white/10 text-white/60 px-3 md:px-4 py-0.5 md:py-1 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center gap-1.5 md:gap-2 hover:bg-white/20 hover:text-white transition-all"
-                            >
-                                <Icons.RefreshCw className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                                MUTATE
-                            </button>
+                        </div>
+
+                        <div className="w-full mb-8">
+                            <AvatarSelector 
+                                selectedSeed={selectedPlayer.avatarSeed}
+                                selectedUrl={selectedPlayer.avatarUrl}
+                                onSelect={(seed, isGallery, isUrl, gp) => {
+                                    setSelectedPlayer(prev => {
+                                        if (!prev) return null;
+                                        return {
+                                            ...prev,
+                                            name: gp ? gp.name : prev.name,
+                                            nationality: gp ? gp.nationality : prev.nationality,
+                                            avatarSeed: isUrl ? undefined : seed,
+                                            avatarUrl: isUrl ? seed : undefined
+                                        };
+                                    });
+                                }}
+                            />
                         </div>
 
                         <div className="w-full space-y-4 md:space-y-6">
